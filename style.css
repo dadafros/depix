@@ -1,9 +1,9 @@
 html, body {
   margin: 0;
-  min-height: 100%;
-  background: radial-gradient(circle at top, #0f3d3e, #071b1f);
-  font-family: system-ui, sans-serif;
+  height: 100%;
+  background: #071b1f;
   color: #eaf6f6;
+  font-family: system-ui, sans-serif;
 }
 
 body {
@@ -13,36 +13,33 @@ body {
 }
 
 .container {
-  background: rgba(15,45,48,0.9);
-  padding: 32px;
+  background: #0f3d3e;
+  padding: 24px;
   border-radius: 16px;
-  max-width: 420px;
   width: 100%;
+  max-width: 400px;
   text-align: center;
 }
 
 input, button {
   width: 100%;
-  padding: 14px;
-  margin-bottom: 12px;
-  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
   border: none;
 }
 
 button {
-  background: linear-gradient(135deg, #4fd1c5, #38b2ac);
-  font-weight: 600;
+  background: #38b2ac;
+  color: #003333;
+  font-weight: bold;
 }
 
-.secondary {
-  background: transparent;
-  border: 1px solid #4fd1c5;
-  color: #4fd1c5;
+.hidden {
+  display: none;
 }
 
-.hidden { display: none; }
-
-/* FAB instalar */
+/* Botão flutuante */
 .install-fab {
   position: fixed;
   right: 16px;
@@ -51,26 +48,23 @@ button {
   color: #003333;
   border-radius: 999px;
   padding: 12px 16px;
-  font-size: 14px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-  z-index: 1000;
+  border: none;
 }
 
-/* MODAL */
+/* Modal */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
 }
 
 .modal-content {
   background: #0f3d3e;
-  padding: 24px;
-  border-radius: 16px;
+  padding: 20px;
+  border-radius: 12px;
   width: 90%;
-  max-width: 320px;
+  max-width: 300px;
 }

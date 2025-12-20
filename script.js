@@ -23,12 +23,12 @@ const closeModal = document.getElementById("closeModal");
 /* =========================
    ESTADO
 ========================= */
+let deferredPrompt = null;
 let qrCopyPaste = "";
 let emAndamento = false;
-let deferredPrompt = null;
 
 /* =========================
-   FORMATAÇÃO DE VALOR
+   FORMATAÇÃO R$
 ========================= */
 valorInput.addEventListener("input", () => {
   let v = valorInput.value.replace(/\D/g, "");
@@ -90,6 +90,10 @@ btnGerar.addEventListener("click", async () => {
       throw new Error(data.response.errorMessage);
     }
 
+    if (!data?.response?.qrImageUrl) {
+      throw new Error("Resposta inválida da API");
+    }
+
     qrCopyPaste = data.response.qrCopyPaste;
     qrImageEl.src = data.response.qrImageUrl;
     qrIdEl.innerText = "Identificador: " + data.response.id;
@@ -124,47 +128,30 @@ btnReset.addEventListener("click", () => {
 });
 
 /* =========================
-   PWA – INSTALAÇÃO
+   PWA INSTALL (SEM MAGIA)
 ========================= */
-
-/* Detecta iOS corretamente */
-function isIOS() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-}
 
 /* Android / Desktop */
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredPrompt = e;
-  installFab.classList.remove("hidden");
 });
 
 /* Clique no botão flutuante */
 installFab.addEventListener("click", async () => {
-  // Android → instalação real
+  // Android → instala de verdade
   if (deferredPrompt) {
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
-    installFab.classList.add("hidden");
     return;
   }
 
-  // iPhone → mostrar instruções
-  if (isIOS()) {
-    modal.classList.remove("hidden");
-  }
+  // Qualquer outro caso (iPhone) → modal
+  modal.classList.remove("hidden");
 });
 
 /* Fechar modal */
 closeModal.addEventListener("click", () => {
   modal.classList.add("hidden");
 });
-
-/* Se já estiver instalado, esconder botão */
-if (
-  window.matchMedia("(display-mode: standalone)").matches ||
-  window.navigator.standalone === true
-) {
-  installFab.classList.add("hidden");
-}

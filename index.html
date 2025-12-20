@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>DePix – Gerar QR Code PIX</title>
+  <title>DePix</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="manifest" href="manifest.json" />
@@ -26,32 +26,29 @@
       <button type="button" id="btnGerar">Gerar QR Code</button>
     </form>
 
-    <div id="loading" class="hidden">
-      <div class="spinner"></div>
-      <p>Gerando QR Code…</p>
-    </div>
+    <div id="loading" class="hidden">Gerando…</div>
 
     <div id="resultado" class="hidden">
       <img id="qrImage" />
       <p id="qrId"></p>
       <button id="btnCopy">PIX copia e cola</button>
-      <button id="btnReset" class="secondary">Novo pagamento</button>
+      <button id="btnReset">Novo pagamento</button>
     </div>
   </div>
 
-  <!-- BOTÃO INSTALAR (FLOAT) -->
-  <button id="installFab" class="install-fab hidden">
+  <!-- BOTÃO FLUTUANTE -->
+  <button id="installFab" class="install-fab">
     ⬇️ Instale o app
   </button>
 
-  <!-- MODAL iOS (SÓ MOSTRA COM CLIQUE) -->
+  <!-- MODAL (NUNCA ABRE SOZINHO) -->
   <div id="installModal" class="modal hidden">
     <div class="modal-content">
-      <h2>Instalar aplicativo</h2>
+      <h2>Instalar no iPhone</h2>
       <ol>
-        <li>Toque em <b>Compartilhar</b> (⬆️)</li>
-        <li>Toque em <b>Mais</b> (⋯)</li>
-        <li>Selecione <b>Adicionar à Tela de Início</b></li>
+        <li>Compartilhar (⬆️)</li>
+        <li>Mais (⋯)</li>
+        <li>Adicionar à Tela de Início</li>
       </ol>
       <button id="closeModal">Entendi</button>
     </div>
