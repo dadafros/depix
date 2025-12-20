@@ -1,20 +1,29 @@
 * {
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-body {
+html, body {
   margin: 0;
-  min-height: 100vh;
+  width: 100%;
+  min-height: 100%;
   background: radial-gradient(
     circle at top,
     #0f3d3e 0%,
     #0b2a2e 35%,
     #071b1f 100%
   );
+}
+
+body {
+  min-height: 100vh;
+  padding: env(safe-area-inset-top)
+           env(safe-area-inset-right)
+           env(safe-area-inset-bottom)
+           env(safe-area-inset-left);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color: #eaf6f6;
 }
 
@@ -24,23 +33,20 @@ body {
   border-radius: 16px;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
   text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
 h1 {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
-/* ===== Mensagens ===== */
 .mensagem {
   min-height: 24px;
   margin-bottom: 16px;
   color: #ff6b6b;
-  font-weight: 500;
 }
 
-/* ===== Inputs ===== */
 input {
   width: 100%;
   padding: 14px;
@@ -50,7 +56,6 @@ input {
   font-size: 16px;
 }
 
-/* ===== Botões ===== */
 button {
   width: 100%;
   padding: 14px;
@@ -66,16 +71,10 @@ button {
 button.secondary {
   background: transparent;
   color: #4fd1c5;
-  margin-top: 10px;
   border: 1px solid #4fd1c5;
+  margin-bottom: 12px;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ===== Loading ===== */
 .hidden {
   display: none;
 }
@@ -94,31 +93,19 @@ button:disabled {
   to { transform: rotate(360deg); }
 }
 
-/* ===== Resultado ===== */
-#resultado img {
-  max-width: 100%;
-  margin-bottom: 12px;
-}
-
 .qr-id {
-  font-size: 14px;
-  margin-bottom: 12px;
   cursor: pointer;
+  margin-bottom: 12px;
 }
 
-/* ===== Botão instalar ===== */
-#btnInstall {
-  margin-bottom: 16px;
-}
-
-/* ===== Modal ===== */
+/* ===== MODAL ===== */
 .modal {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.6);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 999;
 }
 
@@ -129,18 +116,4 @@ button:disabled {
   max-width: 320px;
   width: 90%;
   text-align: center;
-  color: #eaf6f6;
-}
-
-.modal-content h2 {
-  margin-top: 0;
-}
-
-.modal-content ol {
-  text-align: left;
-  margin: 16px 0;
-}
-
-.modal-content button {
-  margin-top: 12px;
 }
