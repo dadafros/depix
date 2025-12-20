@@ -1,155 +1,107 @@
-:root {
-  --primary: #4ECAC2;
-  --primary-dark: #2FA7A0;
-  --secondary: #2E4B5B;
-
-  --bg-dark: #0F1F26;
-  --card: #162A33;
-  --text: #E6F2F2;
-  --border: #24424F;
-}
-
-/* RESET */
 * {
   box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-html, body {
-  height: 100%;
-  margin: 0;
-}
-
-/* 🔹 Gradiente FIXO (não repete, não reinicia) */
 body {
-  font-family: "Inter", Arial, sans-serif;
-  color: var(--text);
-  background-color: var(--bg-dark);
-}
-
-.page {
+  margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(
-      ellipse at top,
-      rgba(78, 202, 194, 0.18) 0%,
-      rgba(15, 31, 38, 0.9) 45%,
-      #0F1F26 75%
-    );
+  background: radial-gradient(
+    circle at top,
+    #0f3d3e 0%,
+    #0b2a2e 35%,
+    #071b1f 100%
+  );
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 48px 16px;
+  color: #eaf6f6;
 }
 
 .container {
+  background: rgba(15, 45, 48, 0.9);
+  padding: 32px;
+  border-radius: 16px;
   width: 100%;
   max-width: 420px;
-  background: var(--card);
-  padding: 28px;
-  border-radius: 18px;
-  border: 1px solid var(--border);
-  box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
   text-align: center;
 }
 
 h1 {
-  margin-bottom: 28px;
-  font-weight: 600;
+  margin-bottom: 24px;
 }
 
+/* ===== Mensagens ===== */
+.mensagem {
+  min-height: 24px;
+  margin-bottom: 16px;
+  color: #ff6b6b;
+  font-weight: 500;
+}
+
+/* ===== Inputs ===== */
 input {
   width: 100%;
-  padding: 15px;
-  margin-bottom: 16px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-size: 16px;
-}
-
-input::placeholder {
-  color: #8BAFB2;
-}
-
-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(78, 202, 194, 0.25);
-}
-
-button {
-  width: 100%;
-  padding: 15px;
-  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  border-radius: 10px;
   border: none;
   font-size: 16px;
-  font-weight: 600;
+}
+
+/* ===== Botões ===== */
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
   cursor: pointer;
+  background: linear-gradient(135deg, #4fd1c5, #38b2ac);
+  color: #003333;
+  font-weight: 600;
 }
 
-#btnGerar {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #fff;
+button.secondary {
+  background: transparent;
+  color: #4fd1c5;
+  margin-top: 10px;
+  border: 1px solid #4fd1c5;
 }
 
-#btnGerar:disabled {
+button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.copy-btn {
-  margin-top: 12px;
-  background: transparent;
-  border: 1px solid var(--secondary);
-  color: var(--secondary);
-}
-
-.reset-btn {
-  margin-top: 18px;
-  background: transparent;
-  color: #8BAFB2;
-}
-
+/* ===== Loading ===== */
 .hidden {
   display: none;
 }
 
-#resultado img {
-  width: 260px;
-  margin: 24px auto 16px;
-  display: block;
-}
-
-.id {
-  font-size: 14px;
-  cursor: pointer;
-  opacity: 0.85;
-  word-break: break-all;
-  margin-bottom: 14px;
-}
-
-.id:hover {
-  text-decoration: underline;
-}
-
-.message {
-  margin-top: 10px;
-  color: var(--primary-dark);
-}
-
-/* Loading */
-
 .spinner {
-  width: 42px;
-  height: 42px;
-  border: 4px solid rgba(78, 202, 194, 0.25);
-  border-top: 4px solid var(--primary);
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top: 4px solid #4fd1c5;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 14px;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ===== Resultado ===== */
+#resultado img {
+  max-width: 100%;
+  margin-bottom: 12px;
+}
+
+.qr-id {
+  font-size: 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
 }
