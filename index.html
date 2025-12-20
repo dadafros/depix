@@ -27,30 +27,14 @@
       Instalar aplicativo
     </button>
 
-    <!-- MENSAGEM (sempre visível) -->
+    <!-- MENSAGEM -->
     <div id="mensagem" class="mensagem"></div>
 
     <!-- FORM -->
     <form id="form" novalidate>
-      <input
-        id="valor"
-        type="text"
-        placeholder="R$ 0,00"
-        inputmode="numeric"
-        autocomplete="off"
-      />
-
-      <input
-        id="endereco"
-        type="text"
-        placeholder="Endereço Liquid"
-        autocomplete="off"
-        spellcheck="false"
-      />
-
-      <button type="button" id="btnGerar">
-        Gerar QR Code
-      </button>
+      <input id="valor" type="text" placeholder="R$ 0,00" inputmode="numeric" />
+      <input id="endereco" type="text" placeholder="Endereço Liquid" />
+      <button type="button" id="btnGerar">Gerar QR Code</button>
     </form>
 
     <!-- LOADING -->
@@ -63,7 +47,6 @@
     <div id="resultado" class="hidden">
       <img id="qrImage" alt="QR Code PIX" />
       <p id="qrId" class="qr-id"></p>
-
       <button id="btnCopy">PIX copia e cola</button>
       <button id="btnReset" class="secondary">Novo pagamento</button>
     </div>
