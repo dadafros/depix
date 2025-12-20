@@ -55,7 +55,7 @@ btnGerar.onclick = async () => {
   loadingEl.classList.remove("hidden");
 
   try {
-    const res = await fetch("https://depix.davi-bf.workers.dev", {
+    const res = await fetch("https://depix-backend.vercel.app/api/depix", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
