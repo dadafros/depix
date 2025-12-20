@@ -1,3 +1,6 @@
+/* =========================
+   ELEMENTOS
+========================= */
 const valorInput = document.getElementById("valor");
 const enderecoInput = document.getElementById("endereco");
 
@@ -12,72 +15,52 @@ const qrImageEl = document.getElementById("qrImage");
 const qrIdEl = document.getElementById("qrId");
 const mensagemEl = document.getElementById("mensagem");
 
-const btnInstall = document.getElementById("btnInstall");
+/* PWA */
+const installFab = document.getElementById("installFab");
 const modal = document.getElementById("installModal");
 const closeModal = document.getElementById("closeModal");
 
-let deferredPrompt = null;
+/* =========================
+   ESTADO
+========================= */
 let qrCopyPaste = "";
 let emAndamento = false;
+let deferredPrompt = null;
 
-/* FORMATAÇÃO R$ */
+/* =========================
+   FORMATAÇÃO DE VALOR
+========================= */
 valorInput.addEventListener("input", () => {
   let v = valorInput.value.replace(/\D/g, "");
-  if (!v) return (valorInput.value = "");
+  if (!v) {
+    valorInput.value = "";
+    return;
+  }
   v = (v / 100).toFixed(2).replace(".", ",");
   v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   valorInput.value = "R$ " + v;
 });
 
-function centavos(v) {
+function toCents(valor) {
   return Math.round(
-    parseFloat(v.replace("R$", "").replace(/\./g, "").replace(",", ".")) * 100
+    parseFloat(
+      valor.replace("R$", "").replace(/\./g, "").replace(",", ".")
+    ) * 100
   );
 }
 
-/* PWA INSTALL */
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  btnInstall.classList.remove("hidden");
-});
-
-btnInstall.addEventListener("click", async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    btnInstall.classList.add("hidden");
-  } else if (isIOS()) {
-    modal.classList.remove("hidden");
-  }
-});
-
-closeModal.addEventListener("click", () => {
-  modal.classList.add("hidden");
-});
-
-window.addEventListener("appinstalled", () => {
-  btnInstall.classList.add("hidden");
-});
-
-if (
-  window.matchMedia("(display-mode: standalone)").matches ||
-  window.navigator.standalone === true
-) {
-  btnInstall.classList.add("hidden");
-}
-
-function isIOS() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-
-/* GERAR QR */
-btnGerar.onclick = async () => {
+/* =========================
+   GERAR QR CODE
+========================= */
+btnGerar.addEventListener("click", async () => {
   if (emAndamento) return;
+
   mensagemEl.innerText = "";
 
-  if (!valorInput.value || !enderecoInput.value.trim()) {
+  const valor = valorInput.value;
+  const endereco = enderecoInput.value.trim();
+
+  if (!valor || !endereco) {
     mensagemEl.innerText = "Preencha todos os campos";
     return;
   }
@@ -89,14 +72,17 @@ btnGerar.onclick = async () => {
   loadingEl.classList.remove("hidden");
 
   try {
-    const res = await fetch("https://depix-backend.vercel.app/api/depix", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amountInCents: centavos(valorInput.value),
-        depixAddress: enderecoInput.value.trim()
-      })
-    });
+    const res = await fetch(
+      "https://depix-backend.vercel.app/api/depix",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amountInCents: toCents(valor),
+          depixAddress: endereco
+        })
+      }
+    );
 
     const data = await res.json();
 
@@ -119,11 +105,66 @@ btnGerar.onclick = async () => {
     emAndamento = false;
     btnGerar.disabled = false;
   }
-};
+});
 
-btnCopy.onclick = () => {
+/* =========================
+   COPIAR PIX
+========================= */
+btnCopy.addEventListener("click", () => {
+  if (!qrCopyPaste) return;
   navigator.clipboard.writeText(qrCopyPaste);
-  mensagemEl.innerText = "Código copiado";
-};
+  mensagemEl.innerText = "Código copiado. Cole no app do seu banco.";
+});
 
-btnReset.onclick = () => location.reload();
+/* =========================
+   RESET
+========================= */
+btnReset.addEventListener("click", () => {
+  window.location.reload();
+});
+
+/* =========================
+   PWA – INSTALAÇÃO
+========================= */
+
+/* Detecta iOS corretamente */
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+
+/* Android / Desktop */
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installFab.classList.remove("hidden");
+});
+
+/* Clique no botão flutuante */
+installFab.addEventListener("click", async () => {
+  // Android → instalação real
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installFab.classList.add("hidden");
+    return;
+  }
+
+  // iPhone → mostrar instruções
+  if (isIOS()) {
+    modal.classList.remove("hidden");
+  }
+});
+
+/* Fechar modal */
+closeModal.addEventListener("click", () => {
+  modal.classList.add("hidden");
+});
+
+/* Se já estiver instalado, esconder botão */
+if (
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true
+) {
+  installFab.classList.add("hidden");
+}
