@@ -20,7 +20,7 @@ let deferredPrompt = null;
 let qrCopyPaste = "";
 let emAndamento = false;
 
-/* ===== Formatação R$ ===== */
+/* FORMATAÇÃO R$ */
 valorInput.addEventListener("input", () => {
   let v = valorInput.value.replace(/\D/g, "");
   if (!v) return (valorInput.value = "");
@@ -35,7 +35,7 @@ function centavos(v) {
   );
 }
 
-/* ===== PWA INSTALL ===== */
+/* PWA INSTALL */
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredPrompt = e;
@@ -61,7 +61,10 @@ window.addEventListener("appinstalled", () => {
   btnInstall.classList.add("hidden");
 });
 
-if (window.matchMedia("(display-mode: standalone)").matches) {
+if (
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true
+) {
   btnInstall.classList.add("hidden");
 }
 
@@ -69,15 +72,12 @@ function isIOS() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
 
-/* ===== GERAR QR ===== */
+/* GERAR QR */
 btnGerar.onclick = async () => {
   if (emAndamento) return;
   mensagemEl.innerText = "";
 
-  const valor = valorInput.value;
-  const endereco = enderecoInput.value.trim();
-
-  if (!valor || !endereco) {
+  if (!valorInput.value || !enderecoInput.value.trim()) {
     mensagemEl.innerText = "Preencha todos os campos";
     return;
   }
@@ -89,17 +89,14 @@ btnGerar.onclick = async () => {
   loadingEl.classList.remove("hidden");
 
   try {
-    const res = await fetch(
-      "https://depix-backend.vercel.app/api/depix",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amountInCents: centavos(valor),
-          depixAddress: endereco
-        })
-      }
-    );
+    const res = await fetch("https://depix-backend.vercel.app/api/depix", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amountInCents: centavos(valorInput.value),
+        depixAddress: enderecoInput.value.trim()
+      })
+    });
 
     const data = await res.json();
 
@@ -125,7 +122,6 @@ btnGerar.onclick = async () => {
 };
 
 btnCopy.onclick = () => {
-  if (!qrCopyPaste) return;
   navigator.clipboard.writeText(qrCopyPaste);
   mensagemEl.innerText = "Código copiado";
 };
