@@ -3,14 +3,23 @@ const enderecoInput = document.getElementById("endereco");
 
 const btnGerar = document.getElementById("btnGerar");
 const btnCopy = document.getElementById("btnCopy");
-const btnReset = document.getElementById("btnReset");
+
+const formEl = document.getElementById("form");
+const loadingEl = document.getElementById("loading");
+const resultadoEl = document.getElementById("resultado");
+const qrImageEl = document.getElementById("qrImage");
+const qrIdEl = document.getElementById("qrId");
+const mensagemEl = document.getElementById("mensagem");
 
 let qrCopyPaste = "";
 let emAndamento = false;
 
-/* Formatação moeda */
+/* ===============================
+   Formatação moeda
+================================ */
 valorInput.addEventListener("input", () => {
   let v = valorInput.value.replace(/\D/g, "");
+  if (!v) return (valorInput.value = "");
   v = (v / 100).toFixed(2).replace(".", ",");
   v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   valorInput.value = "R$ " + v;
@@ -22,22 +31,28 @@ function centavos(v) {
   );
 }
 
+/* ===============================
+   Fluxo principal
+================================ */
 btnGerar.onclick = async () => {
   if (emAndamento) return;
+
+  mensagemEl.innerText = "";
 
   const valor = valorInput.value;
   const endereco = enderecoInput.value.trim();
 
   if (!valor || !endereco) {
-    alert("Preencha todos os campos");
+    mensagemEl.innerText = "Preencha todos os campos";
     return;
   }
 
   emAndamento = true;
   btnGerar.disabled = true;
 
-  document.getElementById("form").classList.add("hidden");
-  document.getElementById("loading").classList.remove("hidden");
+  formEl.classList.add("hidden");
+  resultadoEl.classList.add("hidden");
+  loadingEl.classList.remove("hidden");
 
   try {
     const res = await fetch("https://depix.davi-bf.workers.dev", {
@@ -49,41 +64,59 @@ btnGerar.onclick = async () => {
       })
     });
 
-    const data = await res.json();
-
-    if (!data.response || !data.response.qrCopyPaste) {
-      throw new Error(data.error || "Erro ao gerar QR Code");
+    // 🚨 TRATAMENTO EXPLÍCITO DE 520 / ERRO DE GATEWAY
+    if (!res.ok) {
+      throw new Error(
+        "Falha de comunicação com o servidor. Tente novamente."
+      );
     }
 
+    const data = await res.json();
+
+    // 🔴 erro de negócio da Depix
+    if (data?.response?.errorMessage) {
+      throw new Error(data.response.errorMessage);
+    }
+
+    // 🔴 resposta inválida
+    if (
+      !data?.response?.qrCopyPaste ||
+      !data?.response?.qrImageUrl ||
+      !data?.response?.id
+    ) {
+      throw new Error("Resposta inválida da API");
+    }
+
+    // 🟢 sucesso
     qrCopyPaste = data.response.qrCopyPaste;
+    qrImageEl.src = data.response.qrImageUrl;
+    qrIdEl.innerText = "Identificador: " + data.response.id;
 
-    document.getElementById("qrImage").src = data.response.qrImageUrl;
-    document.getElementById("qrId").innerText =
-      "Identificador: " + data.response.id;
-
-    document.getElementById("qrId").onclick = () =>
-      navigator.clipboard.writeText(data.response.id);
-
-    document.getElementById("loading").classList.add("hidden");
-    document.getElementById("resultado").classList.remove("hidden");
+    loadingEl.classList.add("hidden");
+    resultadoEl.classList.remove("hidden");
 
   } catch (err) {
-    alert(err.message);
-    resetar();
+    console.error("Erro ao gerar QR Code:", err);
+
+    mensagemEl.innerText =
+      err?.message ||
+      "Erro inesperado ao gerar QR Code";
+
+    loadingEl.classList.add("hidden");
+    formEl.classList.remove("hidden");
+
   } finally {
     emAndamento = false;
     btnGerar.disabled = false;
   }
 };
 
+/* ===============================
+   Copiar PIX
+================================ */
 btnCopy.onclick = () => {
+  if (!qrCopyPaste) return;
   navigator.clipboard.writeText(qrCopyPaste);
-  document.getElementById("mensagem").innerText =
+  mensagemEl.innerText =
     "Código copiado, cole no app do seu banco";
 };
-
-btnReset.onclick = resetar;
-
-function resetar() {
-  location.reload();
-}
