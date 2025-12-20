@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Depósito PIX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#00b894" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="container">
+  <h1>Gerar QR Code PIX</h1>
+
+  <div id="form">
+    <input id="valor" placeholder="Valor (R$)" />
+    <input id="endereco" placeholder="Endereço Liquid Network" />
+    <button onclick="gerarQrCode()">Gerar QR Code</button>
+  </div>
+
+  <div id="loading" class="hidden">
+    <div class="spinner"></div>
+    <p>Gerando QR Code...</p>
+  </div>
+
+  <div id="resultado" class="hidden">
+    <img id="qrImage" />
+    <div id="qrId" class="id"></div>
+    <button class="copy-btn" onclick="copiarPix()">Pix copia e cola</button>
+    <div id="mensagem" class="message"></div>
+    <button class="reset-btn" onclick="resetar()">Gerar novo</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
+</body>
+</html>
