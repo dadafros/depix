@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>DePix – Gerar QR Code PIX</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#38b2ac" />
 
-  <!-- Ícones -->
-  <link rel="icon" sizes="192x192" href="icon-192.png" />
+  <link rel="icon" href="icon-192.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
 
   <link rel="stylesheet" href="style.css" />
@@ -19,60 +16,50 @@
 <body>
 
   <div class="container">
-
     <h1>Gerar QR Code PIX</h1>
 
-    <!-- BOTÃO INSTALAR -->
-    <button id="btnInstall" class="secondary hidden">
-      Instalar aplicativo
-    </button>
-
-    <!-- MENSAGEM -->
     <div id="mensagem" class="mensagem"></div>
 
-    <!-- FORM -->
-    <form id="form" novalidate>
-      <input id="valor" type="text" placeholder="R$ 0,00" inputmode="numeric" />
-      <input id="endereco" type="text" placeholder="Endereço Liquid" />
+    <form id="form">
+      <input id="valor" placeholder="R$ 0,00" inputmode="numeric" />
+      <input id="endereco" placeholder="Endereço Liquid" />
       <button type="button" id="btnGerar">Gerar QR Code</button>
     </form>
 
-    <!-- LOADING -->
     <div id="loading" class="hidden">
       <div class="spinner"></div>
       <p>Gerando QR Code…</p>
     </div>
 
-    <!-- RESULTADO -->
     <div id="resultado" class="hidden">
-      <img id="qrImage" alt="QR Code PIX" />
-      <p id="qrId" class="qr-id"></p>
+      <img id="qrImage" />
+      <p id="qrId"></p>
       <button id="btnCopy">PIX copia e cola</button>
       <button id="btnReset" class="secondary">Novo pagamento</button>
     </div>
-
   </div>
 
-  <!-- MODAL iOS -->
+  <!-- BOTÃO INSTALAR (FLOAT) -->
+  <button id="installFab" class="install-fab hidden">
+    ⬇️ Instale o app
+  </button>
+
+  <!-- MODAL iOS (SÓ MOSTRA COM CLIQUE) -->
   <div id="installModal" class="modal hidden">
     <div class="modal-content">
       <h2>Instalar aplicativo</h2>
-      <p>No iPhone, siga os passos:</p>
       <ol>
-        <li>Toque em <strong>Compartilhar</strong> (⬆️)</li>
-        <li>Toque em <strong>Mais</strong> (⋯)</li>
-        <li>Selecione <strong>Adicionar à Tela de Início</strong></li>
+        <li>Toque em <b>Compartilhar</b> (⬆️)</li>
+        <li>Toque em <b>Mais</b> (⋯)</li>
+        <li>Selecione <b>Adicionar à Tela de Início</b></li>
       </ol>
       <button id="closeModal">Entendi</button>
     </div>
   </div>
 
-  <!-- Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js");
-      });
+      navigator.serviceWorker.register("./service-worker.js");
     }
   </script>
 
