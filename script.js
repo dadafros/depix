@@ -79,6 +79,10 @@ btnGerar.onclick = async () => {
     }
 
     qrCopyPaste = data.response.qrCopyPaste;
+    qrImage.onload = () => {
+       qrImage.style.display = "block";
+    };
+
     qrImage.src = data.response.qrImageUrl;
     qrId.innerText = "ID: " + data.response.id;
 
