@@ -138,4 +138,10 @@ button {
   display: none;
 }
 
+@supports (-webkit-touch-callout: none) {
+  .toast {
+    bottom: 32px;
+  }
+}
+
 
