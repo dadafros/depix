@@ -18,6 +18,9 @@ const installBtn = document.getElementById("installBtn");
 const modal = document.getElementById("installModal");
 const closeModal = document.getElementById("closeModal");
 
+const MIN_VALOR_CENTS = 500;      // R$ 5,00
+const MAX_VALOR_CENTS = 300000;  // R$ 3.000,00
+
 let qrCopyPaste = "";
 let deferredPrompt = null;
 
@@ -49,6 +52,16 @@ valorInput.addEventListener("input", () => {
   valorInput.value = "R$ " + v;
 });
 
+function isValorValidoEmCentavos(cents) {
+  if (cents < MIN_VALOR_CENTS) {
+    return "O valor mínimo é R$ 5,00";
+  }
+  if (cents > MAX_VALOR_CENTS) {
+    return "O valor máximo é R$ 3.000,00";
+  }
+  return null;
+}
+
 const toCents = v =>
   Math.round(
     parseFloat(v.replace("R$", "").replace(/\./g, "").replace(",", "."))
@@ -60,6 +73,20 @@ const toCents = v =>
 ====================== */
 btnGerar.onclick = async () => {
   mensagem.innerText = "";
+
+  if (!valorInput.value || !enderecoInput.value.trim()) {
+    mensagem.innerText = "Preencha todos os campos";
+    return;
+  }
+
+  const valorCents = toCents(valorInput.value);
+
+  const erroValor = isValorValidoEmCentavos(valorCents);
+  if (erroValor) {
+    mensagem.innerText = erroValor;
+    return;
+  }
+
   loading.classList.remove("hidden");
 
   try {
@@ -67,7 +94,7 @@ btnGerar.onclick = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amountInCents: toCents(valorInput.value),
+        amountInCents: valorCents,
         depixAddress: enderecoInput.value.trim()
       })
     });
@@ -79,10 +106,6 @@ btnGerar.onclick = async () => {
     }
 
     qrCopyPaste = data.response.qrCopyPaste;
-    qrImage.onload = () => {
-       qrImage.style.display = "block";
-    };
-
     qrImage.src = data.response.qrImageUrl;
     qrId.innerText = "ID: " + data.response.id;
 
