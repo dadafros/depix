@@ -4,6 +4,7 @@
 
 html, body {
   margin: 0;
+  padding: 0;
 }
 
 body {
@@ -11,6 +12,11 @@ body {
   font-family: system-ui, sans-serif;
   background: radial-gradient(circle at top, #0f3d3e, #071b1f);
   color: #eaf6f6;
+
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 .page {
