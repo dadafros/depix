@@ -106,6 +106,7 @@ document.getElementById("btn-login")?.addEventListener("click", async () => {
   const senha = document.getElementById("login-senha").value;
 
   setMsg("login-msg", "");
+  document.getElementById("login-verify-action")?.classList.add("hidden");
 
   if (!usuario || !senha) {
     setMsg("login-msg", "Preencha todos os campos");
@@ -123,7 +124,14 @@ document.getElementById("btn-login")?.addEventListener("click", async () => {
     const data = await res.json();
 
     if (!res.ok) {
-      setMsg("login-msg", data?.response?.errorMessage || "Erro ao fazer login");
+      const errorMsg = data?.response?.errorMessage || "Erro ao fazer login";
+      setMsg("login-msg", errorMsg);
+
+      // Show resend verification link if email not verified
+      if (errorMsg.toLowerCase().includes("verificad")) {
+        sessionStorage.setItem("depix-verify-usuario", usuario);
+        document.getElementById("login-verify-action")?.classList.remove("hidden");
+      }
       return;
     }
 
@@ -191,11 +199,41 @@ document.getElementById("btn-register")?.addEventListener("click", async () => {
 // VERIFY EMAIL
 // =========================================
 
+function getVerifyUsuario() {
+  return sessionStorage.getItem("depix-verify-usuario") ||
+    document.getElementById("verify-usuario")?.value.trim() || "";
+}
+
+function startResendCooldown(linkId, seconds) {
+  const link = document.getElementById(linkId);
+  if (!link) return;
+  const originalText = link.innerText;
+  link.style.pointerEvents = "none";
+  link.style.opacity = "0.5";
+  let remaining = seconds;
+  const timer = setInterval(() => {
+    remaining--;
+    link.innerText = `Reenviar código (${remaining}s)`;
+    if (remaining <= 0) {
+      clearInterval(timer);
+      link.innerText = originalText;
+      link.style.pointerEvents = "";
+      link.style.opacity = "";
+    }
+  }, 1000);
+}
+
 document.getElementById("btn-verify")?.addEventListener("click", async () => {
   const codigo = document.getElementById("verify-code").value.trim();
-  const usuario = sessionStorage.getItem("depix-verify-usuario") || "";
+  const usuario = getVerifyUsuario();
 
   setMsg("verify-msg", "");
+
+  if (!usuario) {
+    setMsg("verify-msg", "Informe seu nome de usuário");
+    document.getElementById("verify-usuario-group")?.classList.remove("hidden");
+    return;
+  }
 
   if (!codigo || codigo.length !== 6) {
     setMsg("verify-msg", "Digite o código de 6 dígitos");
@@ -212,7 +250,7 @@ document.getElementById("btn-verify")?.addEventListener("click", async () => {
     });
     const data = await res.json();
 
-    if (!res.ok) {
+    if (!res.ok || data?.response?.errorMessage) {
       setMsg("verify-msg", data?.response?.errorMessage || "Erro na verificação");
       return;
     }
@@ -223,6 +261,68 @@ document.getElementById("btn-verify")?.addEventListener("click", async () => {
     setMsg("verify-msg", e.message || "Erro de conexão");
   } finally {
     btn.disabled = false;
+  }
+});
+
+// Resend verification code from verify screen
+document.getElementById("btn-resend-verify")?.addEventListener("click", async (e) => {
+  e.preventDefault();
+  const usuario = getVerifyUsuario();
+
+  if (!usuario) {
+    setMsg("verify-msg", "Informe seu nome de usuário");
+    document.getElementById("verify-usuario-group")?.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    const res = await apiFetch("/api/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ usuario })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMsg("verify-msg", data?.errorMessage || "Erro ao reenviar código");
+      return;
+    }
+
+    setMsg("verify-msg", "Código reenviado! Verifique seu email.", true);
+    startResendCooldown("btn-resend-verify", 30);
+  } catch (e) {
+    setMsg("verify-msg", e.message || "Erro de conexão");
+  }
+});
+
+// Resend verification code from login screen
+document.getElementById("btn-resend-login")?.addEventListener("click", async (e) => {
+  e.preventDefault();
+  const usuario = sessionStorage.getItem("depix-verify-usuario") ||
+    document.getElementById("login-usuario").value.trim();
+
+  if (!usuario) {
+    setMsg("login-msg", "Informe seu usuário acima para reenviar o código");
+    return;
+  }
+
+  sessionStorage.setItem("depix-verify-usuario", usuario);
+
+  try {
+    const res = await apiFetch("/api/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ usuario })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMsg("login-msg", data?.errorMessage || "Erro ao reenviar código");
+      return;
+    }
+
+    navigate("#verify");
+    setMsg("verify-msg", "Código reenviado! Verifique seu email.", true);
+  } catch (e) {
+    setMsg("login-msg", e.message || "Erro de conexão");
   }
 });
 
@@ -762,7 +862,15 @@ route("#login", () => {
 });
 
 route("#register", () => { setMsg("register-msg", ""); });
-route("#verify", () => { setMsg("verify-msg", ""); document.getElementById("verify-code").value = ""; });
+route("#verify", () => {
+  setMsg("verify-msg", "");
+  document.getElementById("verify-code").value = "";
+  const hasUsuario = !!sessionStorage.getItem("depix-verify-usuario");
+  const grupoUsuario = document.getElementById("verify-usuario-group");
+  if (grupoUsuario) {
+    grupoUsuario.classList.toggle("hidden", hasUsuario);
+  }
+});
 route("#no-address", () => {});
 
 route("#reports", () => {
