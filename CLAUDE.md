@@ -121,3 +121,9 @@ npm run test:watch  # Watch mode
 - Branch naming: `feat/*` for features, `claude/*` for Claude Code branches
 - CI: GitHub Actions on push/PR to main
 - Deploy: GitHub Pages from main branch
+
+## Workflow Rules
+
+- **Always start from latest main**: Before starting any task, pull the latest `main` from remote (`git pull origin main`) to ensure you're working with the most recent code.
+- **Commit directly to main**: When finished, commit and push directly to the `main` branch — do not create separate branches unless explicitly asked.
+- **Sync before branching**: If the user requests work on a separate branch with multiple commits, always sync with `main` first (`git pull origin main`) to incorporate any parallel work before starting.
