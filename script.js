@@ -272,7 +272,7 @@ document.getElementById("btn-resend-verify")?.addEventListener("click", async (e
   }
 
   try {
-    const res = await apiFetch("/api/auth/resend-verification", {
+    const res = await apiFetch("/api/auth/resend", {
       method: "POST",
       body: JSON.stringify({ usuario })
     });
@@ -304,7 +304,7 @@ document.getElementById("btn-resend-login")?.addEventListener("click", async (e)
   sessionStorage.setItem("depix-verify-usuario", usuario);
 
   try {
-    const res = await apiFetch("/api/auth/resend-verification", {
+    const res = await apiFetch("/api/auth/resend", {
       method: "POST",
       body: JSON.stringify({ usuario })
     });
@@ -427,9 +427,9 @@ document.getElementById("btn-resend-reset")?.addEventListener("click", async (e)
   }
 
   try {
-    const res = await apiFetch("/api/auth/resend-reset-code", {
+    const res = await apiFetch("/api/auth/resend", {
       method: "POST",
-      body: JSON.stringify({ identificador })
+      body: JSON.stringify({ tipo: "reset_senha", identificador })
     });
     await res.json();
 
@@ -775,7 +775,7 @@ document.getElementById("btn-send-contact")?.addEventListener("click", async () 
 
   try {
     const user = getUser();
-    const res = await apiFetch("/api/support/contact", {
+    const res = await apiFetch("/api/contact", {
       method: "POST",
       body: JSON.stringify({
         assunto,
