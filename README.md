@@ -106,4 +106,4 @@ Deployed automatically to GitHub Pages on push to `main`. The app is served at:
 
 ## License
 
-[MIT](LICENSE)
+[LICENSE](LICENSE)
