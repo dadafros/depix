@@ -266,7 +266,7 @@ document.getElementById("btn-resend-verify")?.addEventListener("click", async (e
     const data = await res.json();
 
     if (!res.ok) {
-      setMsg("verify-msg", data?.errorMessage || "Erro ao reenviar código");
+      setMsg("verify-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao reenviar código");
       return;
     }
 
@@ -298,12 +298,13 @@ document.getElementById("btn-resend-login")?.addEventListener("click", async (e)
     const data = await res.json();
 
     if (!res.ok) {
-      setMsg("login-msg", data?.errorMessage || "Erro ao reenviar código");
+      setMsg("login-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao reenviar código");
       return;
     }
 
     navigate("#verify");
-    setMsg("verify-msg", "Código reenviado! Verifique seu email.", true);
+    // setTimeout ensures the message is set AFTER the route handler clears verify-msg
+    setTimeout(() => setMsg("verify-msg", "Código reenviado! Verifique seu email.", true), 0);
   } catch (e) {
     setMsg("login-msg", e.message || "Erro de conexão");
   }
