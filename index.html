@@ -337,20 +337,14 @@
       <details class="landing-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
         <summary itemprop="name">O Depix App é seguro?</summary>
         <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-          <p itemprop="text">Sim. Os seus fundos (DePix, Bitcoin ou USDt) não ficam armazenados no Depix App — eles estão protegidos pela tecnologia blockchain na sua carteira externa. O Depix App não possui carteira nativa, por isso você utiliza uma carteira compatível com a Liquid Network, como a SideSwap. Além disso, utilizamos autenticação JWT, senhas criptografadas, conexão HTTPS e não armazenamos dados bancários. Toda troca de endereço exige confirmação de senha.</p>
+          <div itemprop="text" class="faq-content-security"></div>
         </div>
       </details>
 
       <details class="landing-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-        <summary itemprop="name">O que fazer com o DePix?</summary>
+        <summary itemprop="name">O que você pode fazer com DePix?</summary>
         <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-          <div itemprop="text">
-            <p>Na SideSwap, você converte seus DePix em outras criptomoedas — tudo sem intermediários:</p>
-            <p><strong>DePix → USDt (dólar digital):</strong> Proteja seu dinheiro da desvalorização do real. Na SideSwap, vá em "Swap", selecione DePix como moeda de entrega e USDt como moeda de recebimento.</p>
-            <p><strong>DePix → L-BTC (Liquid Bitcoin):</strong> Converta para Bitcoin na rede Liquid. Mesmo processo: "Swap" → DePix → L-BTC.</p>
-            <p><strong>L-BTC → BTC (Peg-Out):</strong> Saque Liquid Bitcoin para Bitcoin on-chain com autocustódia total. Na SideSwap, vá em "Peg-In/Out" → aba "Peg-Out" → cole o endereço BTC de destino. Taxa: 0,1%.</p>
-            <p><strong>Envie DePix para qualquer pessoa:</strong> Funciona como um PIX — instantâneo e com taxa de apenas alguns centavos. Na SideSwap, toque em "Pagar", cole o endereço Liquid do destinatário e confirme.</p>
-          </div>
+          <div itemprop="text" class="faq-content-depix-uses"></div>
         </div>
       </details>
 
@@ -780,17 +774,11 @@
       </div>
       <div class="faq-item">
         <button class="faq-question">O Depix App é seguro?</button>
-        <div class="faq-answer hidden"><p>Sim. Os seus fundos (DePix, Bitcoin ou USDt) não ficam armazenados no Depix App — eles estão protegidos pela tecnologia blockchain na sua carteira externa. O Depix App não possui carteira nativa, por isso você utiliza uma carteira compatível com a Liquid Network, como a SideSwap. Além disso, utilizamos autenticação JWT, senhas criptografadas, conexão HTTPS e não armazenamos dados bancários. Toda troca de endereço exige confirmação de senha.</p></div>
+        <div class="faq-answer hidden faq-content-security"></div>
       </div>
       <div class="faq-item">
-        <button class="faq-question">O que fazer com o DePix?</button>
-        <div class="faq-answer hidden">
-          <p>Na SideSwap, você converte seus DePix em outras criptomoedas — tudo sem intermediários:</p>
-          <p><strong>DePix → USDt (dólar digital):</strong> Proteja seu dinheiro da desvalorização do real. Na SideSwap, vá em "Swap", selecione DePix como moeda de entrega e USDt como moeda de recebimento.</p>
-          <p><strong>DePix → L-BTC (Liquid Bitcoin):</strong> Converta para Bitcoin na rede Liquid. Mesmo processo: "Swap" → DePix → L-BTC.</p>
-          <p><strong>L-BTC → BTC (Peg-Out):</strong> Saque Liquid Bitcoin para Bitcoin on-chain com autocustódia total. Na SideSwap, vá em "Peg-In/Out" → aba "Peg-Out" → cole o endereço BTC de destino. Taxa: 0,1%.</p>
-          <p><strong>Envie DePix para qualquer pessoa:</strong> Funciona como um PIX — instantâneo e com taxa de apenas alguns centavos. Na SideSwap, toque em "Pagar", cole o endereço Liquid do destinatário e confirme.</p>
-        </div>
+        <button class="faq-question">O que você pode fazer com DePix?</button>
+        <div class="faq-answer hidden faq-content-depix-uses"></div>
       </div>
       <div class="faq-item">
         <button class="faq-question">Como reportar um problema?</button>
@@ -988,6 +976,73 @@
 <div id="toast" class="toast hidden">
   Código copiado. Cole no app do seu banco.
 </div>
+
+<!-- Shared FAQ content templates (single source of truth) -->
+<template id="tpl-faq-security">
+  <p><strong>Sim — sua segurança vem primeiro.</strong></p>
+  <p>Seus fundos nunca ficam no Depix App. Eles permanecem protegidos na blockchain, na sua própria carteira (como a SideSwap), garantindo que você tenha total controle dos seus ativos.</p>
+  <p>Além disso, aplicamos padrões modernos de segurança:</p>
+  <div class="faq-security-grid">
+    <div class="faq-security-item">
+      <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Criptografia de senhas</span>
+    </div>
+    <div class="faq-security-item">
+      <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span>Autenticação segura (JWT)</span>
+    </div>
+    <div class="faq-security-item">
+      <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span>Conexão protegida (HTTPS)</span>
+    </div>
+    <div class="faq-security-item">
+      <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      <span>Zero armazenamento de dados bancários</span>
+    </div>
+  </div>
+  <p>E mais: qualquer alteração sensível exige confirmação de senha.</p>
+  <p class="faq-highlight">Você no controle. Sempre.</p>
+</template>
+
+<template id="tpl-faq-depix-uses">
+  <p>Com DePix, você tem liberdade total para movimentar, proteger e usar seu dinheiro — sem intermediários.</p>
+  <div class="faq-use-cards">
+    <div class="faq-use-card">
+      <div class="faq-use-header">
+        <svg class="faq-use-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <strong>Converter para dólar digital (USDt)</strong>
+      </div>
+      <p>Proteja seu saldo da desvalorização do real convertendo para USDt.</p>
+      <div class="faq-use-path">Na SideSwap: Swap → DePix → USDt</div>
+    </div>
+    <div class="faq-use-card">
+      <div class="faq-use-header">
+        <svg class="faq-use-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.155-6.2L8.29 4.26m5.908 1.042.348-1.97M7.48 20.364l3.126-17.727"/></svg>
+        <strong>Converter para Bitcoin (L-BTC)</strong>
+      </div>
+      <p>Transforme seus DePix em Bitcoin na rede Liquid de forma rápida e prática.</p>
+      <div class="faq-use-path">Na SideSwap: Swap → DePix → L-BTC</div>
+    </div>
+    <div class="faq-use-card">
+      <div class="faq-use-header">
+        <svg class="faq-use-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <strong>Sacar para Bitcoin on-chain (BTC)</strong>
+      </div>
+      <p>Leve seu L-BTC para a rede principal do Bitcoin com autocustódia total.</p>
+      <div class="faq-use-path">Na SideSwap: Peg-In/Out → Peg-Out · Taxa: apenas 0,1%</div>
+    </div>
+    <div class="faq-use-card">
+      <div class="faq-use-header">
+        <svg class="faq-use-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <strong>Enviar para qualquer pessoa</strong>
+      </div>
+      <p>Envie DePix como um PIX — rápido e instantâneo.</p>
+      <p class="faq-use-detail">A única taxa é a da rede (geralmente poucos centavos).<br>O Depix não cobra nada por transferências entre carteiras.</p>
+      <div class="faq-use-path">Na SideSwap: Pagar → cole o endereço → confirme</div>
+    </div>
+  </div>
+  <p class="faq-highlight">Seu dinheiro, do seu jeito. Sem limites.</p>
+</template>
 
 <script type="module" src="script.js"></script>
 </body>
