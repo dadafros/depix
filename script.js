@@ -110,7 +110,12 @@ for (const [tplId, cls] of [
   ["tpl-faq-withdraw", "faq-content-withdraw"],
   ["tpl-faq-security", "faq-content-security"],
   ["tpl-faq-depix-uses", "faq-content-depix-uses"],
-  ["tpl-faq-ecosystem", "faq-content-ecosystem"]
+  ["tpl-faq-ecosystem", "faq-content-ecosystem"],
+  ["tpl-faq-liquid-address", "faq-content-liquid-address"],
+  ["tpl-faq-change-address", "faq-content-change-address"],
+  ["tpl-faq-processing-time", "faq-content-processing-time"],
+  ["tpl-faq-fees", "faq-content-fees"],
+  ["tpl-faq-report", "faq-content-report"]
 ]) {
   const tpl = document.getElementById(tplId);
   if (tpl) {
