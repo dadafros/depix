@@ -306,13 +306,19 @@ button:focus-visible {
 .store-badge {
   display: inline-flex;
   text-decoration: none;
-  border-radius: 8px;
-  transition: transform 0.15s, opacity 0.15s;
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .store-badge:hover {
   transform: scale(1.04);
-  opacity: 0.9;
+  border-color: rgba(255,255,255,0.22);
+  background: linear-gradient(145deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
 }
 
 /* ===== Mode Switch (toggle depósito/saque) ===== */
