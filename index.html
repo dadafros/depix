@@ -113,6 +113,13 @@
           <h3>Saque via PIX</h3>
           <p>Converta de volta para reais e saque direto na sua conta bancária quando quiser.</p>
         </div>
+        <div class="landing-benefit">
+          <div class="landing-benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <h3>Relatórios de vendas</h3>
+          <p>Acompanhe todas as suas transações com extrato detalhado, filtros e busca. Exporte relatórios para controle do seu negócio.</p>
+        </div>
       </div>
     </div>
 
@@ -154,7 +161,7 @@
         </div>
         <div class="landing-info-item">
           <span class="landing-info-label">Máximo</span>
-          <span class="landing-info-value">R$ 3.000/dia <em>por cliente</em></span>
+          <span class="landing-info-value">R$ 6.000/dia <em>por cliente</em></span>
         </div>
       </div>
     </div>
@@ -172,7 +179,7 @@
         </div>
         <div class="landing-eco-card">
           <h3>Cartão cripto</h3>
-          <p>Use cartões como Kast ou RedotPay para gastar suas criptos em qualquer lugar do mundo.</p>
+          <p>Use cartões como Kast para gastar suas criptos em qualquer lugar do mundo.</p>
         </div>
         <div class="landing-eco-card">
           <h3>Saque PIX</h3>
@@ -258,7 +265,7 @@
         </div>
         <div class="landing-info-item">
           <span class="landing-info-label">Máximo</span>
-          <span class="landing-info-value">R$ 3.000/dia</span>
+          <span class="landing-info-value">R$ 6.000/dia</span>
         </div>
       </div>
     </div>
@@ -276,7 +283,7 @@
         </div>
         <div class="landing-eco-card">
           <h3>Gastar no mundo</h3>
-          <p>Use cartões cripto como Kast ou RedotPay para gastar em qualquer lugar do mundo.</p>
+          <p>Use cartões cripto como Kast para gastar em qualquer lugar do mundo.</p>
         </div>
         <div class="landing-eco-card">
           <h3>Sacar em PIX</h3>
@@ -285,6 +292,36 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Affiliates section — shared by both modes -->
+  <div class="landing-section landing-affiliates-section">
+    <h2>Programa de Afiliados</h2>
+    <p class="landing-affiliates-subtitle">Indique o DePix App e ganhe comissão sobre cada transação dos seus indicados. Aberto para lojistas e pessoas físicas.</p>
+    <div class="landing-benefits">
+      <div class="landing-benefit">
+        <div class="landing-benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+        <h3>Indique e ganhe</h3>
+        <p>Compartilhe seu link de indicação. Cada pessoa que se cadastrar e usar o DePix gera comissão para você.</p>
+      </div>
+      <div class="landing-benefit">
+        <div class="landing-benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Comissão recorrente</h3>
+        <p>Ganhe uma porcentagem sobre o volume de depósitos dos seus indicados. Pagamentos mensais, direto na sua conta.</p>
+      </div>
+      <div class="landing-benefit">
+        <div class="landing-benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Painel em tempo real</h3>
+        <p>Acompanhe suas indicações, volume gerado e comissão acumulada diretamente no app.</p>
+      </div>
+    </div>
+    <a href="#register" class="landing-cta-btn">Cadastre-se e comece a ganhar</a>
   </div>
 
   <!-- FAQ — shared by both modes, SEO-optimized with schema.org -->
@@ -359,6 +396,13 @@
         <summary itemprop="name">O Ecossistema DePix</summary>
         <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
           <div itemprop="text" class="faq-content-ecosystem"></div>
+        </div>
+      </details>
+
+      <details class="landing-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <summary itemprop="name">Como funciona o Programa de Afiliados?</summary>
+        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <div itemprop="text" class="faq-content-affiliates"></div>
         </div>
       </details>
 
@@ -783,6 +827,23 @@
   </div>
 </div>
 
+<!-- ===== MODAL: LIMITE POR TRANSAÇÃO ===== -->
+<div id="limit-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2>Limite por transação</h2>
+    <p class="info-text">Cada pagamento pode ser de no máximo <strong>R$ 3.000,00</strong>.</p>
+    <p class="info-text">Para valores maiores, basta criar mais de um pagamento. O limite diário total é de <strong>R$ 6.000,00</strong> por CPF.</p>
+    <div class="limit-example">
+      <p class="limit-example-title">Exemplo: você quer receber R$ 5.000</p>
+      <div class="limit-example-steps">
+        <span class="limit-example-step">1º pagamento: <strong>R$ 3.000</strong></span>
+        <span class="limit-example-step">2º pagamento: <strong>R$ 2.000</strong></span>
+      </div>
+    </div>
+    <button id="close-limit-modal" class="secondary">Entendi</button>
+  </div>
+</div>
+
 <!-- ===== TRANSAÇÕES ===== -->
 <section data-view="transactions" class="page hidden">
   <div class="card">
@@ -1153,15 +1214,14 @@
 <template id="tpl-faq-ecosystem">
   <p>O DePix abre portas para um ecossistema financeiro completo.</p>
   <div class="faq-eco-grid">
-    <a href="https://p2p.land" target="_blank" rel="noopener noreferrer" class="faq-eco-card">
+    <div class="faq-eco-card faq-eco-card-no-link">
       <div class="faq-eco-header">
-        <div class="faq-eco-icon faq-eco-p2p">P2P</div>
-        <span class="faq-eco-name faq-eco-p2p-name">P2P.Land</span>
-        <svg class="faq-eco-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        <div class="faq-eco-icon faq-eco-swap">⇄</div>
+        <span class="faq-eco-name">Troque por outras criptos</span>
       </div>
-      <strong>Troque DePix por outras criptomoedas</strong>
-      <p>Plataforma peer-to-peer para trocar DePix por criptos em outras blockchains (Bitcoin, Ethereum, Polygon, etc).</p>
-    </a>
+      <strong>Swaps cross-chain</strong>
+      <p>Use <a href="https://p2p.land" target="_blank" rel="noopener noreferrer">P2P.Land</a> ou <a href="https://brswap.me" target="_blank" rel="noopener noreferrer">BrSwap.me</a> para trocar DePix por criptos em outras blockchains (Bitcoin, Ethereum, Polygon, etc).</p>
+    </div>
     <a href="https://enorsecurities.com" target="_blank" rel="noopener noreferrer" class="faq-eco-card">
       <div class="faq-eco-header">
         <div class="faq-eco-icon faq-eco-enor">ES</div>
@@ -1171,27 +1231,18 @@
       <strong>Invista em ativos tokenizados</strong>
       <p>Invista em ativos tokenizados usando DePix. Mercado de valores mobiliários diretamente na rede Liquid.</p>
     </a>
-    <a href="https://kast.xyz" target="_blank" rel="noopener noreferrer" class="faq-eco-card">
+    <a href="https://go.kast.xyz/VqVO/TWUQMOLG" target="_blank" rel="noopener noreferrer" class="faq-eco-card">
       <div class="faq-eco-header">
         <div class="faq-eco-icon faq-eco-kast">K</div>
         <span class="faq-eco-name faq-eco-kast-name">Kast</span>
         <svg class="faq-eco-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       </div>
       <strong>Cartão cripto internacional</strong>
-      <p>Cartão de crédito/débito alimentado por cripto. Gaste em qualquer lugar do mundo.</p>
-    </a>
-    <a href="https://redotpay.com" target="_blank" rel="noopener noreferrer" class="faq-eco-card">
-      <div class="faq-eco-header">
-        <div class="faq-eco-icon faq-eco-redot">●</div>
-        <span class="faq-eco-name faq-eco-redot-name">RedotPay</span>
-        <svg class="faq-eco-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-      </div>
-      <strong>Pague com cripto globalmente</strong>
-      <p>Outra opção de cartão cripto aceito globalmente. Aceito em milhões de estabelecimentos.</p>
+      <p>Cartão de crédito/débito alimentado por cripto. Gaste em qualquer lugar do mundo, aceito em milhões de estabelecimentos.</p>
     </a>
   </div>
   <div class="faq-eco-tip">
-    <p><svg class="faq-eco-inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> <strong>Cartões cripto (Kast, RedotPay e similares)</strong> — Para usar cartões, converta DePix para a moeda aceita (geralmente USDT na rede Polygon) via SideSwap e/ou P2P.Land antes de carregar o cartão.</p>
+    <p><svg class="faq-eco-inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> <strong>Cartões cripto (Kast e similares)</strong> — Para usar cartões, converta DePix para a moeda aceita (geralmente USDT na rede Polygon) via SideSwap, P2P.Land ou BrSwap.me antes de carregar seu cartão.</p>
   </div>
   <div class="faq-eco-highlight">
     <p><span class="faq-eco-badge">Disponível</span> <strong>Saque DePix direto para sua conta bancária via PIX.</strong> — Rápido, simples e sem complicação. Converta seus DePix de volta para reais a qualquer momento.</p>
@@ -1282,9 +1333,21 @@
     <div class="faq-table-row"><span class="faq-table-label">Taxa</span><span class="faq-table-value">2% + R$ 0,99</span></div>
     <div class="faq-table-row"><span class="faq-table-label">Prazo</span><span class="faq-table-value">D+1 (~24h)</span></div>
     <div class="faq-table-row"><span class="faq-table-label">Mínimo</span><span class="faq-table-value">R$ 5,00</span></div>
-    <div class="faq-table-row"><span class="faq-table-label">Máximo</span><span class="faq-table-value">R$ 3.000,00 por dia / por CPF</span></div>
+    <div class="faq-table-row"><span class="faq-table-label">Máximo</span><span class="faq-table-value">R$ 6.000,00 por dia / por CPF</span></div>
   </div>
   <p>Para o saque, as taxas são exibidas no momento da solicitação.</p>
+</template>
+
+<template id="tpl-faq-affiliates">
+  <p><strong>Indique o DePix e ganhe dinheiro com cada transação dos seus indicados.</strong></p>
+  <p>O programa é aberto para qualquer pessoa — lojistas, autônomos ou pessoa física. Basta se cadastrar no DePix para receber seu link exclusivo de indicação.</p>
+  <p><strong>Como funciona:</strong></p>
+  <ol>
+    <li>Compartilhe seu link de indicação com amigos, clientes ou nas redes sociais.</li>
+    <li>Cada pessoa que se cadastrar pelo seu link se torna seu indicado permanentemente.</li>
+    <li>Você ganha uma comissão sobre o volume de depósitos PIX dos seus indicados.</li>
+  </ol>
+  <p><strong>Pagamentos:</strong> As comissões são calculadas mensalmente e pagas diretamente na sua conta. Acompanhe tudo em tempo real pelo painel de afiliados no app.</p>
 </template>
 
 <template id="tpl-faq-report">

@@ -658,6 +658,34 @@ button:focus-visible {
   overflow-y: auto;
 }
 
+.limit-example {
+  background: rgba(56, 227, 172, 0.06);
+  border: 1px solid rgba(56, 227, 172, 0.15);
+  border-radius: 10px;
+  padding: 14px;
+  margin: 12px 0 16px;
+}
+
+.limit-example-title {
+  font-size: 13px;
+  color: #8a9bb0;
+  margin-bottom: 10px;
+}
+
+.limit-example-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.limit-example-step {
+  font-size: 14px;
+  color: #c0cdd8;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+}
+
 /* ===== Address list (select modal) ===== */
 .addr-list-item {
   display: flex;
@@ -1330,6 +1358,26 @@ textarea:focus {
 .faq-eco-enor-name { color: #a78bfa; }
 .faq-eco-kast-name { color: #e0e0e0; }
 .faq-eco-redot-name { color: #ef4444; }
+
+.faq-eco-swap {
+  background: rgba(56, 227, 172, 0.15);
+  color: #38e3ac;
+  font-size: 14px;
+}
+
+.faq-eco-card-no-link {
+  cursor: default;
+}
+
+.faq-eco-card-no-link a {
+  color: #38e3ac;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.faq-eco-card-no-link a:hover {
+  color: #4fd1c5;
+}
 
 .faq-eco-link-icon {
   width: 14px;
@@ -2503,6 +2551,28 @@ textarea:focus {
 }
 
 /* Final CTA */
+.landing-affiliates-section {
+  text-align: center;
+}
+
+.landing-affiliates-subtitle {
+  color: #8a9bb0;
+  font-size: 15px;
+  margin-bottom: 28px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-affiliates-section .landing-benefits {
+  text-align: left;
+  margin-bottom: 28px;
+}
+
+.landing-affiliates-section .landing-cta-btn {
+  display: inline-block;
+}
+
 .landing-final-cta {
   text-align: center;
   padding: 52px 20px;

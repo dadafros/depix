@@ -26,8 +26,8 @@ describe("toCents", () => {
     expect(toCents("R$ 5,00")).toBe(500);
   });
 
-  it("should handle maximum value R$ 3.000,00", () => {
-    expect(toCents("R$ 3.000,00")).toBe(300000);
+  it("should handle maximum value R$ 6.000,00", () => {
+    expect(toCents("R$ 6.000,00")).toBe(600000);
   });
 });
 
@@ -48,8 +48,8 @@ describe("formatBRL", () => {
     expect(formatBRL(500)).toBe("R$ 5,00");
   });
 
-  it("should format 300000 cents as R$ 3000,00", () => {
-    expect(formatBRL(300000)).toBe("R$ 3000,00");
+  it("should format 600000 cents as R$ 6000,00", () => {
+    expect(formatBRL(600000)).toBe("R$ 6000,00");
   });
 
   it("should format 99 cents as R$ 0,99", () => {

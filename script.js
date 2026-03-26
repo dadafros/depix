@@ -16,6 +16,7 @@ import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAff
 // ===== Constants =====
 const MIN_VALOR_CENTS = 500;
 const MAX_VALOR_CENTS = 300000;
+const MAX_DIARIO_CENTS = 600000;
 
 let qrCopyPaste = "";
 let deferredPrompt = null;
@@ -119,6 +120,7 @@ for (const [tplId, cls] of [
   ["tpl-faq-change-address", "faq-content-change-address"],
   ["tpl-faq-processing-time", "faq-content-processing-time"],
   ["tpl-faq-fees", "faq-content-fees"],
+  ["tpl-faq-affiliates", "faq-content-affiliates"],
   ["tpl-faq-report", "faq-content-report"]
 ]) {
   const tpl = document.getElementById(tplId);
@@ -582,7 +584,7 @@ document.getElementById("btnGerar")?.addEventListener("click", async () => {
     return;
   }
   if (valorCents > MAX_VALOR_CENTS) {
-    setMsg("mensagem", "O valor máximo é R$ 3.000,00");
+    showLimitModal();
     return;
   }
 
@@ -684,7 +686,7 @@ document.getElementById("btnSacar")?.addEventListener("click", async () => {
     return;
   }
   if (valorCents > MAX_VALOR_CENTS) {
-    setMsg("mensagemSaque", "O valor máximo é R$ 3.000,00");
+    showLimitModal();
     return;
   }
 
@@ -1136,6 +1138,14 @@ document.getElementById("affiliate-volume-info")?.addEventListener("click", () =
 
 document.getElementById("close-volume-info")?.addEventListener("click", () => {
   document.getElementById("volume-info-modal")?.classList.add("hidden");
+});
+
+// Limit explanation modal
+function showLimitModal() {
+  document.getElementById("limit-modal")?.classList.remove("hidden");
+}
+document.getElementById("close-limit-modal")?.addEventListener("click", () => {
+  document.getElementById("limit-modal")?.classList.add("hidden");
 });
 
 document.getElementById("btn-request-report")?.addEventListener("click", async () => {
