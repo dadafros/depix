@@ -1576,6 +1576,13 @@ textarea:focus {
   flex: 1;
   font-size: 0.85rem;
   min-width: 0;
+  margin-bottom: 0;
+}
+
+.affiliate-link-row button {
+  width: auto;
+  flex-shrink: 0;
+  margin-bottom: 0;
 }
 
 .affiliate-stats {

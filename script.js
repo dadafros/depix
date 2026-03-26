@@ -1438,7 +1438,8 @@ setupLandingToggle();
 // ===== Initialize =====
 const isPWA = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
 
-if (isPWA || (window.location.hash && window.location.hash !== "#" && window.location.hash !== "#landing")) {
+const hashBase = window.location.hash.split("?")[0];
+if (isPWA || (hashBase && hashBase !== "#" && hashBase !== "#landing")) {
   goToAppropriateScreen();
 } else if (isLoggedIn()) {
   goToAppropriateScreen();
