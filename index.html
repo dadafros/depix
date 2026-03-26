@@ -586,8 +586,8 @@
     <!-- ===== SWITCH MODO ===== -->
     <div class="mode-switch">
       <div class="mode-toggle" role="radiogroup" aria-label="Modo">
-        <button class="mode-toggle-option active" id="modeDeposit" role="radio" aria-checked="true">Receber pagamento</button>
-        <button class="mode-toggle-option" id="modeWithdraw" role="radio" aria-checked="false">Sacar DePix</button>
+        <button class="mode-toggle-option active" id="modeDeposit" role="radio" aria-checked="true">Receber pagamento<br><small>(Comprar DePix)</small></button>
+        <button class="mode-toggle-option" id="modeWithdraw" role="radio" aria-checked="false">Realizar pagamento<br><small>(Sacar DePix)</small></button>
       </div>
     </div>
 
@@ -600,7 +600,7 @@
         <label for="valor">Valor do pagamento</label>
         <input id="valor" placeholder="R$ 0,00" inputmode="numeric" />
 
-        <button id="btnGerar">Gerar código de pagamento</button>
+        <button id="btnGerar">Gerar QR code de pagamento</button>
       </div>
 
       <div id="loading" class="hidden"><span class="spinner"></span> Gerando código de pagamento…</div>

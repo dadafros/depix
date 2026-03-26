@@ -624,7 +624,7 @@ document.getElementById("btnGerar")?.addEventListener("click", async () => {
   } finally {
     document.getElementById("loading").classList.add("hidden");
     btn.disabled = false;
-    btn.innerText = "Gerar código de pagamento";
+    btn.innerText = "Gerar QR code de pagamento";
   }
 });
 
@@ -1595,6 +1595,7 @@ route("#home", () => {
   stopTransactionsPolling();
   updateAddrDisplay();
   document.getElementById("resultado")?.classList.add("hidden");
+  document.getElementById("formDeposito")?.classList.remove("hidden");
   document.getElementById("valor").value = "";
   setMsg("mensagem", "");
   // Reset saque state
