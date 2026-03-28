@@ -615,12 +615,16 @@ function switchMode(mode) {
     }
   });
 
-  // Remove iframe when leaving convert mode
+  // Remove iframe and clean up when leaving convert mode
   if (mode !== "convert") {
     const container = document.getElementById("converterContent");
     if (container) container.innerHTML = "";
     document.getElementById("converterError")?.classList.add("hidden");
     document.getElementById("converterLoading")?.classList.add("hidden");
+    if (brswapMessageHandler) {
+      window.removeEventListener("message", brswapMessageHandler);
+      brswapMessageHandler = null;
+    }
   }
 
   modoSaque = mode === "withdraw";
@@ -630,11 +634,19 @@ function switchMode(mode) {
   if (mode === "convert") loadBrswapWidget();
 }
 
+let brswapMessageHandler = null;
+
 function loadBrswapWidget() {
   const container = document.getElementById("converterContent");
   const errorEl = document.getElementById("converterError");
   const loadingEl = document.getElementById("converterLoading");
   if (!container || !errorEl) return;
+
+  // Clean up previous message listener
+  if (brswapMessageHandler) {
+    window.removeEventListener("message", brswapMessageHandler);
+    brswapMessageHandler = null;
+  }
 
   container.innerHTML = "";
   errorEl.classList.add("hidden");
@@ -668,6 +680,7 @@ function loadBrswapWidget() {
   let loaded = false;
 
   function resizeIframeToContent() {
+    if (!container.contains(iframe)) return;
     try {
       const h = iframe.contentWindow.document.documentElement.scrollHeight;
       if (h > 0) iframe.height = h;
@@ -691,12 +704,14 @@ function loadBrswapWidget() {
   });
 
   // Listen for postMessage resize events from the widget
-  window.addEventListener("message", (e) => {
+  brswapMessageHandler = (e) => {
+    if (!container.contains(iframe)) return;
     if (!iframe.src.startsWith(e.origin)) return;
     const data = typeof e.data === "string" ? (() => { try { return JSON.parse(e.data); } catch { return {}; } })() : (e.data || {});
     const h = data.height || data.frameHeight || data.size?.height;
     if (h && typeof h === "number" && h > 0) iframe.height = h;
-  });
+  };
+  window.addEventListener("message", brswapMessageHandler);
 
   // Timeout fallback — if iframe doesn't load in 10s, show error
   setTimeout(() => {
