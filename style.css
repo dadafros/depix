@@ -348,10 +348,10 @@ button:focus-visible {
 .mode-toggle-option {
   flex: 1;
   width: auto;
-  padding: 9px 12px;
+  padding: 9px 8px;
   margin: 0;
   border-radius: 7px;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: #5a6d82;
   background: transparent;
@@ -373,6 +373,78 @@ button:focus-visible {
   background: rgba(56, 227, 172, 0.15);
   color: #38e3ac;
   font-weight: 600;
+}
+
+/* ===== BRSwap Converter ===== */
+.converter-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.brswap-iframe-wrapper {
+  width: 100%;
+  max-height: 65vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 227, 172, 0.3) rgba(255, 255, 255, 0.05);
+}
+
+.brswap-iframe-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.brswap-iframe-wrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.brswap-iframe-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(56, 227, 172, 0.3);
+  border-radius: 3px;
+}
+
+.brswap-iframe-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 227, 172, 0.5);
+}
+
+.converter-loading {
+  text-align: center;
+  color: #5a6d82;
+  padding: 40px 0;
+  font-size: 0.9rem;
+}
+
+.converter-error {
+  text-align: center;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.25);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 80px;
+  font-size: 0.9rem;
+}
+
+/* ===== Saque Warning ===== */
+.saque-warning-icon {
+  vertical-align: middle;
+  margin-right: 4px;
+  stroke: #ffd93d;
+}
+
+.saque-warning {
+  text-align: center;
+  color: #ffd93d;
+  background: rgba(255, 217, 61, 0.1);
+  border: 1px solid rgba(255, 217, 61, 0.3);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 /* ===== Switch base (used by valor mode switch) ===== */
@@ -529,12 +601,14 @@ button:focus-visible {
 
 #saqueQr {
   width: 100%;
-  max-width: min(220px, 60vw);
+  max-width: min(240px, 65vw);
   height: auto;
   aspect-ratio: 1 / 1;
-  margin: 12px 0 0;
+  margin: 16px 0 4px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 14px;
+  border: 2px solid rgba(56, 227, 172, 0.2);
+  box-shadow: 0 0 20px rgba(56, 227, 172, 0.08);
 }
 
 /* ===== Resultado (depósito) separator ===== */

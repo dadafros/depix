@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toCents, formatBRL, isAllowedImageUrl } from "../utils.js";
+import { toCents, formatBRL, formatDePix, isAllowedImageUrl } from "../utils.js";
 
 describe("toCents", () => {
   it("should parse simple value", () => {
@@ -54,6 +54,41 @@ describe("formatBRL", () => {
 
   it("should format 99 cents as R$ 0,99", () => {
     expect(formatBRL(99)).toBe("R$ 0,99");
+  });
+});
+
+describe("formatDePix", () => {
+  it("should format integer cents with 2 decimal places", () => {
+    expect(formatDePix(15000)).toBe("150,00 DePix");
+  });
+
+  it("should format small value", () => {
+    expect(formatDePix(500)).toBe("5,00 DePix");
+  });
+
+  it("should format 1 cent", () => {
+    expect(formatDePix(1)).toBe("0,01 DePix");
+  });
+
+  it("should show full precision for sub-cent values", () => {
+    expect(formatDePix(499.931)).toBe("4,99931 DePix");
+  });
+
+  it("should show up to 8 decimal places", () => {
+    expect(formatDePix(0.01)).toBe("0,0001 DePix");
+  });
+
+  it("should not pad unnecessary zeros beyond 2 decimals", () => {
+    expect(formatDePix(510)).toBe("5,10 DePix");
+  });
+
+  it("should handle zero", () => {
+    expect(formatDePix(0)).toBe("0,00 DePix");
+  });
+
+  it("should preserve precision for values like 4.99931", () => {
+    // 4.99931 DePix = 499.931 cents
+    expect(formatDePix(499.931)).toBe("4,99931 DePix");
   });
 });
 

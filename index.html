@@ -6,7 +6,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="DePix converte pagamentos PIX em bitcoin, dólar digital ou stablecoin automaticamente. Receba PIX como lojista ou compre cripto como pessoa física — com privacidade, sem exchange." />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data: https://*.eulen.app https://depix.eulen.app https://api.qrserver.com; connect-src https://depix-backend.vercel.app; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data: https://*.eulen.app https://depix.eulen.app https://api.qrserver.com; connect-src https://depix-backend.vercel.app; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src https://brswap.me" />
   <meta name="theme-color" content="#0a0f14" />
 
   <link rel="canonical" href="https://depixapp.com/" />
@@ -588,6 +588,7 @@
       <div class="mode-toggle" role="radiogroup" aria-label="Modo">
         <button class="mode-toggle-option active" id="modeDeposit" role="radio" aria-checked="true">Receber pagamento<br><small>(Comprar DePix)</small></button>
         <button class="mode-toggle-option" id="modeWithdraw" role="radio" aria-checked="false">Realizar pagamento<br><small>(Sacar DePix)</small></button>
+        <button class="mode-toggle-option hidden" id="modeConvert" role="radio" aria-checked="false">Converter DePix<br><small>(BRSwap)</small></button>
       </div>
     </div>
 
@@ -609,7 +610,7 @@
         <img id="qrImage" alt="QR Code PIX" />
         <p id="qrId"></p>
         <button id="btnCopy">PIX copia e cola</button>
-        <button id="btnAcompanhar" class="secondary">Acompanhe esta transação</button>
+        <button id="btnAcompanhar" class="secondary">Acompanhe este pagamento</button>
         <button id="btnReset" class="secondary">Novo pagamento</button>
       </div>
     </div>
@@ -652,7 +653,7 @@
             <span id="saqueDepositAmount" class="resultado-value"></span>
           </div>
           <div class="resultado-item">
-            <span class="resultado-label">Você recebe na conta</span>
+            <span class="resultado-label">Você recebe</span>
             <span id="saquePayoutAmount" class="resultado-value"></span>
           </div>
         </div>
@@ -665,11 +666,20 @@
 
         <img id="saqueQr" class="hidden" alt="QR Code endereço Liquid" />
 
+        <p id="saqueWarning" class="saque-warning hidden"></p>
+
         <p class="resultado-sublabel qr-hint">Abra o app SideSwap e escaneie o QR Code acima para completar a transferência.</p>
 
-        <button id="btnAcompanharSaque" class="secondary">Acompanhe esta transação</button>
-        <button id="btnNovoSaque" class="secondary">Nova transferência</button>
+        <button id="btnAcompanharSaque" class="secondary">Já pagou? Acompanhe seu saque</button>
+        <button id="btnNovoSaque" class="secondary">Novo saque</button>
       </div>
+    </div>
+
+    <!-- ===== TELA: CONVERTER (BRSwap) ===== -->
+    <div id="telaConverter" class="hidden">
+      <div id="converterLoading" class="converter-loading hidden"><span class="spinner"></span> Carregando…</div>
+      <div id="converterContent" class="converter-container"></div>
+      <p id="converterError" class="converter-error hidden">Serviço indisponível no momento, tente mais tarde.</p>
     </div>
 
   </div>

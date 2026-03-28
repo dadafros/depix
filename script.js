@@ -8,7 +8,7 @@ import {
   getSelectedAddress, setSelectedAddress,
   abbreviateAddress, hasAddresses
 } from "./addresses.js";
-import { ALLOWED_QR_HOSTS, isAllowedImageUrl, toCents, formatBRL } from "./utils.js";
+import { ALLOWED_QR_HOSTS, isAllowedImageUrl, toCents, formatBRL, formatDePix } from "./utils.js";
 import { validateLiquidAddress, validatePhone } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML } from "./affiliates.js";
@@ -23,6 +23,8 @@ let deferredPrompt = null;
 let pendingAddressChange = "";
 let reportType = "";
 let modoSaque = false;
+let modoConvert = false;
+let brswapConfig = null;
 let valorModeIsPix = false;
 let saqueDepositAddress = "";
 let lastDepositQrId = "";
@@ -36,6 +38,81 @@ if ("serviceWorker" in navigator) {
 
 // ===== Utility functions =====
 // showToast and setMsg are imported from script-helpers.js
+
+function generateBrandedQr(data, imgEl) {
+  const size = 300;
+  const qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=" + size + "x" + size + "&ecc=H&data=" + encodeURIComponent(data);
+
+  const qrImg = new Image();
+  qrImg.crossOrigin = "anonymous";
+  qrImg.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+
+    // Draw dark background
+    ctx.fillStyle = "#111921";
+    ctx.fillRect(0, 0, size, size);
+
+    // Draw QR on canvas to read pixels
+    ctx.drawImage(qrImg, 0, 0, size, size);
+    const imageData = ctx.getImageData(0, 0, size, size);
+    const pixels = imageData.data;
+
+    // Replace colors: black modules → teal, white → dark bg
+    for (let i = 0; i < pixels.length; i += 4) {
+      const brightness = pixels[i]; // R channel (grayscale QR)
+      if (brightness < 128) {
+        // Dark module → teal
+        pixels[i] = 56;      // R
+        pixels[i + 1] = 227; // G
+        pixels[i + 2] = 172; // B
+      } else {
+        // Light module → dark background
+        pixels[i] = 17;      // R
+        pixels[i + 1] = 25;  // G
+        pixels[i + 2] = 33;  // B
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    // Draw logo in center with circular background
+    const logo = new Image();
+    logo.onload = () => {
+      const logoSize = size * 0.22;
+      const padding = 6;
+      const cx = (size - logoSize) / 2;
+      const cy = (size - logoSize) / 2;
+
+      // Circle background behind logo
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, logoSize / 2 + padding, 0, Math.PI * 2);
+      ctx.fillStyle = "#111921";
+      ctx.fill();
+
+      // Draw logo
+      ctx.drawImage(logo, cx, cy, logoSize, logoSize);
+
+      // Set result as data URL
+      imgEl.src = canvas.toDataURL("image/png");
+      imgEl.classList.remove("hidden");
+    };
+    logo.onerror = () => {
+      // Logo failed — show QR without logo
+      imgEl.src = canvas.toDataURL("image/png");
+      imgEl.classList.remove("hidden");
+    };
+    logo.src = "./icon-192.png";
+  };
+
+  qrImg.onerror = () => {
+    // Fallback: plain QR
+    imgEl.src = qrApiUrl;
+    imgEl.classList.remove("hidden");
+  };
+  qrImg.src = qrApiUrl;
+}
 
 function formatCurrencyInput(input) {
   if (!input) return;
@@ -518,26 +595,153 @@ function updateAddrDisplay() {
   }
 }
 
+function switchMode(mode) {
+  const modes = ["deposit", "withdraw", "convert"];
+  const buttons = { deposit: "modeDeposit", withdraw: "modeWithdraw", convert: "modeConvert" };
+  const screens = { deposit: "telaDeposito", withdraw: "telaSaque", convert: "telaConverter" };
+
+  modes.forEach(m => {
+    const btn = document.getElementById(buttons[m]);
+    const screen = document.getElementById(screens[m]);
+    if (m === mode) {
+      btn?.classList.add("active");
+      btn?.setAttribute("aria-checked", "true");
+      screen?.classList.remove("hidden");
+    } else {
+      btn?.classList.remove("active");
+      btn?.setAttribute("aria-checked", "false");
+      screen?.classList.add("hidden");
+    }
+  });
+
+  // Remove iframe when leaving convert mode
+  if (mode !== "convert") {
+    const container = document.getElementById("converterContent");
+    if (container) container.innerHTML = "";
+    document.getElementById("converterError")?.classList.add("hidden");
+    document.getElementById("converterLoading")?.classList.add("hidden");
+  }
+
+  modoSaque = mode === "withdraw";
+  modoConvert = mode === "convert";
+
+  // Load BRSwap widget when entering convert mode
+  if (mode === "convert") loadBrswapWidget();
+}
+
+function loadBrswapWidget() {
+  const container = document.getElementById("converterContent");
+  const errorEl = document.getElementById("converterError");
+  const loadingEl = document.getElementById("converterLoading");
+  if (!container || !errorEl) return;
+
+  container.innerHTML = "";
+  errorEl.classList.add("hidden");
+  loadingEl?.classList.add("hidden");
+
+  if (!brswapConfig || !brswapConfig.active) {
+    errorEl.classList.remove("hidden");
+    return;
+  }
+
+  // Show loading
+  loadingEl?.classList.remove("hidden");
+
+  let src = "https://brswap.me/widget";
+  if (brswapConfig.partnerId) {
+    src += "?ref=" + encodeURIComponent(brswapConfig.partnerId);
+  }
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "brswap-iframe-wrapper";
+
+  const iframe = document.createElement("iframe");
+  iframe.src = src;
+  iframe.width = "420";
+  iframe.height = "1050";
+  iframe.frameBorder = "0";
+  iframe.setAttribute("scrolling", "yes");
+  iframe.setAttribute("allow", "clipboard-write");
+  iframe.style.cssText = "border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 100%; display: block;";
+
+  let loaded = false;
+
+  function resizeIframeToContent() {
+    try {
+      const h = iframe.contentWindow.document.documentElement.scrollHeight;
+      if (h > 0) iframe.height = h;
+    } catch {
+      // Cross-origin: can't read height directly
+    }
+  }
+
+  iframe.addEventListener("load", () => {
+    loaded = true;
+    loadingEl?.classList.add("hidden");
+    resizeIframeToContent();
+    setTimeout(resizeIframeToContent, 1000);
+    setTimeout(resizeIframeToContent, 3000);
+  });
+
+  iframe.addEventListener("error", () => {
+    loadingEl?.classList.add("hidden");
+    container.innerHTML = "";
+    errorEl.classList.remove("hidden");
+  });
+
+  // Listen for postMessage resize events from the widget
+  window.addEventListener("message", (e) => {
+    if (!iframe.src.startsWith(e.origin)) return;
+    const data = typeof e.data === "string" ? (() => { try { return JSON.parse(e.data); } catch { return {}; } })() : (e.data || {});
+    const h = data.height || data.frameHeight || data.size?.height;
+    if (h && typeof h === "number" && h > 0) iframe.height = h;
+  });
+
+  // Timeout fallback — if iframe doesn't load in 10s, show error
+  setTimeout(() => {
+    if (!loaded && container.contains(iframe)) {
+      loadingEl?.classList.add("hidden");
+      container.innerHTML = "";
+      errorEl.classList.remove("hidden");
+    }
+  }, 10000);
+
+  wrapper.appendChild(iframe);
+  container.appendChild(wrapper);
+}
+
+async function fetchBrswapConfig() {
+  try {
+    const res = await apiFetch("/api/status?type=features");
+    const data = await res.json();
+    brswapConfig = data?.brswap || null;
+  } catch {
+    brswapConfig = null;
+  }
+
+  const convertBtn = document.getElementById("modeConvert");
+  if (brswapConfig?.active) {
+    convertBtn.classList.remove("hidden");
+  } else {
+    convertBtn.classList.add("hidden");
+    // If user was on convert screen, switch back to deposit
+    if (modoConvert) switchMode("deposit");
+  }
+}
+
 document.getElementById("modeDeposit")?.addEventListener("click", () => {
-  if (!modoSaque) return;
-  modoSaque = false;
-  document.getElementById("modeDeposit").classList.add("active");
-  document.getElementById("modeDeposit").setAttribute("aria-checked", "true");
-  document.getElementById("modeWithdraw").classList.remove("active");
-  document.getElementById("modeWithdraw").setAttribute("aria-checked", "false");
-  document.getElementById("telaSaque").classList.add("hidden");
-  document.getElementById("telaDeposito").classList.remove("hidden");
+  if (!modoSaque && !modoConvert) return;
+  switchMode("deposit");
 });
 
 document.getElementById("modeWithdraw")?.addEventListener("click", () => {
   if (modoSaque) return;
-  modoSaque = true;
-  document.getElementById("modeWithdraw").classList.add("active");
-  document.getElementById("modeWithdraw").setAttribute("aria-checked", "true");
-  document.getElementById("modeDeposit").classList.remove("active");
-  document.getElementById("modeDeposit").setAttribute("aria-checked", "false");
-  document.getElementById("telaDeposito").classList.add("hidden");
-  document.getElementById("telaSaque").classList.remove("hidden");
+  switchMode("withdraw");
+});
+
+document.getElementById("modeConvert")?.addEventListener("click", () => {
+  if (modoConvert) return;
+  switchMode("convert");
 });
 
 document.getElementById("valorModeTrack")?.addEventListener("click", () => {
@@ -724,7 +928,7 @@ document.getElementById("btnSacar")?.addEventListener("click", async () => {
     const r = data.response;
     lastWithdrawalId = r.id;
 
-    document.getElementById("saqueDepositAmount").innerText = formatBRL(r.depositAmountInCents);
+    document.getElementById("saqueDepositAmount").innerText = formatDePix(r.depositAmountInCents);
     document.getElementById("saquePayoutAmount").innerText = formatBRL(r.payoutAmountInCents);
     saqueDepositAddress = r.depositAddress;
     const addrShort = r.depositAddress.length > 16
@@ -732,11 +936,17 @@ document.getElementById("btnSacar")?.addEventListener("click", async () => {
       : r.depositAddress;
     document.getElementById("saqueAddress").innerText = addrShort;
 
-    // Generate QR code for the Liquid address
-    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(r.depositAddress);
+    // Generate branded QR code for the Liquid address
     const saqueQr = document.getElementById("saqueQr");
-    saqueQr.src = qrUrl;
-    saqueQr.classList.remove("hidden");
+    generateBrandedQr(r.depositAddress, saqueQr);
+
+    // Show warning about exact amount
+    const warningEl = document.getElementById("saqueWarning");
+    if (warningEl) {
+      const warnIcon = '<svg class="saque-warning-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      warningEl.innerHTML = `${warnIcon} Envie EXATAMENTE ${formatDePix(r.depositAmountInCents)}. Se você enviar qualquer outro valor (ou qualquer outra moeda), seus fundos podem ser perdidos para sempre.`;
+      warningEl.classList.remove("hidden");
+    }
 
     document.getElementById("formSaque").classList.add("hidden");
     document.getElementById("resultadoSaque").classList.remove("hidden");
@@ -1602,6 +1812,14 @@ route("#home", () => {
   document.getElementById("resultadoSaque")?.classList.add("hidden");
   document.getElementById("formSaque")?.classList.remove("hidden");
   document.getElementById("saqueQr")?.classList.add("hidden");
+  document.getElementById("saqueWarning")?.classList.add("hidden");
+  // Reset converter state
+  const converterContent = document.getElementById("converterContent");
+  if (converterContent) converterContent.innerHTML = "";
+  document.getElementById("converterError")?.classList.add("hidden");
+  document.getElementById("converterLoading")?.classList.add("hidden");
+  // Fetch BRSwap feature config
+  fetchBrswapConfig();
 });
 
 route("#login", () => {

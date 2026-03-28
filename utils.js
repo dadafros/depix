@@ -25,3 +25,9 @@ export function toCents(v) {
 export function formatBRL(cents) {
   return "R$ " + (cents / 100).toFixed(2).replace(".", ",");
 }
+
+export function formatDePix(cents) {
+  // DePix has up to 8 decimal places — show full precision, minimum 2 decimals
+  let str = (cents / 100).toFixed(8).replace(/0{1,6}$/, "");
+  return str.replace(".", ",") + " DePix";
+}
