@@ -114,13 +114,14 @@ function generateBrandedQr(data, imgEl) {
   qrImg.src = qrApiUrl;
 }
 
-function formatCurrencyInput(input) {
+function formatCurrencyInput(input, mode) {
   if (!input) return;
   input.addEventListener("input", () => {
     let v = input.value.replace(/\D/g, "");
     if (!v) { input.value = ""; return; }
     v = (v / 100).toFixed(2).replace(".", ",");
-    input.value = "R$ " + v;
+    const useDepix = mode === "saque" && !valorModeIsPix;
+    input.value = useDepix ? v + " DePix" : "R$ " + v;
   });
 }
 
@@ -658,11 +659,11 @@ function loadBrswapWidget() {
   const iframe = document.createElement("iframe");
   iframe.src = src;
   iframe.width = "420";
-  iframe.height = "3000";
+  iframe.height = "1600";
   iframe.frameBorder = "0";
   iframe.setAttribute("scrolling", "yes");
   iframe.setAttribute("allow", "clipboard-write");
-  iframe.style.cssText = "border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 100%; display: block;";
+  iframe.style.cssText = "border: none; width: 100%; display: block;";
 
   let loaded = false;
 
@@ -741,6 +742,16 @@ document.getElementById("modeWithdraw")?.addEventListener("click", () => {
 
 document.getElementById("modeConvert")?.addEventListener("click", () => {
   if (modoConvert) return;
+  if (!localStorage.getItem("depix-brswap-warned")) {
+    document.getElementById("brswap-modal")?.classList.remove("hidden");
+    return;
+  }
+  switchMode("convert");
+});
+
+document.getElementById("brswap-modal-ok")?.addEventListener("click", () => {
+  localStorage.setItem("depix-brswap-warned", "1");
+  document.getElementById("brswap-modal")?.classList.add("hidden");
   switchMode("convert");
 });
 
@@ -759,14 +770,23 @@ document.getElementById("valorModeTrack")?.addEventListener("click", () => {
     text.innerText = "Valor que você envia";
     if (valorInput) valorInput.placeholder = "0,00 DePix";
   }
+
+  // Re-format current value with correct prefix/suffix
+  if (valorInput && valorInput.value) {
+    let v = valorInput.value.replace(/\D/g, "");
+    if (v) {
+      v = (v / 100).toFixed(2).replace(".", ",");
+      valorInput.value = valorModeIsPix ? "R$ " + v : v + " DePix";
+    }
+  }
 });
 
 // =========================================
 // HOME — Depósito (QR Code generation)
 // =========================================
 
-formatCurrencyInput(document.getElementById("valor"));
-formatCurrencyInput(document.getElementById("valorSaque"));
+formatCurrencyInput(document.getElementById("valor"), "deposito");
+formatCurrencyInput(document.getElementById("valorSaque"), "saque");
 
 document.getElementById("btnGerar")?.addEventListener("click", async () => {
   setMsg("mensagem", "");
@@ -1816,6 +1836,13 @@ route("#home", () => {
   document.getElementById("formSaque")?.classList.remove("hidden");
   document.getElementById("saqueQr")?.classList.add("hidden");
   document.getElementById("saqueWarning")?.classList.add("hidden");
+  // Reset saque toggle to default (DePix mode)
+  valorModeIsPix = false;
+  document.getElementById("valorModeTrack")?.classList.remove("active");
+  const valorModeTextEl = document.getElementById("valorModeText");
+  if (valorModeTextEl) valorModeTextEl.innerText = "Valor que você envia";
+  const valorSaqueInput = document.getElementById("valorSaque");
+  if (valorSaqueInput) { valorSaqueInput.value = ""; valorSaqueInput.placeholder = "0,00 DePix"; }
   // Reset converter state
   const converterContent = document.getElementById("converterContent");
   if (converterContent) converterContent.innerHTML = "";

@@ -29,6 +29,37 @@ describe("toCents", () => {
   it("should handle maximum value R$ 6.000,00", () => {
     expect(toCents("R$ 6.000,00")).toBe(600000);
   });
+
+  it("should parse DePix format '150,00 DePix'", () => {
+    expect(toCents("150,00 DePix")).toBe(15000);
+  });
+
+  it("should parse DePix format '5,00 DePix'", () => {
+    expect(toCents("5,00 DePix")).toBe(500);
+  });
+
+  it("should parse DePix format '0,01 DePix'", () => {
+    expect(toCents("0,01 DePix")).toBe(1);
+  });
+
+  it("should parse DePix format '6.000,00 DePix'", () => {
+    expect(toCents("6.000,00 DePix")).toBe(600000);
+  });
+
+  it("should round-trip: toCents(formatBRL(x)) === x", () => {
+    for (const x of [0, 1, 99, 500, 1000, 15000, 600000]) {
+      expect(toCents(formatBRL(x))).toBe(x);
+    }
+  });
+
+  it("should round-trip: toCents(formatDePix(x)) for integer cents", () => {
+    for (const x of [1, 99, 500, 1000, 15000, 600000]) {
+      const depixStr = formatDePix(x);
+      // Extract numeric part before " DePix"
+      const numStr = depixStr.replace(" DePix", "").replace(",", ".");
+      expect(Math.round(parseFloat(numStr) * 100)).toBe(x);
+    }
+  });
 });
 
 describe("formatBRL", () => {

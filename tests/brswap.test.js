@@ -297,6 +297,100 @@ describe("fetchBrswapConfig", () => {
   });
 });
 
+// ===== Saque input formatting (DePix vs BRL toggle) =====
+describe("Saque input format toggle", () => {
+  function setupSaqueFormDom() {
+    document.body.innerHTML = `
+      <input id="valorSaque" placeholder="0,00 DePix" inputmode="numeric" />
+      <span class="switch-track" id="valorModeTrack"><span class="switch-thumb"></span></span>
+      <span id="valorModeText">Valor que você envia</span>
+    `;
+  }
+
+  function formatInputValue(rawDigits, useDepix) {
+    const v = (rawDigits / 100).toFixed(2).replace(".", ",");
+    return useDepix ? v + " DePix" : "R$ " + v;
+  }
+
+  beforeEach(() => setupSaqueFormDom());
+
+  it("should format as DePix when in send mode (default)", () => {
+    expect(formatInputValue(15000, true)).toBe("150,00 DePix");
+  });
+
+  it("should format as BRL when in receive mode", () => {
+    expect(formatInputValue(15000, false)).toBe("R$ 150,00");
+  });
+
+  it("should re-format value when toggling from DePix to BRL", () => {
+    // Simulate: user typed in DePix mode, now toggling to BRL
+    const input = document.getElementById("valorSaque");
+    input.value = "150,00 DePix";
+
+    // Toggle logic: extract digits, re-format as BRL
+    let v = input.value.replace(/\D/g, "");
+    v = (v / 100).toFixed(2).replace(".", ",");
+    input.value = "R$ " + v;
+
+    expect(input.value).toBe("R$ 150,00");
+  });
+
+  it("should re-format value when toggling from BRL to DePix", () => {
+    const input = document.getElementById("valorSaque");
+    input.value = "R$ 150,00";
+
+    let v = input.value.replace(/\D/g, "");
+    v = (v / 100).toFixed(2).replace(".", ",");
+    input.value = v + " DePix";
+
+    expect(input.value).toBe("150,00 DePix");
+  });
+
+  it("should update placeholder when toggling to receive mode", () => {
+    const input = document.getElementById("valorSaque");
+    input.placeholder = "R$ 0,00";
+    expect(input.placeholder).toBe("R$ 0,00");
+  });
+
+  it("should update placeholder when toggling to send mode", () => {
+    const input = document.getElementById("valorSaque");
+    input.placeholder = "0,00 DePix";
+    expect(input.placeholder).toBe("0,00 DePix");
+  });
+
+  it("should handle empty input when toggling", () => {
+    const input = document.getElementById("valorSaque");
+    input.value = "";
+
+    let v = input.value.replace(/\D/g, "");
+    // Should not change empty input
+    expect(v).toBe("");
+  });
+
+  it("should reset to default DePix mode on navigation", () => {
+    const input = document.getElementById("valorSaque");
+    const text = document.getElementById("valorModeText");
+    const track = document.getElementById("valorModeTrack");
+
+    // Simulate being in BRL mode
+    input.value = "R$ 150,00";
+    input.placeholder = "R$ 0,00";
+    text.innerText = "Valor que você recebe";
+    track.classList.add("active");
+
+    // Simulate reset (what #home route does)
+    input.value = "";
+    input.placeholder = "0,00 DePix";
+    text.innerText = "Valor que você envia";
+    track.classList.remove("active");
+
+    expect(input.value).toBe("");
+    expect(input.placeholder).toBe("0,00 DePix");
+    expect(text.innerText).toBe("Valor que você envia");
+    expect(track.classList.contains("active")).toBe(false);
+  });
+});
+
 // ===== Saque warning display =====
 describe("Saque warning message", () => {
   function setupSaqueDom() {

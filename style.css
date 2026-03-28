@@ -379,16 +379,16 @@ button:focus-visible {
 .converter-container {
   display: flex;
   justify-content: center;
-  width: calc(100% + 40px);
-  margin-left: -20px;
-  margin-right: -20px;
+  width: calc(100% + 64px);
+  margin: 0 -32px -32px -32px;
 }
 
 .brswap-iframe-wrapper {
   width: 100%;
   max-height: 65vh;
-  overflow-y: auto;
-  border-radius: 12px;
+  overflow: hidden auto;
+  background: rgb(10, 10, 10);
+  border-radius: 18px;
   scrollbar-width: thin;
   scrollbar-color: rgba(56, 227, 172, 0.3) rgba(255, 255, 255, 0.05);
 }
@@ -411,6 +411,17 @@ button:focus-visible {
   background: rgba(56, 227, 172, 0.5);
 }
 
+.brswap-chat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #3B82F6;
+  border-radius: 50%;
+  vertical-align: -5px;
+}
+
 .converter-loading {
   text-align: center;
   color: #5a6d82;
@@ -424,9 +435,10 @@ button:focus-visible {
   background: rgba(255, 107, 107, 0.1);
   border: 1px solid rgba(255, 107, 107, 0.25);
   border-radius: 10px;
-  padding: 16px;
-  margin-top: 80px;
+  padding: 24px 16px;
+  margin-top: 60px;
   font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 /* ===== Saque Warning ===== */

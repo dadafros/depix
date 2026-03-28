@@ -18,7 +18,7 @@ export function isAllowedImageUrl(url) {
 
 export function toCents(v) {
   return Math.round(
-    parseFloat(v.replace("R$", "").replace(/\./g, "").replace(",", ".")) * 100
+    parseFloat(v.replace("R$", "").replace("DePix", "").replace(/\./g, "").replace(",", ".").trim()) * 100
   );
 }
 
