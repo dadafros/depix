@@ -155,6 +155,12 @@ Frontend changes reflect immediately (volume mount). See `../depix-dev/CLAUDE.md
 - CI: GitHub Actions runs `npm test` on push to `main`/`feat/*` and PRs to `main`
 - Deploy: GitHub Pages from main branch
 
+## Service Worker Cache
+
+**CRITICAL**: After ANY change to frontend files (JS, CSS, HTML), you MUST bump the `CACHE_NAME` version in `service-worker.js` (e.g. `"depix-v23"` → `"depix-v24"`). Without this, users with the old service worker will keep serving stale cached files, which can break the app entirely if imports changed.
+
+The service worker caches all static files on install. On activate, it deletes all caches except the current `CACHE_NAME`. Bumping the version forces a fresh install of all assets.
+
 ## Workflow Rules
 
 - **Always start from latest main**: Before starting any task, pull the latest `main` from remote (`git pull origin main`) to ensure you're working with the most recent code.
