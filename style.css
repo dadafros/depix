@@ -2197,10 +2197,21 @@ textarea:focus {
   line-height: 1;
 }
 
+.affiliate-section {
+  margin-top: 28px;
+}
+
+.affiliate-section-title {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .affiliates-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .referral-item {
@@ -2208,7 +2219,7 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
 }
@@ -2222,6 +2233,45 @@ textarea:focus {
   font-size: 0.75rem;
   color: #5a6d82;
   margin-left: auto;
+}
+
+.payment-item {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.payment-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.payment-addr {
+  font-size: 0.75rem;
+  color: #5a6d82;
+  font-family: monospace;
+}
+
+.tx-link {
+  font-size: 0.75rem;
+  color: #4fd1c5;
+  text-decoration: none;
+}
+
+.tx-link:hover {
+  text-decoration: underline;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.modal-actions button {
+  flex: 1;
 }
 
 /* ===== Landing Page ===== */

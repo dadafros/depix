@@ -4,7 +4,8 @@ import {
   buildRegistrationBody,
   clearReferralCode,
   buildAffiliateLink,
-  renderReferralsHTML
+  renderReferralsHTML,
+  generateFingerprint
 } from "../affiliates.js";
 
 // Mock sessionStorage
@@ -113,6 +114,29 @@ describe("Affiliate program helpers", () => {
       const body = buildRegistrationBody({});
       expect(body).toEqual({ ref: "code1" });
     });
+
+    it("should include fingerprint when provided", () => {
+      const body = buildRegistrationBody(baseFields, "fp-hash-123");
+      expect(body.fingerprint).toBe("fp-hash-123");
+      expect(body.nome).toBe("Maria");
+    });
+
+    it("should include both ref and fingerprint", () => {
+      sessionStorage.setItem("depix-ref", "partner42");
+      const body = buildRegistrationBody(baseFields, "fp-hash-456");
+      expect(body.ref).toBe("partner42");
+      expect(body.fingerprint).toBe("fp-hash-456");
+    });
+
+    it("should omit fingerprint when null", () => {
+      const body = buildRegistrationBody(baseFields, null);
+      expect(body).not.toHaveProperty("fingerprint");
+    });
+
+    it("should omit fingerprint when empty string", () => {
+      const body = buildRegistrationBody(baseFields, "");
+      expect(body).not.toHaveProperty("fingerprint");
+    });
   });
 
   describe("clearReferralCode", () => {
@@ -212,6 +236,30 @@ describe("Affiliate program helpers", () => {
       ];
       const result = renderReferralsHTML(referrals, customDate);
       expect(result.html).toContain("Desde 01/jan");
+    });
+  });
+
+  describe("generateFingerprint", () => {
+    beforeEach(() => {
+      // Mock screen, Intl, and crypto.subtle for jsdom
+      if (typeof globalThis.screen === "undefined") {
+        Object.defineProperty(globalThis, "screen", {
+          value: { width: 1920, height: 1080, colorDepth: 24 },
+          configurable: true
+        });
+      }
+    });
+
+    it("should return a hex string", async () => {
+      const fp = await generateFingerprint();
+      expect(typeof fp).toBe("string");
+      expect(fp).toMatch(/^[0-9a-f]{64}$/); // SHA-256 hex
+    });
+
+    it("should return consistent results for same environment", async () => {
+      const fp1 = await generateFingerprint();
+      const fp2 = await generateFingerprint();
+      expect(fp1).toBe(fp2);
     });
   });
 });

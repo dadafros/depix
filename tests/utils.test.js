@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toCents, formatBRL, formatDePix, isAllowedImageUrl } from "../utils.js";
+import { toCents, formatBRL, formatDePix, isAllowedImageUrl, escapeHtml } from "../utils.js";
 
 describe("toCents", () => {
   it("should parse simple value", () => {
@@ -79,8 +79,8 @@ describe("formatBRL", () => {
     expect(formatBRL(500)).toBe("R$ 5,00");
   });
 
-  it("should format 600000 cents as R$ 6000,00", () => {
-    expect(formatBRL(600000)).toBe("R$ 6000,00");
+  it("should format 600000 cents as R$ 6.000,00", () => {
+    expect(formatBRL(600000)).toBe("R$ 6.000,00");
   });
 
   it("should format 99 cents as R$ 0,99", () => {
@@ -168,5 +168,51 @@ describe("isAllowedImageUrl", () => {
 
   it("should reject data:text/ URIs", () => {
     expect(isAllowedImageUrl("data:text/html,<script>alert(1)</script>")).toBe(false);
+  });
+});
+
+describe("escapeHtml", () => {
+  it("should escape angle brackets", () => {
+    expect(escapeHtml("<script>alert(1)</script>")).toBe("&lt;script&gt;alert(1)&lt;/script&gt;");
+  });
+
+  it("should escape ampersands", () => {
+    expect(escapeHtml("a & b")).toBe("a &amp; b");
+  });
+
+  it("should escape double quotes", () => {
+    expect(escapeHtml('"hello"')).toBe("&quot;hello&quot;");
+  });
+
+  it("should escape single quotes", () => {
+    expect(escapeHtml("it's")).toBe("it&#x27;s");
+  });
+
+  it("should handle plain text unchanged", () => {
+    expect(escapeHtml("hello world")).toBe("hello world");
+  });
+
+  it("should handle empty string", () => {
+    expect(escapeHtml("")).toBe("");
+  });
+
+  it("should handle non-string input", () => {
+    expect(escapeHtml(null)).toBe("");
+    expect(escapeHtml(undefined)).toBe("");
+    expect(escapeHtml(123)).toBe("");
+  });
+
+  it("should escape nested injection attempts", () => {
+    expect(escapeHtml('"><img src=x onerror=alert(1)>')).toContain("&lt;img");
+    expect(escapeHtml('"><img src=x onerror=alert(1)>')).not.toContain("<img");
+  });
+
+  it("should handle Liquid addresses safely", () => {
+    const addr = "ex1qw508d6qejxtdg4y5r3zarvary0c5xw7kxw5dkm";
+    expect(escapeHtml(addr)).toBe(addr); // no special chars
+  });
+
+  it("should handle user names with special chars", () => {
+    expect(escapeHtml("João <admin>")).toBe("Jo\u00e3o &lt;admin&gt;");
   });
 });

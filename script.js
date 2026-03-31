@@ -8,10 +8,10 @@ import {
   getSelectedAddress, setSelectedAddress,
   abbreviateAddress, hasAddresses
 } from "./addresses.js";
-import { ALLOWED_QR_HOSTS, isAllowedImageUrl, toCents, formatBRL, formatDePix } from "./utils.js";
+import { ALLOWED_QR_HOSTS, isAllowedImageUrl, toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
 import { validateLiquidAddress, validatePhone } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
-import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML } from "./affiliates.js";
+import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
 
 // ===== Constants =====
 const MIN_VALOR_CENTS = 500;
@@ -235,9 +235,12 @@ async function handleLogin() {
   btn.innerText = "Entrando…";
 
   try {
+    let fp = null;
+    try { fp = await generateFingerprint(); } catch {}
+
     const res = await apiFetch("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ usuario, senha })
+      body: JSON.stringify({ usuario, senha, ...(fp && { fingerprint: fp }) })
     });
     const data = await res.json();
 
@@ -306,9 +309,12 @@ document.getElementById("btn-register")?.addEventListener("click", async () => {
   btn.innerText = "Criando conta…";
 
   try {
+    let fp = null;
+    try { fp = await generateFingerprint(); } catch {}
+
     const res = await apiFetch("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify(buildRegistrationBody({ nome, email, whatsapp, usuario, senha }))
+      body: JSON.stringify(buildRegistrationBody({ nome, email, whatsapp, usuario, senha }, fp))
     });
     const data = await res.json();
 
@@ -1167,11 +1173,12 @@ function renderAddressList() {
 
   container.innerHTML = addresses.map(addr => {
     const isSelected = addr === selected;
+    const safe = escapeHtml(addr);
     return `
-      <div class="addr-list-item${isSelected ? " selected" : ""}" data-addr="${addr}">
+      <div class="addr-list-item${isSelected ? " selected" : ""}" data-addr="${safe}">
         <div class="addr-radio"></div>
-        <span class="addr-text" title="${addr}">${abbreviateAddress(addr)}</span>
-        <button class="addr-delete" data-delete="${addr}" title="Remover">🗑</button>
+        <span class="addr-text" title="${safe}">${escapeHtml(abbreviateAddress(addr))}</span>
+        <button class="addr-delete" data-delete="${safe}" title="Remover">🗑</button>
       </div>
     `;
   }).join("");
@@ -1346,10 +1353,16 @@ async function loadAffiliateData() {
 
     document.getElementById("affiliate-link").value = buildAffiliateLink(data.referralCode);
     document.getElementById("affiliate-commission-rate").innerText = `${data.commissionRate}%`;
-    document.getElementById("affiliate-volume").innerText = formatBRL(data.monthlyVolumeCents);
-    document.getElementById("affiliate-commission-value").innerText = formatBRL(data.monthlyCommissionCents);
+    document.getElementById("affiliate-volume").innerText = formatBRL(data.totalVolumeCents);
+    document.getElementById("affiliate-commission-value").innerText = formatDePix(data.pendingCommissionCents);
 
     renderReferrals(data.referrals);
+    renderPayments(data.payments);
+
+    // Show/hide payment request button
+    const paySection = document.getElementById("payment-request-section");
+    if (paySection) paySection.classList.toggle("hidden", !data.canRequestPayment);
+
     content.classList.remove("hidden");
   } catch (e) {
     setMsg("affiliates-msg", e.message || "Sem conexão. Verifique sua internet.");
@@ -1380,12 +1393,129 @@ document.getElementById("btn-copy-affiliate")?.addEventListener("click", async (
   }
 });
 
+function renderPayments(payments) {
+  const list = document.getElementById("affiliate-payments-list");
+  const empty = document.getElementById("affiliate-payments-empty");
+  if (!list) return;
+
+  if (!payments || payments.length === 0) {
+    list.innerHTML = "";
+    if (empty) empty.classList.remove("hidden");
+    return;
+  }
+
+  if (empty) empty.classList.add("hidden");
+  list.innerHTML = payments.map(p => {
+    const amount = escapeHtml(formatDePix(p.amountCents));
+    const date = escapeHtml(formatDateShort(p.paidAt));
+    const addr = p.liquidAddress || "";
+    const addrShort = escapeHtml(addr.length > 14 ? `${addr.slice(0, 8)}...${addr.slice(-4)}` : addr);
+    // Validate txUrl is a safe https URL before putting in href
+    let txLink = "";
+    if (p.liquidTxUrl && typeof p.liquidTxUrl === "string" && p.liquidTxUrl.startsWith("https://")) {
+      txLink = `<a href="${escapeHtml(p.liquidTxUrl)}" target="_blank" rel="noopener" class="tx-link">Ver TX</a>`;
+    }
+    return `
+      <div class="referral-item payment-item">
+        <div class="payment-info-row">
+          <span class="referral-name">${amount}</span>
+          <span class="referral-date">${date}</span>
+        </div>
+        <div class="payment-info-row">
+          <span class="payment-addr">${addrShort}</span>
+          ${txLink}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 document.getElementById("affiliate-volume-info")?.addEventListener("click", () => {
   document.getElementById("volume-info-modal")?.classList.remove("hidden");
 });
 
 document.getElementById("close-volume-info")?.addEventListener("click", () => {
   document.getElementById("volume-info-modal")?.classList.add("hidden");
+});
+
+// Commission info modal
+document.getElementById("affiliate-commission-info")?.addEventListener("click", () => {
+  document.getElementById("commission-info-modal")?.classList.remove("hidden");
+});
+document.getElementById("close-commission-info")?.addEventListener("click", () => {
+  document.getElementById("commission-info-modal")?.classList.add("hidden");
+});
+
+// Payments info modal
+document.getElementById("affiliate-payments-info")?.addEventListener("click", () => {
+  document.getElementById("payments-info-modal")?.classList.remove("hidden");
+});
+document.getElementById("close-payments-info")?.addEventListener("click", () => {
+  document.getElementById("payments-info-modal")?.classList.add("hidden");
+});
+
+// ===== Payment request flow =====
+document.getElementById("btn-request-payment")?.addEventListener("click", () => {
+  document.getElementById("payment-warning-modal")?.classList.remove("hidden");
+});
+
+document.getElementById("btn-payment-warning-ok")?.addEventListener("click", () => {
+  document.getElementById("payment-warning-modal")?.classList.add("hidden");
+  document.getElementById("payment-address-input").value = "";
+  setMsg("payment-address-msg", "");
+  document.getElementById("payment-address-modal")?.classList.remove("hidden");
+});
+
+document.getElementById("btn-payment-address-cancel")?.addEventListener("click", () => {
+  document.getElementById("payment-address-modal")?.classList.add("hidden");
+});
+
+document.getElementById("btn-payment-address-submit")?.addEventListener("click", () => {
+  const addr = document.getElementById("payment-address-input").value.trim();
+  const { valid, error } = validateLiquidAddress(addr);
+  if (!valid) {
+    setMsg("payment-address-msg", error || "Endereço Liquid inválido");
+    return;
+  }
+  document.getElementById("payment-address-modal")?.classList.add("hidden");
+  const amount = document.getElementById("affiliate-commission-value").innerText;
+  document.getElementById("payment-confirm-amount").innerText = amount;
+  const addrShort = addr.length > 14 ? `${addr.slice(0, 8)}...${addr.slice(-4)}` : addr;
+  document.getElementById("payment-confirm-address").innerText = addrShort;
+  document.getElementById("payment-confirm-modal")?.classList.remove("hidden");
+  window._paymentAddress = addr;
+});
+
+document.getElementById("btn-payment-confirm-cancel")?.addEventListener("click", () => {
+  document.getElementById("payment-confirm-modal")?.classList.add("hidden");
+});
+
+document.getElementById("btn-payment-confirm")?.addEventListener("click", async () => {
+  const btn = document.getElementById("btn-payment-confirm");
+  btn.disabled = true;
+  btn.innerText = "Enviando...";
+  try {
+    const res = await apiFetch("/api/reports", {
+      method: "POST",
+      body: JSON.stringify({
+        tipo: "solicitar_comissao",
+        liquidAddress: window._paymentAddress
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data?.response?.errorMessage || "Erro ao solicitar pagamento");
+      return;
+    }
+    document.getElementById("payment-confirm-modal")?.classList.add("hidden");
+    showToast("Solicitação enviada com sucesso!");
+    loadAffiliateData();
+  } catch (e) {
+    showToast(e.message || "Erro de conexão");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Sim, solicitar";
+  }
 });
 
 // Limit explanation modal

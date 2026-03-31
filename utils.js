@@ -1,5 +1,19 @@
 // Pure utility functions extracted from script.js for testability
 
+/**
+ * Escape HTML special characters to prevent XSS when interpolating
+ * user-controlled values inside innerHTML templates.
+ */
+export function escapeHtml(str) {
+  if (typeof str !== "string") return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 export const ALLOWED_QR_HOSTS = ["depix.eulen.app", "eulen.app", "api.qrserver.com"];
 
 export function isAllowedImageUrl(url) {
@@ -23,7 +37,10 @@ export function toCents(v) {
 }
 
 export function formatBRL(cents) {
-  return "R$ " + (cents / 100).toFixed(2).replace(".", ",");
+  const value = (cents / 100).toFixed(2);
+  const [intPart, decPart] = value.split(".");
+  const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return "R$ " + formatted + "," + decPart;
 }
 
 export function formatDePix(cents) {
