@@ -22,11 +22,11 @@ vi.mock("../router.js", () => ({
 
 global.fetch = vi.fn();
 
-import { setAuth, clearAuth, getToken, isLoggedIn } from "../auth.js";
+import { setAuth, getToken, isLoggedIn } from "../auth.js";
 import { apiFetch } from "../api.js";
 import { navigate } from "../router.js";
 import { goToAppropriateScreen } from "../script-helpers.js";
-import { addAddress, getAddresses, hasAddresses } from "../addresses.js";
+import { addAddress, hasAddresses } from "../addresses.js";
 
 describe("Integration: 401 auto-refresh flow", () => {
   beforeEach(() => {

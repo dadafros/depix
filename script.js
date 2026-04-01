@@ -8,7 +8,7 @@ import {
   getSelectedAddress, setSelectedAddress,
   abbreviateAddress, hasAddresses
 } from "./addresses.js";
-import { ALLOWED_QR_HOSTS, isAllowedImageUrl, toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
+import { isAllowedImageUrl, toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
 import { validateLiquidAddress, validatePhone } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
@@ -16,8 +16,6 @@ import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAff
 // ===== Constants =====
 const MIN_VALOR_CENTS = 500;
 const MAX_VALOR_CENTS = 300000;
-const MAX_DIARIO_CENTS = 600000;
-
 let qrCopyPaste = "";
 let deferredPrompt = null;
 let pendingAddressChange = "";

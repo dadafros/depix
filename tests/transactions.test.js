@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 
 // ===== Status label and color mapping tests =====
 // These test the pure functions that will be used in transaction rendering

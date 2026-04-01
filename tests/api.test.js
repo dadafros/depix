@@ -33,7 +33,7 @@ vi.mock("../router.js", () => ({
 global.fetch = vi.fn();
 
 import { apiFetch } from "../api.js";
-import { getToken, getRefreshToken, setAuth, clearAuth } from "../auth.js";
+import { getToken, getRefreshToken, clearAuth } from "../auth.js";
 import { navigate } from "../router.js";
 
 describe("apiFetch", () => {

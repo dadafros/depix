@@ -6,7 +6,7 @@ const baseRules = {
   "no-undef": "error",
   "no-unreachable": "error",
   "no-unused-vars": [
-    "warn",
+    "error",
     {
       argsIgnorePattern: "^_",
       caughtErrorsIgnorePattern: "^_",
