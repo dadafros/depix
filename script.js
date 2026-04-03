@@ -8,7 +8,7 @@ import {
   getSelectedAddress, setSelectedAddress,
   abbreviateAddress, hasAddresses
 } from "./addresses.js";
-import { isAllowedImageUrl, toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
+import { toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
 import { validateLiquidAddress, validatePhone } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
@@ -910,7 +910,7 @@ document.getElementById("btnSacar")?.addEventListener("click", async () => {
 
     // Generate branded QR code for the Liquid address
     const saqueQr = document.getElementById("saqueQr");
-    generateBrandedQr(r.depositAddress, saqueQr, {
+    renderBrandedQr(r.depositAddress, saqueQr, {
       loadingEl: document.getElementById("saqueQrLoading"),
       errorEl: document.getElementById("saqueQrError")
     });
