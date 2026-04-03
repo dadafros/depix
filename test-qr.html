@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test — Telas de Depósito e Saque</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <section class="page" style="display:block">
+    <div class="card">
+      <h1 style="color:#38e3ac;text-align:center;font-size:1.2rem;">Tela de Depósito (mock)</h1>
+
+      <div class="resultado">
+        <div id="qrLoading" class="hidden"><span class="spinner"></span> Carregando QR Code…</div>
+        <img id="qrImage" alt="QR Code PIX" />
+        <button class="address-copy-btn">
+          <span class="address-copy-text">PIX copia e cola</span>
+          <svg class="address-copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg class="address-copy-check hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+        <p id="qrImageError" class="qr-error hidden">Não foi possível carregar o QR Code.</p>
+        <p class="resultado-sublabel qr-hint">Escaneie com o app do seu banco ou copie o código Pix para pagar.</p>
+        <button class="secondary">Acompanhe este pagamento</button>
+        <button class="secondary">Novo pagamento</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <h1 style="color:#38e3ac;text-align:center;font-size:1.2rem;">Tela de Saque (mock)</h1>
+
+      <div class="resultado">
+        <div class="resultado-valores">
+          <div class="resultado-item">
+            <span class="resultado-label">Você envia</span>
+            <span class="resultado-value">11,00 DePix</span>
+          </div>
+          <div class="resultado-item">
+            <span class="resultado-label">Você recebe</span>
+            <span class="resultado-value">R$ 10,00</span>
+          </div>
+        </div>
+
+        <div id="saqueQrLoading" class="hidden"><span class="spinner"></span> Carregando QR Code…</div>
+        <img id="saqueQr" class="hidden" alt="QR Code endereço Liquid" />
+        <p id="saqueQrError" class="qr-error hidden">Erro ao gerar QR.</p>
+
+        <button class="address-copy-btn" onclick="navigator.clipboard.writeText('lq1qqvmkrx3srukzfgy5636cdastgy58ualv87fkkjl70asyps9pjr2tlanszxmwvmxqmd8a6hnkf97fumsj5ycvg476qr3vl3pzh')">
+          <span class="address-copy-text">lq1qqvmk...3pzh</span>
+          <svg class="address-copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg class="address-copy-check hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+
+        <p class="resultado-sublabel qr-hint">Escaneie com o app SideSwap ou copie o endereço para enviar os DePix.</p>
+
+        <button class="secondary">Já pagou? Acompanhe seu saque</button>
+        <button class="secondary">Novo saque</button>
+
+        <p id="saqueWarningInfo" class="saque-warning hidden"></p>
+        <p id="saqueWarningAmount" class="saque-warning hidden"></p>
+      </div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { renderBrandedQr } from "./qr.js";
+    import { formatBRL, formatDePix, escapeHtml } from "./utils.js";
+
+    const pixCode = "00020101021226860014br.gov.bcb.pix2564qrcode.fitbank.com.br/QR/cob/B1E77FD68F494C88BFA2DB7FDFCE5D276905204000053039865802BR5925PLEBANK.COM.BR SOLUCOES E6007BARUERI61080645400062070503***6304006D";
+    const addr = "lq1qqvmkrx3srukzfgy5636cdastgy58ualv87fkkjl70asyps9pjr2tlanszxmwvmxqmd8a6hnkf97fumsj5ycvg476qr3vl3pzh";
+
+    // === Deposit ===
+    renderBrandedQr(pixCode, document.getElementById("qrImage"), {
+      loadingEl: document.getElementById("qrLoading"),
+      errorEl: document.getElementById("qrImageError")
+    });
+    // === Withdrawal ===
+    renderBrandedQr(addr, document.getElementById("saqueQr"), {
+      loadingEl: document.getElementById("saqueQrLoading"),
+      errorEl: document.getElementById("saqueQrError")
+    });
+
+    // Warnings
+    const warnIcon = '<svg class="saque-warning-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+    const infoEl = document.getElementById("saqueWarningInfo");
+    infoEl.innerHTML = `${warnIcon} Sacando ${formatBRL(1000)} para a chave Pix <b>${escapeHtml("31920000682")}</b>. Confira com cuidado antes de enviar.`;
+    infoEl.classList.remove("hidden");
+
+    const amountEl = document.getElementById("saqueWarningAmount");
+    amountEl.innerHTML = `${warnIcon} Envie EXATAMENTE ${formatDePix(1100)}. Qualquer outro valor ou moeda causará perda permanente.`;
+    amountEl.classList.remove("hidden");
+  </script>
+</body>
+</html>

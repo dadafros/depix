@@ -455,22 +455,22 @@ button:focus-visible {
 }
 
 .saque-warning-icon {
-  vertical-align: middle;
-  margin-right: 4px;
-  stroke: #ffd93d;
+  vertical-align: -2px;
+  margin-right: 3px;
+  stroke: #c4a73a;
 }
 
 .saque-warning {
   text-align: center;
-  color: #ffd93d;
-  background: rgba(255, 217, 61, 0.1);
-  border: 1px solid rgba(255, 217, 61, 0.3);
-  border-radius: 10px;
-  padding: 12px 16px;
-  margin: 12px 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  line-height: 1.4;
+  color: #c4a73a;
+  background: rgba(196, 167, 58, 0.08);
+  border: 1px solid rgba(196, 167, 58, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 /* ===== Switch base (used by valor mode switch) ===== */
@@ -619,10 +619,58 @@ button:focus-visible {
   opacity: 0.9;
 }
 
+.address-copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: min(240px, 65vw);
+  margin: 0 auto 16px;
+  background: #111921;
+  border: 2px solid rgba(56, 227, 172, 0.2);
+  border-radius: 0 0 14px 14px;
+  padding: 10px 16px;
+  margin-top: -2px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #8a9bb0;
+}
+
+.address-copy-btn:active {
+  transform: scale(0.98);
+}
+
+.address-copy-btn.copied {
+  border-color: #38e3ac;
+  color: #38e3ac;
+}
+
+.address-copy-text {
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.address-copy-icon,
+.address-copy-check {
+  flex-shrink: 0;
+  margin-left: 10px;
+  color: #5a6d82;
+}
+
+.address-copy-btn.copied .address-copy-check {
+  color: #38e3ac;
+}
+
 .qr-hint {
-  font-size: 13px;
-  opacity: 0.85;
-  margin-top: 10px;
+  font-size: 0.8rem;
+  color: #6b7f94;
+  margin: 16px 0 8px;
+  line-height: 1.45;
 }
 
 #saqueQr {
@@ -630,10 +678,12 @@ button:focus-visible {
   max-width: min(240px, 65vw);
   height: auto;
   aspect-ratio: 1 / 1;
-  margin: 16px 0 4px;
+  margin: 16px auto 0;
+  display: block;
   object-fit: contain;
-  border-radius: 14px;
+  border-radius: 14px 14px 0 0;
   border: 2px solid rgba(56, 227, 172, 0.2);
+  border-bottom: none;
   box-shadow: 0 0 20px rgba(56, 227, 172, 0.08);
 }
 
@@ -869,11 +919,16 @@ button:focus-visible {
 
 #qrImage {
   width: 100%;
-  max-width: min(280px, 80vw);
+  max-width: min(240px, 65vw);
   height: auto;
   aspect-ratio: 1 / 1;
-  margin: 16px 0;
+  margin: 16px auto 0;
+  display: block;
   object-fit: contain;
+  border-radius: 14px 14px 0 0;
+  border: 2px solid rgba(56, 227, 172, 0.2);
+  border-bottom: none;
+  box-shadow: 0 0 20px rgba(56, 227, 172, 0.08);
 }
 
 /* ===== Textarea ===== */

@@ -685,9 +685,13 @@
       <div id="resultado" class="resultado hidden">
         <div id="qrLoading" class="hidden"><span class="spinner"></span> Carregando QR Code…</div>
         <img id="qrImage" alt="QR Code PIX" />
-        <p id="qrImageError" class="qr-error hidden">Não foi possível carregar o QR Code. Use o botão abaixo para copiar o código PIX.</p>
-        <p id="qrId"></p>
-        <button id="btnCopy">PIX copia e cola</button>
+        <button id="btnCopy" class="address-copy-btn">
+          <span class="address-copy-text">PIX copia e cola</span>
+          <svg class="address-copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg class="address-copy-check hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+        <p id="qrImageError" class="qr-error hidden">Não foi possível carregar o QR Code. Use o botão acima para copiar o código PIX.</p>
+        <p class="resultado-sublabel qr-hint">Escaneie com o app do seu banco<br>ou copie o código Pix para pagar.</p>
         <button id="btnAcompanhar" class="secondary">Acompanhe este pagamento</button>
         <button id="btnReset" class="secondary">Novo pagamento</button>
       </div>
@@ -723,7 +727,6 @@
       <div id="loadingSaque" class="hidden"><span class="spinner"></span> Processando transferência…</div>
 
       <div id="resultadoSaque" class="resultado hidden">
-        <p class="resultado-titulo">Transferência criada!</p>
 
         <div class="resultado-valores">
           <div class="resultado-item">
@@ -736,23 +739,23 @@
           </div>
         </div>
 
-        <p class="resultado-sublabel">Envie o DePix para o endereço (copie ou escaneie):</p>
-        <div class="address-box">
-          <span id="saqueAddress" class="address-text"></span>
-        </div>
-        <button id="btnCopyAddress">Copiar endereço</button>
-
         <div id="saqueQrLoading" class="hidden"><span class="spinner"></span> Carregando QR Code…</div>
         <img id="saqueQr" class="hidden" alt="QR Code endereço Liquid" />
         <p id="saqueQrError" class="qr-error hidden">Não foi possível carregar o QR Code. Copie o endereço acima e cole no app SideSwap.</p>
 
-        <p id="saqueWarningInfo" class="saque-warning hidden"></p>
-        <p id="saqueWarningAmount" class="saque-warning hidden"></p>
+        <button id="btnCopyAddress" class="address-copy-btn">
+          <span id="saqueAddress" class="address-copy-text"></span>
+          <svg class="address-copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg class="address-copy-check hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
 
-        <p class="resultado-sublabel qr-hint">Abra o app SideSwap e escaneie o QR Code acima para enviar os DePix e completar a transferência.</p>
+        <p class="resultado-sublabel qr-hint">Escaneie com o app SideSwap<br>ou copie o endereço para enviar os DePix.</p>
 
         <button id="btnAcompanharSaque" class="secondary">Já pagou? Acompanhe seu saque</button>
         <button id="btnNovoSaque" class="secondary">Novo saque</button>
+
+        <p id="saqueWarningInfo" class="saque-warning hidden"></p>
+        <p id="saqueWarningAmount" class="saque-warning hidden"></p>
       </div>
     </div>
 

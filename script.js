@@ -785,7 +785,6 @@ document.getElementById("btnGerar")?.addEventListener("click", async () => {
 
     qrCopyPaste = data.response.qrCopyPaste;
     lastDepositQrId = data.response.id;
-    document.getElementById("qrId").innerText = "ID: " + data.response.id;
     document.getElementById("formDeposito").classList.add("hidden");
     document.getElementById("resultado").classList.remove("hidden");
 
@@ -809,11 +808,13 @@ document.getElementById("btnCopy")?.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(qrCopyPaste);
     showToast("Código copiado. Cole no app do seu banco.");
-    copyBtn.innerText = "Copiado!";
-    copyBtn.classList.add("copy-success");
+    copyBtn.classList.add("copied");
+    copyBtn.querySelector(".address-copy-icon")?.classList.add("hidden");
+    copyBtn.querySelector(".address-copy-check")?.classList.remove("hidden");
     setTimeout(() => {
-      copyBtn.innerText = "PIX copia e cola";
-      copyBtn.classList.remove("copy-success");
+      copyBtn.classList.remove("copied");
+      copyBtn.querySelector(".address-copy-icon")?.classList.remove("hidden");
+      copyBtn.querySelector(".address-copy-check")?.classList.add("hidden");
     }, 2000);
   } catch {
     showToast("Não foi possível copiar. Copie manualmente.");
@@ -916,15 +917,15 @@ document.getElementById("btnSacar")?.addEventListener("click", async () => {
     });
 
     // Show warning about exact amount
-    const warnIcon = '<svg class="saque-warning-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    const warnIcon = '<svg class="saque-warning-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
     const infoEl = document.getElementById("saqueWarningInfo");
     if (infoEl) {
-      infoEl.innerHTML = `${warnIcon} Sacando ${formatBRL(r.payoutAmountInCents)} para a chave Pix <b>${escapeHtml(pixKeyInput.value.trim())}</b>. Confira se a chave está correta. Do contrário, seus fundos podem ser perdidos para sempre.`;
+      infoEl.innerHTML = `${warnIcon} Sacando ${formatBRL(r.payoutAmountInCents)} para a chave Pix <b>${escapeHtml(pixKeyInput.value.trim())}</b>. Confira com cuidado antes de enviar.`;
       infoEl.classList.remove("hidden");
     }
     const amountEl = document.getElementById("saqueWarningAmount");
     if (amountEl) {
-      amountEl.innerHTML = `${warnIcon} Envie EXATAMENTE ${formatDePix(r.depositAmountInCents)}. Se você enviar qualquer outro valor (ou qualquer outra moeda), seus fundos podem ser perdidos para sempre.`;
+      amountEl.innerHTML = `${warnIcon} Envie EXATAMENTE ${formatDePix(r.depositAmountInCents)}. Qualquer outro valor ou moeda causará perda permanente.`;
       amountEl.classList.remove("hidden");
     }
 
@@ -940,21 +941,24 @@ document.getElementById("btnSacar")?.addEventListener("click", async () => {
   }
 });
 
-document.getElementById("btnCopyAddress")?.addEventListener("click", async () => {
-  const copyBtn = document.getElementById("btnCopyAddress");
+async function copyAddress(btn) {
   try {
     await navigator.clipboard.writeText(saqueDepositAddress);
     showToast("Endereço copiado.");
-    copyBtn.innerText = "Copiado!";
-    copyBtn.classList.add("copy-success");
+    btn.classList.add("copied");
+    btn.querySelector(".address-copy-icon")?.classList.add("hidden");
+    btn.querySelector(".address-copy-check")?.classList.remove("hidden");
     setTimeout(() => {
-      copyBtn.innerText = "Copiar endereço";
-      copyBtn.classList.remove("copy-success");
+      btn.classList.remove("copied");
+      btn.querySelector(".address-copy-icon")?.classList.remove("hidden");
+      btn.querySelector(".address-copy-check")?.classList.add("hidden");
     }, 2000);
   } catch {
     showToast("Não foi possível copiar. Copie manualmente.");
   }
-});
+}
+
+document.getElementById("btnCopyAddress")?.addEventListener("click", function () { copyAddress(this); });
 
 document.getElementById("btnNovoSaque")?.addEventListener("click", () => {
   document.getElementById("resultadoSaque").classList.add("hidden");
