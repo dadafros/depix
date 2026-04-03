@@ -14,7 +14,7 @@ export function escapeHtml(str) {
     .replace(/'/g, "&#x27;");
 }
 
-export const ALLOWED_QR_HOSTS = ["depix.eulen.app", "eulen.app", "response.eulen.app", "api.qrserver.com"];
+export const ALLOWED_QR_HOSTS = ["depix.eulen.app", "eulen.app", "response.eulen.app"];
 
 export function isAllowedImageUrl(url) {
   if (typeof url !== "string") return false;

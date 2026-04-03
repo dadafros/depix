@@ -136,8 +136,8 @@ describe("isAllowedImageUrl", () => {
     expect(isAllowedImageUrl("https://eulen.app/image.png")).toBe(true);
   });
 
-  it("should allow https://api.qrserver.com", () => {
-    expect(isAllowedImageUrl("https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=test")).toBe(true);
+  it("should reject https://api.qrserver.com (no longer used)", () => {
+    expect(isAllowedImageUrl("https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=test")).toBe(false);
   });
 
   it("should allow subdomains of allowed hosts", () => {
