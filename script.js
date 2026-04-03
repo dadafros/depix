@@ -790,7 +790,7 @@ document.getElementById("btnGerar")?.addEventListener("click", async () => {
     document.getElementById("resultado").classList.remove("hidden");
 
     // Generate QR code locally from PIX copy-paste data
-    renderPixQr(qrCopyPaste, document.getElementById("qrImage"), {
+    renderBrandedQr(qrCopyPaste, document.getElementById("qrImage"), {
       loadingEl: document.getElementById("qrLoading"),
       errorEl: document.getElementById("qrImageError")
     });
@@ -916,11 +916,16 @@ document.getElementById("btnSacar")?.addEventListener("click", async () => {
     });
 
     // Show warning about exact amount
-    const warningEl = document.getElementById("saqueWarning");
-    if (warningEl) {
-      const warnIcon = '<svg class="saque-warning-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
-      warningEl.innerHTML = `${warnIcon} Sacando ${formatBRL(r.payoutAmountInCents)} para a chave pix ${pixKeyInput.value.trim()}.<br>Envie EXATAMENTE ${formatDePix(r.depositAmountInCents)}. Se você enviar qualquer outro valor (ou qualquer outra moeda), seus fundos podem ser perdidos para sempre.`;
-      warningEl.classList.remove("hidden");
+    const warnIcon = '<svg class="saque-warning-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    const infoEl = document.getElementById("saqueWarningInfo");
+    if (infoEl) {
+      infoEl.innerHTML = `${warnIcon} Sacando ${formatBRL(r.payoutAmountInCents)} para a chave Pix <b>${escapeHtml(pixKeyInput.value.trim())}</b>. Confira se a chave está correta. Do contrário, seus fundos podem ser perdidos para sempre.`;
+      infoEl.classList.remove("hidden");
+    }
+    const amountEl = document.getElementById("saqueWarningAmount");
+    if (amountEl) {
+      amountEl.innerHTML = `${warnIcon} Envie EXATAMENTE ${formatDePix(r.depositAmountInCents)}. Se você enviar qualquer outro valor (ou qualquer outra moeda), seus fundos podem ser perdidos para sempre.`;
+      amountEl.classList.remove("hidden");
     }
 
     document.getElementById("formSaque").classList.add("hidden");
@@ -1943,7 +1948,8 @@ route("#home", () => {
   document.getElementById("resultadoSaque")?.classList.add("hidden");
   document.getElementById("formSaque")?.classList.remove("hidden");
   document.getElementById("saqueQr")?.classList.add("hidden");
-  document.getElementById("saqueWarning")?.classList.add("hidden");
+  document.getElementById("saqueWarningInfo")?.classList.add("hidden");
+  document.getElementById("saqueWarningAmount")?.classList.add("hidden");
   // Reset saque toggle to default (DePix mode)
   valorModeIsPix = false;
   document.getElementById("valorModeTrack")?.classList.remove("active");
