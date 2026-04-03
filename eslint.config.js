@@ -17,6 +17,7 @@ const baseRules = {
 
 const browserGlobals = {
   Image: "readonly",
+  IntersectionObserver: "readonly",
   Response: "readonly",
   TextEncoder: "readonly",
   URL: "readonly",
