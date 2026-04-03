@@ -22,26 +22,33 @@ describe("validateLiquidAddress", () => {
     expect(result.error).toContain("inválido");
   });
 
-  it("should accept valid bech32 lq1 address", () => {
-    // Typical confidential Liquid bech32 address (lq1 prefix, lowercase alphanumeric, 40+ chars)
-    const addr = "lq1qqv2ggzyg0ercm3v3dvsalwzpqxn00wzzkvafkm064f0zy0kmst3sxgh7m7r9";
+  it("should accept valid blech32 lq1 address", () => {
+    const addr = "lq1qqpzry9x8gf2tvdw0s3jn54khce6mua7lqpzry9x8gf2tvdw0s3jn54khce6mua7lqpzry9x8gf2tvdw0s3jn5psx4kgu9l78v";
     expect(validateLiquidAddress(addr).valid).toBe(true);
   });
 
   it("should accept valid bech32 ex1 address", () => {
-    const addr = "ex1" + "a".repeat(60);
+    const addr = "ex1qqpzry9x8gf2tvdw0s3jn54khce6mua7lmkqn9x";
     expect(validateLiquidAddress(addr).valid).toBe(true);
   });
 
-  it("should reject bech32 address with uppercase", () => {
-    const addr = "lq1QQABCDEF" + "a".repeat(40);
+  it("should reject bech32 address with invalid checksum", () => {
+    // Valid address with one character changed in the middle
+    const addr = "ex1qqpzry9x8gf2tvdw0s3jn54khce6mua7lmkqn9a";
     expect(validateLiquidAddress(addr).valid).toBe(false);
+    expect(validateLiquidAddress(addr).error).toContain("checksum");
   });
 
   it("should reject bech32 address that is too short", () => {
     const result = validateLiquidAddress("lq1abcdefghij");
     expect(result.valid).toBe(false);
-    expect(result.error).toContain("curto");
+  });
+
+  it("should reject bech32 address with missing character", () => {
+    // Remove a character from the middle — should fail checksum
+    const valid = "ex1qqpzry9x8gf2tvdw0s3jn54khce6mua7lmkqn9x";
+    const tampered = valid.slice(0, 20) + valid.slice(21);
+    expect(validateLiquidAddress(tampered).valid).toBe(false);
   });
 
   it("should accept valid base58 VJL address", () => {

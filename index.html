@@ -6,7 +6,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Converta Pix em cripto em segundos. Para seu negócio ou para você." />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data: https://depix.eulen.app https://eulen.app https://response.eulen.app https://api.qrserver.com; connect-src 'self' https://depix-backend.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src https://brswap.me" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-CfhkB0t1w4huapj30hvuB91Yj3BBXM349rph5EzFxd4='; img-src 'self' data: https://depix.eulen.app https://eulen.app https://response.eulen.app; connect-src 'self' https://depix-backend.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src https://brswap.me" />
   <meta name="theme-color" content="#0a0f14" />
 
   <link rel="canonical" href="https://depixapp.com/" />
@@ -683,7 +683,9 @@
       <div id="loading" class="hidden"><span class="spinner"></span> Gerando código de pagamento…</div>
 
       <div id="resultado" class="resultado hidden">
+        <div id="qrLoading" class="hidden"><span class="spinner"></span> Carregando QR Code…</div>
         <img id="qrImage" alt="QR Code PIX" />
+        <p id="qrImageError" class="qr-error hidden">Não foi possível carregar o QR Code. Use o botão abaixo para copiar o código PIX.</p>
         <p id="qrId"></p>
         <button id="btnCopy">PIX copia e cola</button>
         <button id="btnAcompanhar" class="secondary">Acompanhe este pagamento</button>
@@ -740,7 +742,9 @@
         </div>
         <button id="btnCopyAddress">Copiar endereço</button>
 
+        <div id="saqueQrLoading" class="hidden"><span class="spinner"></span> Carregando QR Code…</div>
         <img id="saqueQr" class="hidden" alt="QR Code endereço Liquid" />
+        <p id="saqueQrError" class="qr-error hidden">Não foi possível carregar o QR Code. Copie o endereço acima e cole no app SideSwap.</p>
 
         <p id="saqueWarning" class="saque-warning hidden"></p>
 
@@ -1087,15 +1091,13 @@
       </div>
     </div>
 
-    <div id="transactions-count" class="extrato-count hidden"></div>
     <div id="transactions-msg" class="mensagem"></div>
     <div id="transactions-loading" class="hidden"><span class="spinner"></span> Carregando…</div>
     <div id="transactions-empty" class="hidden">
       <p class="info-text">Nenhuma transação encontrada.</p>
     </div>
-    <div id="transactions-list" class="transactions-list"></div>
-    <div id="transactions-load-more" class="hidden">
-      <button id="btn-load-more" class="secondary">Carregar mais</button>
+    <div id="transactions-list" class="transactions-list">
+      <div id="transactions-sentinel" aria-hidden="true" style="height:1px"></div>
     </div>
     <p class="link-text">
       <a href="#home" class="link">← Voltar</a>

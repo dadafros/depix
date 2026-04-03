@@ -12,6 +12,7 @@ import { isAllowedImageUrl, toCents, formatBRL, formatDePix, escapeHtml } from "
 import { validateLiquidAddress, validatePhone } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
+import { renderBrandedQr, renderPixQr } from "./qr.js";
 
 // ===== Constants =====
 const MIN_VALOR_CENTS = 500;
@@ -19,6 +20,7 @@ const MAX_VALOR_CENTS = 300000;
 let qrCopyPaste = "";
 let deferredPrompt = null;
 let pendingAddressChange = "";
+let pendingAddressDelete = "";
 let reportType = "";
 let modoSaque = false;
 let modoConvert = false;
@@ -37,80 +39,7 @@ if ("serviceWorker" in navigator) {
 // ===== Utility functions =====
 // showToast and setMsg are imported from script-helpers.js
 
-function generateBrandedQr(data, imgEl) {
-  const size = 300;
-  const qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=" + size + "x" + size + "&ecc=H&data=" + encodeURIComponent(data);
-
-  const qrImg = new Image();
-  qrImg.crossOrigin = "anonymous";
-  qrImg.onload = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-
-    // Draw dark background
-    ctx.fillStyle = "#111921";
-    ctx.fillRect(0, 0, size, size);
-
-    // Draw QR on canvas to read pixels
-    ctx.drawImage(qrImg, 0, 0, size, size);
-    const imageData = ctx.getImageData(0, 0, size, size);
-    const pixels = imageData.data;
-
-    // Replace colors: black modules → teal, white → dark bg
-    for (let i = 0; i < pixels.length; i += 4) {
-      const brightness = pixels[i]; // R channel (grayscale QR)
-      if (brightness < 128) {
-        // Dark module → teal
-        pixels[i] = 56;      // R
-        pixels[i + 1] = 227; // G
-        pixels[i + 2] = 172; // B
-      } else {
-        // Light module → dark background
-        pixels[i] = 17;      // R
-        pixels[i + 1] = 25;  // G
-        pixels[i + 2] = 33;  // B
-      }
-    }
-    ctx.putImageData(imageData, 0, 0);
-
-    // Draw logo in center with circular background
-    const logo = new Image();
-    logo.onload = () => {
-      const logoSize = size * 0.22;
-      const padding = 6;
-      const cx = (size - logoSize) / 2;
-      const cy = (size - logoSize) / 2;
-
-      // Circle background behind logo
-      ctx.beginPath();
-      ctx.arc(size / 2, size / 2, logoSize / 2 + padding, 0, Math.PI * 2);
-      ctx.fillStyle = "#111921";
-      ctx.fill();
-
-      // Draw logo
-      ctx.drawImage(logo, cx, cy, logoSize, logoSize);
-
-      // Set result as data URL
-      imgEl.src = canvas.toDataURL("image/png");
-      imgEl.classList.remove("hidden");
-    };
-    logo.onerror = () => {
-      // Logo failed — show QR without logo
-      imgEl.src = canvas.toDataURL("image/png");
-      imgEl.classList.remove("hidden");
-    };
-    logo.src = "./icon-192.png";
-  };
-
-  qrImg.onerror = () => {
-    // Fallback: plain QR
-    imgEl.src = qrApiUrl;
-    imgEl.classList.remove("hidden");
-  };
-  qrImg.src = qrApiUrl;
-}
+// generateBrandedQr and renderPixQr are now imported from qr.js (local generation, no external API)
 
 function formatCurrencyInput(input, mode) {
   if (!input) return;
@@ -854,16 +783,17 @@ document.getElementById("btnGerar")?.addEventListener("click", async () => {
       throw new Error(data.response.errorMessage);
     }
 
-    if (!isAllowedImageUrl(data.response.qrImageUrl)) {
-      throw new Error("URL do QR Code inválida");
-    }
-
     qrCopyPaste = data.response.qrCopyPaste;
     lastDepositQrId = data.response.id;
-    document.getElementById("qrImage").src = data.response.qrImageUrl;
     document.getElementById("qrId").innerText = "ID: " + data.response.id;
     document.getElementById("formDeposito").classList.add("hidden");
     document.getElementById("resultado").classList.remove("hidden");
+
+    // Generate QR code locally from PIX copy-paste data
+    renderPixQr(qrCopyPaste, document.getElementById("qrImage"), {
+      loadingEl: document.getElementById("qrLoading"),
+      errorEl: document.getElementById("qrImageError")
+    });
 
   } catch (e) {
     setMsg("mensagem", e.message || "Não foi possível gerar o código. Tente novamente.");
@@ -980,7 +910,10 @@ document.getElementById("btnSacar")?.addEventListener("click", async () => {
 
     // Generate branded QR code for the Liquid address
     const saqueQr = document.getElementById("saqueQr");
-    generateBrandedQr(r.depositAddress, saqueQr);
+    generateBrandedQr(r.depositAddress, saqueQr, {
+      loadingEl: document.getElementById("saqueQrLoading"),
+      errorEl: document.getElementById("saqueQrError")
+    });
 
     // Show warning about exact amount
     const warningEl = document.getElementById("saqueWarning");
@@ -1192,6 +1125,8 @@ function renderAddressList() {
         document.getElementById("select-addr-modal").classList.add("hidden");
         document.getElementById("password-confirm-input").value = "";
         setMsg("password-modal-msg", "");
+        document.querySelector("#password-modal h2").textContent = "Confirmar alteração";
+        document.querySelector("#password-modal .info-text").textContent = "Para trocar o endereço selecionado, confirme sua senha.";
         document.getElementById("password-modal").classList.remove("hidden");
       }
     });
@@ -1200,14 +1135,13 @@ function renderAddressList() {
   container.querySelectorAll(".addr-delete").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const addr = btn.dataset.delete;
-      removeAddress(addr);
-      renderAddressList();
-      updateAddrDisplay();
-      if (!hasAddresses()) {
-        document.getElementById("select-addr-modal").classList.add("hidden");
-        navigate("#no-address");
-      }
+      pendingAddressDelete = btn.dataset.delete;
+      document.getElementById("select-addr-modal").classList.add("hidden");
+      document.getElementById("password-confirm-input").value = "";
+      setMsg("password-modal-msg", "");
+      document.querySelector("#password-modal h2").textContent = "Confirmar exclusão";
+      document.querySelector("#password-modal .info-text").textContent = "Para excluir o endereço selecionado, confirme sua senha.";
+      document.getElementById("password-modal").classList.remove("hidden");
     });
   });
 }
@@ -1238,11 +1172,21 @@ document.getElementById("btn-confirm-password")?.addEventListener("click", async
       return;
     }
 
-    setSelectedAddress(pendingAddressChange);
-    pendingAddressChange = "";
-    document.getElementById("password-modal").classList.add("hidden");
-    updateAddrDisplay();
-    showToast("Endereço alterado com sucesso");
+    if (pendingAddressDelete) {
+      removeAddress(pendingAddressDelete);
+      pendingAddressDelete = "";
+      document.getElementById("password-modal").classList.add("hidden");
+      renderAddressList();
+      updateAddrDisplay();
+      if (!hasAddresses()) navigate("#no-address");
+      showToast("Endereço removido com sucesso");
+    } else {
+      setSelectedAddress(pendingAddressChange);
+      pendingAddressChange = "";
+      document.getElementById("password-modal").classList.add("hidden");
+      updateAddrDisplay();
+      showToast("Endereço alterado com sucesso");
+    }
   } catch (e) {
     setMsg("password-modal-msg", e.message || "Sem conexão. Verifique sua internet e tente novamente.");
   } finally {
@@ -1253,6 +1197,7 @@ document.getElementById("btn-confirm-password")?.addEventListener("click", async
 
 document.getElementById("close-password-modal")?.addEventListener("click", () => {
   pendingAddressChange = "";
+  pendingAddressDelete = "";
   document.getElementById("password-modal").classList.add("hidden");
 });
 
@@ -1630,49 +1575,66 @@ function abbreviateHash(str, prefixLen = 8, suffixLen = 6) {
 // escapeHtml imported from utils.js
 
 function buildTxDetails(tx) {
-  const details = [];
+  const copyDetails = [];
+  let txidHtml = "";
 
   if (tx.payer_name) {
-    details.push({ label: "Pagador", value: escapeHtml(tx.payer_name), full: tx.payer_name });
+    copyDetails.push({ label: "Pagador", value: escapeHtml(tx.payer_name), full: tx.payer_name });
   }
   if (tx.chave_pix) {
-    details.push({ label: "Chave PIX", value: escapeHtml(abbreviateHash(tx.chave_pix, 10, 4)), full: tx.chave_pix, mono: true });
+    copyDetails.push({ label: "Chave PIX", value: escapeHtml(abbreviateHash(tx.chave_pix, 10, 4)), full: tx.chave_pix, mono: true });
   }
   if (tx.customer_message) {
-    details.push({ label: "Msg", value: escapeHtml(tx.customer_message), full: tx.customer_message });
+    copyDetails.push({ label: "Msg", value: escapeHtml(tx.customer_message), full: tx.customer_message });
   }
   if (tx.endereco_liquid) {
-    details.push({ label: "Endereço", value: escapeHtml(abbreviateHash(tx.endereco_liquid)), full: tx.endereco_liquid, mono: true });
+    copyDetails.push({ label: "Endereço", value: escapeHtml(abbreviateHash(tx.endereco_liquid)), full: tx.endereco_liquid, mono: true });
   }
   if (tx.blockchain_tx_id) {
-    details.push({ label: "TXID", value: escapeHtml(abbreviateHash(tx.blockchain_tx_id)), full: tx.blockchain_tx_id, mono: true });
+    const txid = escapeHtml(tx.blockchain_tx_id);
+    const url = `https://blockstream.info/liquid/tx/${txid}`;
+    const externalIcon = '<svg class="external-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+    txidHtml = `<span class="transaction-detail mono"><a href="${url}" target="_blank" rel="noopener"><span class="transaction-detail-label">Blockchain TXID:</span> <span class="transaction-detail-value">${escapeHtml(abbreviateHash(tx.blockchain_tx_id))}</span>${externalIcon}</a></span>`;
   }
 
-  if (details.length === 0) return "";
+  if (copyDetails.length === 0 && !txidHtml) return "";
 
   const copyIcon = '<svg class="copy-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-  const items = details.map(d => {
+  const items = copyDetails.map(d => {
     const monoClass = d.mono ? " mono" : "";
     return `<span class="transaction-detail copyable${monoClass}" title="Copiar: ${escapeHtml(d.full)}" data-copy="${escapeHtml(d.full)}"><span class="transaction-detail-label">${d.label}:</span> <span class="transaction-detail-value">${d.value}</span>${copyIcon}</span>`;
   }).join("");
 
-  return `<div class="transaction-details">${items}</div>`;
+  return `<div class="transaction-details">${items}${txidHtml}</div>`;
 }
 
 let allTransactions = [];
 let filteredTransactions = [];
 let displayedCount = 0;
 const PAGE_SIZE = 50;
+let txObserver = null;
+
+function setupTransactionsObserver() {
+  if (txObserver) txObserver.disconnect();
+  const list = document.getElementById("transactions-list");
+  const sentinel = document.getElementById("transactions-sentinel");
+  if (!list || !sentinel) return;
+  txObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && displayedCount < filteredTransactions.length) {
+      renderNextPage();
+    }
+  }, { root: list, rootMargin: "0px 0px 200px 0px" });
+  txObserver.observe(sentinel);
+}
 
 async function loadTransactions() {
   const loading = document.getElementById("transactions-loading");
 
   loading.classList.remove("hidden");
   setMsg("transactions-msg", "");
-  document.getElementById("transactions-list").innerHTML = "";
+  const list = document.getElementById("transactions-list");
+  list.innerHTML = '<div id="transactions-sentinel" aria-hidden="true" style="height:1px"></div>';
   document.getElementById("transactions-empty").classList.add("hidden");
-  document.getElementById("transactions-load-more").classList.add("hidden");
-  document.getElementById("transactions-count").classList.add("hidden");
 
   try {
     const res = await apiFetch("/api/status?type=all");
@@ -1739,23 +1701,21 @@ function applyFilters() {
   });
 
   displayedCount = 0;
-  document.getElementById("transactions-list").innerHTML = "";
+  const list = document.getElementById("transactions-list");
+  list.innerHTML = '<div id="transactions-sentinel" aria-hidden="true" style="height:1px"></div>';
   renderNextPage();
+  setupTransactionsObserver();
 }
 
 function renderNextPage() {
   const list = document.getElementById("transactions-list");
   const empty = document.getElementById("transactions-empty");
-  const loadMore = document.getElementById("transactions-load-more");
-  const countEl = document.getElementById("transactions-count");
+  const sentinel = document.getElementById("transactions-sentinel");
 
   const nextBatch = filteredTransactions.slice(displayedCount, displayedCount + PAGE_SIZE);
 
   if (displayedCount === 0 && nextBatch.length === 0) {
-    list.innerHTML = "";
     empty.classList.remove("hidden");
-    loadMore.classList.add("hidden");
-    countEl.classList.add("hidden");
     return;
   }
 
@@ -1790,19 +1750,14 @@ function renderNextPage() {
     </div>`;
   }).join("");
 
-  if (displayedCount === 0) {
-    list.innerHTML = html;
+  if (sentinel) {
+    sentinel.insertAdjacentHTML("beforebegin", html);
   } else {
     list.insertAdjacentHTML("beforeend", html);
   }
 
   displayedCount += nextBatch.length;
 
-  const hasMore = displayedCount < filteredTransactions.length;
-  loadMore.classList.toggle("hidden", !hasMore);
-
-  countEl.innerText = `Mostrando ${displayedCount} de ${filteredTransactions.length}`;
-  countEl.classList.remove("hidden");
 
   // Scroll to highlighted on first render
   if (displayedCount <= PAGE_SIZE && highlightId) {
@@ -1815,6 +1770,10 @@ function stopTransactionsPolling() {
   if (transactionsPollingInterval) {
     clearInterval(transactionsPollingInterval);
     transactionsPollingInterval = null;
+  }
+  if (txObserver) {
+    txObserver.disconnect();
+    txObserver = null;
   }
 }
 
@@ -1947,7 +1906,6 @@ document.getElementById("extrato-clear-filters")?.addEventListener("click", () =
 });
 
 // Extrato: load more (client-side pagination)
-document.getElementById("btn-load-more")?.addEventListener("click", renderNextPage);
 
 // Acompanhe buttons
 document.getElementById("btnAcompanhar")?.addEventListener("click", () => {
