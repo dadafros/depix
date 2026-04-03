@@ -12,7 +12,7 @@ import { toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
 import { validateLiquidAddress, validatePhone } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
-import { renderBrandedQr, renderPixQr } from "./qr.js";
+import { renderBrandedQr } from "./qr.js";
 
 // ===== Constants =====
 const MIN_VALOR_CENTS = 500;
