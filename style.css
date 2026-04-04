@@ -2931,6 +2931,21 @@ textarea:focus {
   display: inline-block;
 }
 
+/* Inclusion section */
+.landing-inclusion-section {
+  text-align: center;
+}
+
+.landing-inclusion-text {
+  color: #94a3b8;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto 28px;
+}
+
+
+
 /* Blog section */
 .landing-blog-section {
   text-align: center;
