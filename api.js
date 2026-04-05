@@ -41,6 +41,21 @@ export async function apiFetch(path, options = {}) {
     headers
   });
 
+  // If 403 with blocked flag, show blocked modal and halt
+  if (res.status === 403) {
+    try {
+      const cloned = res.clone();
+      const data = await cloned.json();
+      if (data?.blocked === true) {
+        clearAuth();
+        document.getElementById("blocked-modal")?.classList.remove("hidden");
+        throw new Error("Conta suspensa.");
+      }
+    } catch (e) {
+      if (e.message === "Conta suspensa.") throw e;
+    }
+  }
+
   // If 401, try to refresh token
   if (res.status === 401 && token) {
     const refreshed = await tryRefresh();
