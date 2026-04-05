@@ -6,7 +6,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Converta Pix em cripto em segundos. Para seu negócio ou para você." />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-CfhkB0t1w4huapj30hvuB91Yj3BBXM349rph5EzFxd4='; img-src 'self' data: https://depix.eulen.app https://eulen.app https://response.eulen.app; connect-src 'self' https://depix-backend.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src https://brswap.me" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-CfhkB0t1w4huapj30hvuB91Yj3BBXM349rph5EzFxd4=' https://challenges.cloudflare.com; img-src 'self' data: https://depix.eulen.app https://eulen.app https://response.eulen.app; connect-src 'self' https://depix-backend.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src https://brswap.me https://challenges.cloudflare.com" />
   <meta name="theme-color" content="#0a0f14" />
 
   <link rel="canonical" href="https://depixapp.com/" />
@@ -603,6 +603,8 @@
 
     <label for="reg-senha">Crie uma senha</label>
     <input id="reg-senha" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+
+    <div id="turnstile-container" style="display:flex;justify-content:center;margin:0.5rem 0"></div>
 
     <button id="btn-register">Criar conta</button>
 
@@ -1573,6 +1575,7 @@
   <p>Acesse o menu (☰) e toque em "Ajuda / Contato". Descreva seu problema e responderemos por email.</p>
 </template>
 
-<script type="module" src="script.js?v=24"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script type="module" src="script.js?v=25"></script>
 </body>
 </html>

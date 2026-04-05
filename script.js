@@ -213,6 +213,23 @@ for (const id of ["login-usuario", "login-senha"]) {
 // REGISTER
 // =========================================
 
+// ===== Turnstile CAPTCHA for registration =====
+let turnstileWidgetId = null;
+
+function renderTurnstile() {
+  const container = document.getElementById("turnstile-container");
+  if (!container || typeof turnstile === "undefined") return;
+  if (turnstileWidgetId !== null) {
+    turnstile.reset(turnstileWidgetId);
+    return;
+  }
+  turnstileWidgetId = turnstile.render("#turnstile-container", {
+    sitekey: "0x4AAAAAAC1DLVejZBg3u_ND",
+    theme: "dark",
+    "error-callback": () => setMsg("register-msg", "Erro no CAPTCHA. Recarregue a página.")
+  });
+}
+
 document.getElementById("btn-register")?.addEventListener("click", async () => {
   const nome = document.getElementById("reg-nome").value.trim();
   const email = document.getElementById("reg-email").value.trim();
@@ -238,6 +255,16 @@ document.getElementById("btn-register")?.addEventListener("click", async () => {
     return;
   }
 
+  // Get Turnstile token
+  let cfTurnstileResponse = null;
+  if (typeof turnstile !== "undefined" && turnstileWidgetId !== null) {
+    cfTurnstileResponse = turnstile.getResponse(turnstileWidgetId);
+    if (!cfTurnstileResponse) {
+      setMsg("register-msg", "Aguarde a verificação de segurança completar.");
+      return;
+    }
+  }
+
   const btn = document.getElementById("btn-register");
   btn.disabled = true;
   btn.innerText = "Criando conta…";
@@ -246,14 +273,20 @@ document.getElementById("btn-register")?.addEventListener("click", async () => {
     let fp = null;
     try { fp = await generateFingerprint(); } catch {}
 
+    const body = buildRegistrationBody({ nome, email, whatsapp, usuario, senha }, fp);
+    if (cfTurnstileResponse) body.cfTurnstileResponse = cfTurnstileResponse;
+
     const res = await apiFetch("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify(buildRegistrationBody({ nome, email, whatsapp, usuario, senha }, fp))
+      body: JSON.stringify(body)
     });
     const data = await res.json();
 
     if (!res.ok) {
       setMsg("register-msg", data?.response?.errorMessage || "Erro ao criar conta");
+      if (typeof turnstile !== "undefined" && turnstileWidgetId !== null) {
+        turnstile.reset(turnstileWidgetId);
+      }
       return;
     }
 
@@ -266,6 +299,9 @@ document.getElementById("btn-register")?.addEventListener("click", async () => {
     navigate("#verify");
   } catch (e) {
     setMsg("register-msg", e.message || "Sem conexão. Verifique sua internet e tente novamente.");
+    if (typeof turnstile !== "undefined" && turnstileWidgetId !== null) {
+      turnstile.reset(turnstileWidgetId);
+    }
   } finally {
     btn.disabled = false;
     btn.innerText = "Criar conta";
@@ -2155,6 +2191,7 @@ route("#login", () => {
 route("#register", () => {
   setMsg("register-msg", "");
   captureReferralCode(window.location.hash);
+  renderTurnstile();
 });
 route("#verify", () => {
   setMsg("verify-msg", "");

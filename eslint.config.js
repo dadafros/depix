@@ -42,6 +42,7 @@ const browserGlobals = {
   setTimeout: "readonly",
   skipWaiting: "readonly",
   screen: "readonly",
+  turnstile: "readonly",
   window: "readonly"
 };
 
