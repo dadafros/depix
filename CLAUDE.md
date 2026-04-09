@@ -14,6 +14,10 @@ DePix is a Progressive Web App (PWA) for generating PIX QR codes (deposits) and 
 
 **Live URL**: `https://depixapp.com`
 
+## Code Language
+
+All new code must be written in English — variable names, function names, table/column names, comments, error messages. Existing Portuguese names (e.g., `criado_em`, `valor_centavos`) are not renamed (breaking change), but all new additions must use English.
+
 ## Architecture
 
 - **Language**: Vanilla JavaScript with ES Modules (`type="module"`)

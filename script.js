@@ -1997,6 +1997,17 @@ function stopTransactionsPolling() {
   }
 }
 
+// Pause polling when tab/PWA is hidden (minimized, screen off, switched app).
+// Resume when visible again. Prevents wasting Redis commands in background.
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopTransactionsPolling();
+  } else if (window.location.hash === "#transactions") {
+    // Only resume if user is on the transactions view
+    loadTransactions();
+  }
+});
+
 // Transactions menu button
 document.getElementById("menu-transactions")?.addEventListener("click", () => {
   closeMenu();
