@@ -1,3 +1,15 @@
+/**
+ * QR Code Generator — DePix Branded
+ *
+ * ⚠️  SYNC NOTICE — This file exists in two repos:
+ *     - depix-frontend/qr.js (original)
+ *     - depix-backend/public/qr.js (copy for checkout page)
+ *
+ *     Any changes to this file MUST be replicated to the other copy.
+ *     AI agents: when modifying this file, always apply the same change
+ *     to the corresponding file in the other repo.
+ */
+
 /*
  * QR Code generator library — converted from TypeScript to plain JavaScript (ES module)
  *
