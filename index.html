@@ -667,6 +667,22 @@
       <span id="addr-display" class="addr-chip" title="Endereço selecionado"></span>
     </div>
 
+    <!-- Banner WhatsApp -->
+    <a id="home-whatsapp-banner" class="home-whatsapp-banner hidden" href="https://chat.whatsapp.com/KWuysHsJhXwCQOpYHJZUP5?mode=gi_t" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="#25D366" style="flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      <span><strong>Grupo VIP</strong> — suporte direto e novidades</span>
+      <span class="home-whatsapp-arrow">→</span>
+    </a>
+
+    <!-- Banner verificação -->
+    <div id="home-verify-banner" class="home-verify-banner hidden">
+      <div class="home-verify-banner-text">
+        <strong>Verifique sua conta</strong>
+        <p>Receba DePix <em>instantaneamente</em> e desbloqueie a Área do Lojista para aceitar pagamentos.</p>
+      </div>
+      <a href="#verify-account" class="home-verify-banner-link">Saiba mais →</a>
+    </div>
+
     <!-- ===== SWITCH MODO ===== -->
     <div class="mode-switch">
       <div class="mode-toggle" role="radiogroup" aria-label="Modo">
@@ -794,36 +810,50 @@
     </div>
 
     <div class="menu-section">
-      <h3>Endereços</h3>
-      <button id="menu-select-addr" class="menu-item">Trocar endereço</button>
-      <button id="menu-add-addr" class="menu-item">Adicionar endereço</button>
+      <h3 class="menu-section-toggle"><svg class="menu-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 6v2m0 8v2"/></svg>Endereços</h3>
+      <div class="menu-section-items hidden">
+        <button id="menu-select-addr" class="menu-item">Trocar endereço</button>
+        <button id="menu-add-addr" class="menu-item">Adicionar endereço</button>
+      </div>
+    </div>
+
+    <div id="menu-merchant-section" class="menu-section">
+      <h3 class="menu-section-toggle"><svg class="menu-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Lojista</h3>
+      <div class="menu-section-items hidden">
+        <button id="menu-merchant-charge" class="menu-item">Cobrar</button>
+        <button id="menu-merchant-sales" class="menu-item">Minhas Vendas</button>
+        <button id="menu-merchant-account" class="menu-item">Minha Conta</button>
+        <button id="menu-merchant-api" class="menu-item">API e Webhooks</button>
+      </div>
     </div>
 
     <div class="menu-section">
-      <h3>Transações</h3>
-      <button id="menu-transactions" class="menu-item">Extrato</button>
+      <h3 class="menu-section-link" id="menu-transactions"><svg class="menu-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Extrato</h3>
     </div>
 
     <div class="menu-section">
-      <h3>Afiliados</h3>
-      <button id="menu-affiliates" class="menu-item">Programa de Afiliados</button>
+      <h3 class="menu-section-link" id="menu-affiliates"><svg class="menu-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Afiliados</h3>
     </div>
 
     <div class="menu-section">
-      <h3>Relatórios</h3>
-      <button id="menu-report-depositos" class="menu-item">Depósitos</button>
-      <button id="menu-report-saques" class="menu-item">Saques</button>
-      <button id="menu-report-comissoes" class="menu-item">Comissões</button>
+      <h3 class="menu-section-toggle"><svg class="menu-icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Relatórios</h3>
+      <div class="menu-section-items hidden">
+        <button id="menu-report-depositos" class="menu-item">Depósitos</button>
+        <button id="menu-report-saques" class="menu-item">Saques</button>
+        <button id="menu-report-comissoes" class="menu-item">Comissões</button>
+      </div>
     </div>
 
     <div class="menu-section">
-      <h3>Ajuda</h3>
-      <button id="menu-faq" class="menu-item">Perguntas frequentes</button>
-      <button id="menu-contact" class="menu-item">Ajuda / Contato</button>
-      <a href="https://blog.depixapp.com/" class="menu-item" target="_blank" rel="noopener">Blog</a>
+      <h3 class="menu-section-toggle"><svg class="menu-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Ajuda</h3>
+      <div class="menu-section-items hidden">
+        <button id="menu-faq" class="menu-item">Perguntas frequentes</button>
+        <button id="menu-contact" class="menu-item">Contato</button>
+      </div>
     </div>
 
     <div class="menu-section menu-footer">
+      <a href="https://blog.depixapp.com/" class="menu-item" target="_blank" rel="noopener">Blog</a>
       <button id="menu-logout" class="menu-item danger">Sair</button>
     </div>
   </div>
@@ -1206,6 +1236,450 @@
     </p>
   </div>
 </section>
+
+<!-- ===== MERCHANT: Dispatcher (verifica estado) ===== -->
+<section data-view="merchant" class="page hidden">
+  <div class="card">
+    <h1>Área do Lojista</h1>
+    <div id="merchant-msg" class="mensagem"></div>
+    <div id="merchant-loading" class="hidden"><span class="spinner"></span> Carregando…</div>
+
+    <!-- Não verificado -->
+    <div id="merchant-unverified" class="hidden">
+      <div class="merchant-verify-card">
+        <div class="merchant-verify-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#38e3ac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <h2 class="merchant-verify-title">Quase lá!</h2>
+        <p class="merchant-verify-desc">Aceite pagamentos via DePix, crie links de cobrança e gerencie seu negócio. Faltam apenas alguns depósitos para liberar sua conta de lojista.</p>
+        <div class="progress-bar-container">
+          <div id="merchant-progress-bar" class="progress-bar" style="width: 0%"></div>
+        </div>
+        <p id="merchant-progress-text" class="progress-text">0/10 depósitos concluídos</p>
+        <a href="#verify-account" class="merchant-verify-cta">Ver detalhes da verificação</a>
+      </div>
+    </div>
+
+    <!-- Formulário de criação -->
+    <div id="merchant-create" class="hidden">
+      <p class="info-text">Crie sua conta de lojista para aceitar pagamentos via DePix.</p>
+      <label for="merchant-name">Nome do negócio *</label>
+      <input id="merchant-name" placeholder="Ex: Camisetas do João" />
+      <label for="merchant-liquid-addr">Endereço Liquid *</label>
+      <input id="merchant-liquid-addr" placeholder="Endereço para receber pagamentos" />
+      <label for="merchant-cnpj">CNPJ</label>
+      <input id="merchant-cnpj" placeholder="Opcional" maxlength="14" />
+      <label for="merchant-website">Website</label>
+      <input id="merchant-website" placeholder="Ex: minhaloja.com.br" />
+      <div id="merchant-create-msg" class="mensagem"></div>
+      <button id="btn-create-merchant">Começar</button>
+    </div>
+
+    <!-- Desativado -->
+    <div id="merchant-deactivated" class="hidden">
+      <div class="merchant-banner merchant-banner-danger">
+        <p>Sua conta de lojista foi desativada. Entre em contato: suporte@depixapp.com</p>
+      </div>
+    </div>
+
+    <p class="link-text"><a href="#home" class="link">← Voltar</a></p>
+  </div>
+</section>
+
+<!-- ===== VERIFICAÇÃO DA CONTA ===== -->
+<section data-view="verify-account" class="page hidden">
+  <div class="card">
+    <div class="verify-account-header">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#38e3ac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+      <div>
+        <h1 class="verify-account-title">Verificação da conta</h1>
+        <p class="verify-account-subtitle">Prazo de liberação nos primeiros depósitos</p>
+      </div>
+    </div>
+
+    <p class="verify-account-intro">Seus primeiros depósitos passam por uma verificação automática. É rápido — depois disso, tudo cai na hora.</p>
+
+    <div class="verify-steps">
+      <div class="verify-step verify-step-highlight">
+        <div class="verify-step-dot verify-dot-green"></div>
+        <div class="verify-step-content">
+          <strong>1º depósito</strong>
+          <span class="verify-step-desc">Cai direto na sua carteira</span>
+        </div>
+        <span class="verify-step-badge verify-badge-green">Instantâneo</span>
+      </div>
+      <div class="verify-step">
+        <div class="verify-step-dot verify-dot-yellow"></div>
+        <div class="verify-step-content">
+          <strong>2º ao 5º depósito</strong>
+          <span class="verify-step-desc">Liberado no dia seguinte (D+1)</span>
+        </div>
+        <span class="verify-step-badge verify-badge-yellow">24 horas</span>
+      </div>
+      <div class="verify-step verify-step-highlight">
+        <div class="verify-step-dot verify-dot-green"></div>
+        <div class="verify-step-content">
+          <strong>A partir do 6º depósito</strong>
+          <span class="verify-step-desc">DePix cai instantaneamente na sua carteira</span>
+        </div>
+        <span class="verify-step-badge verify-badge-green">Instantâneo</span>
+      </div>
+      <div class="verify-step verify-step-highlight">
+        <div class="verify-step-dot verify-dot-green"></div>
+        <div class="verify-step-content">
+          <strong>10º depósito</strong>
+          <span class="verify-step-desc">Conta verificada — Área do Lojista desbloqueada</span>
+        </div>
+        <span class="verify-step-badge verify-badge-green">Verificado</span>
+      </div>
+    </div>
+
+    <div class="verify-bonus">
+      <strong>Com a conta verificada você também desbloqueia</strong>
+      <div class="verify-bonus-items">
+        <div class="verify-bonus-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38e3ac" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>Links de pagamento para cobrar seus clientes</span>
+        </div>
+        <div class="verify-bonus-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38e3ac" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          <span>Painel completo de vendas e relatórios</span>
+        </div>
+        <div class="verify-bonus-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38e3ac" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>API para integrar na sua loja ou app</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="verify-progress-section">
+      <div class="progress-bar-container">
+        <div id="verify-page-progress-bar" class="progress-bar" style="width: 0%"></div>
+      </div>
+      <p id="verify-page-progress-text" class="progress-text">0/10 depósitos concluídos</p>
+    </div>
+
+    <a href="#home" class="merchant-verify-cta" style="width:100%;text-align:center;display:block">Fazer um depósito</a>
+
+    <p class="info-text" style="text-align:center;margin-top:14px;font-size:11px;color:#5a6d82">A verificação é automática e acontece conforme você usa a plataforma.</p>
+
+    <p class="link-text"><a href="#home" class="link">← Voltar</a></p>
+  </div>
+</section>
+
+<!-- ===== COBRAR ===== -->
+<section data-view="merchant-charge" class="page hidden">
+  <div class="card">
+    <h1>Cobrar</h1>
+
+    <div id="merchant-ship-banner" class="merchant-banner">
+      <div class="merchant-banner-content">
+        <strong>Quando enviar o produto?</strong>
+        <p>Envie somente quando o status for <strong>"Concluído"</strong>. O DePix já está na sua carteira e a transação é <strong>irreversível</strong> — diferente do PIX, que pode ser estornado por até 80 dias.</p>
+      </div>
+      <button id="dismiss-ship-banner" class="merchant-banner-close" aria-label="Fechar">✕</button>
+    </div>
+
+    <label for="checkout-amount">Valor (R$) *</label>
+    <input id="checkout-amount" inputmode="numeric" placeholder="R$ 0,00" />
+    <label for="checkout-description">Descrição</label>
+    <input id="checkout-description" placeholder="Ex: Camiseta preta G" />
+    <label for="checkout-image">Imagem do produto (URL) <button id="checkout-image-info" class="icon-btn-sm" aria-label="Sobre a imagem">?</button></label>
+    <input id="checkout-image" placeholder="https://..." />
+    <div id="checkout-create-msg" class="mensagem"></div>
+    <button id="btn-create-checkout" class="merchant-cta">Criar link de pagamento</button>
+
+    <div id="checkout-result" class="hidden">
+      <div class="checkout-link-box">
+        <label>Link de pagamento</label>
+        <div class="checkout-link-row">
+          <input id="checkout-link" readonly />
+          <button id="btn-copy-checkout-link" class="secondary">Copiar</button>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="merchant-subsection-title">Últimos links</h2>
+    <div id="merchant-checkouts-list" class="transactions-list"></div>
+    <div id="merchant-checkouts-empty" class="hidden" style="text-align:center">
+      <p class="info-text">Nenhum link criado ainda.</p>
+    </div>
+
+    <p class="link-text"><a href="#home" class="link">← Voltar</a></p>
+  </div>
+</section>
+
+<!-- ===== MINHAS VENDAS ===== -->
+<section data-view="merchant-sales" class="page hidden">
+  <div class="card merchant-card">
+    <h1>Minhas Vendas</h1>
+    <div class="sales-stats">
+      <div class="sales-stat">
+        <span class="sales-stat-label">Vendas</span>
+        <span class="sales-stat-value" id="sales-stat-completed">0</span>
+      </div>
+      <div class="sales-stat">
+        <span class="sales-stat-label">Recebido</span>
+        <span class="sales-stat-value" id="sales-stat-received">R$ 0,00</span>
+      </div>
+      <div class="sales-stat">
+        <span class="sales-stat-label">Conversão</span>
+        <span class="sales-stat-value" id="sales-stat-conversion">0%</span>
+      </div>
+      <div class="sales-stat">
+        <span class="sales-stat-label">Pendentes</span>
+        <span class="sales-stat-value" id="sales-stat-pending">0</span>
+      </div>
+    </div>
+    <div class="extrato-filters">
+      <div class="extrato-toolbar">
+        <div class="extrato-search-row">
+          <svg class="extrato-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="sales-filter-search" type="text" placeholder="Buscar…" autocomplete="off" />
+        </div>
+        <button id="sales-filter-toggle" class="extrato-filter-toggle" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtros
+          <span id="sales-filter-badge" class="extrato-filter-badge hidden">0</span>
+          <svg class="extrato-filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div id="sales-filter-panel" class="extrato-filter-panel hidden">
+        <div class="extrato-filter-group">
+          <label class="extrato-filter-label" for="sales-filter-status">Status</label>
+          <select id="sales-filter-status">
+            <option value="">Todos</option>
+            <option value="pending">Pendente</option>
+            <option value="processing">Processando</option>
+            <option value="completed">Concluído</option>
+            <option value="expired">Expirado</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+        <div class="extrato-filter-group">
+          <label class="extrato-filter-label">Período</label>
+          <div class="extrato-period-presets" role="radiogroup">
+            <button class="extrato-period-btn active" data-sales-period="all" type="button">Todos</button>
+            <button class="extrato-period-btn" data-sales-period="today" type="button">Hoje</button>
+            <button class="extrato-period-btn" data-sales-period="7d" type="button">7 dias</button>
+            <button class="extrato-period-btn" data-sales-period="30d" type="button">30 dias</button>
+            <button class="extrato-period-btn" data-sales-period="90d" type="button">90 dias</button>
+            <button class="extrato-period-btn" data-sales-period="custom" type="button">Intervalo</button>
+          </div>
+          <div id="sales-custom-range" class="extrato-date-row hidden">
+            <div class="extrato-date-field">
+              <span class="extrato-date-prefix">De</span>
+              <input id="sales-filter-start" type="date" />
+            </div>
+            <div class="extrato-date-field">
+              <span class="extrato-date-prefix">Até</span>
+              <input id="sales-filter-end" type="date" />
+            </div>
+          </div>
+        </div>
+        <button id="sales-clear-filters" class="extrato-clear-filters hidden" type="button">Limpar filtros</button>
+      </div>
+    </div>
+    <div id="sales-msg" class="mensagem"></div>
+    <div id="sales-loading" class="hidden"><span class="spinner"></span> Carregando…</div>
+    <div id="sales-empty" class="hidden" style="text-align:center">
+      <p class="info-text">Nenhuma venda ainda. Crie seu primeiro link de pagamento.</p>
+      <button id="btn-sales-goto-create" class="secondary">Criar link de pagamento</button>
+    </div>
+    <div id="sales-list" class="transactions-list">
+      <div id="sales-sentinel" aria-hidden="true" style="height:1px"></div>
+    </div>
+    <p class="link-text"><a href="#home" class="link">← Voltar</a></p>
+  </div>
+</section>
+
+<!-- ===== MINHA CONTA (lojista) ===== -->
+<section data-view="merchant-account" class="page hidden">
+  <div class="card">
+    <h1>Minha Conta</h1>
+
+    <div id="merchant-account-list"></div>
+    <div id="merchant-edit-msg" class="mensagem"></div>
+
+    <p class="link-text"><a href="#home" class="link">← Voltar</a></p>
+  </div>
+</section>
+
+<!-- ===== API E WEBHOOKS ===== -->
+<section data-view="merchant-api" class="page hidden">
+  <div class="card">
+    <h1>API e Webhooks</h1>
+
+    <div id="merchant-alert-expired-key" class="merchant-alert hidden"></div>
+
+    <div id="api-keys-list" class="api-keys-list"></div>
+    <div id="api-keys-empty" class="hidden" style="text-align:center">
+      <p class="info-text">Nenhuma chave criada.</p>
+    </div>
+    <div style="margin-top:10px"><button id="btn-create-api-key" class="merchant-text-btn">+ Criar nova chave</button></div>
+
+    <div class="merchant-divider"></div>
+
+    <div class="api-key-card">
+      <div class="api-key-top-row">
+        <span class="account-field-label" style="margin:0">Webhook secret</span>
+        <button id="btn-rotate-webhook" class="merchant-text-btn" style="margin-left:auto">Gerar novo</button>
+      </div>
+      <div class="api-key-value" style="margin-top:6px;margin-bottom:0">
+        <span id="merchant-webhook-secret" class="mono"></span>
+      </div>
+    </div>
+
+    <div style="margin-top:12px"><a href="#webhook-logs" class="link" style="font-size:13px">Ver logs de webhook →</a></div>
+
+    <p class="link-text"><a href="#home" class="link">← Voltar</a></p>
+  </div>
+</section>
+
+<!-- ===== WEBHOOK LOGS ===== -->
+<section data-view="webhook-logs" class="page hidden">
+  <div class="card">
+    <h1>Logs de Webhook</h1>
+    <div id="webhook-logs-msg" class="mensagem"></div>
+    <div id="webhook-logs-loading" class="hidden"><span class="spinner"></span> Carregando…</div>
+    <div id="webhook-logs-empty" class="hidden">
+      <p class="info-text">Nenhum webhook enviado ainda.</p>
+    </div>
+    <div id="webhook-logs-list" class="webhook-logs-list"></div>
+    <p class="link-text"><a href="#merchant-api" class="link">← Voltar</a></p>
+  </div>
+</section>
+
+<!-- ===== MODAL: WELCOME MERCHANT ===== -->
+<div id="merchant-welcome-modal" class="modal hidden">
+  <div class="modal-box" style="text-align:left">
+    <h2>Suas chaves de API</h2>
+    <p class="info-text" style="margin-bottom:14px">Copie agora — elas não serão exibidas novamente.</p>
+    <div class="key-field">
+      <label>Produção</label>
+      <div class="key-input-wrap">
+        <input id="welcome-live-key" readonly class="mono" />
+        <button class="btn-copy-key" data-target="welcome-live-key" aria-label="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      </div>
+    </div>
+    <div class="key-field">
+      <label>Teste</label>
+      <div class="key-input-wrap">
+        <input id="welcome-test-key" readonly class="mono" />
+        <button class="btn-copy-key" data-target="welcome-test-key" aria-label="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      </div>
+    </div>
+    <div class="key-field">
+      <label>Webhook Secret</label>
+      <div class="key-input-wrap">
+        <input id="welcome-webhook-secret" readonly class="mono" />
+        <button class="btn-copy-key" data-target="welcome-webhook-secret" aria-label="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      </div>
+    </div>
+    <button id="btn-welcome-continue" style="width:100%;margin-top:14px">Entendi</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: CRIAR API KEY ===== -->
+<div id="create-api-key-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2>Criar nova chave</h2>
+    <label for="api-key-type">Tipo *</label>
+    <select id="api-key-type">
+      <option value="live">Produção</option>
+      <option value="test">Teste</option>
+    </select>
+    <label for="api-key-label">Label</label>
+    <input id="api-key-label" placeholder="Ex: WooCommerce" />
+    <label for="api-key-expires">Expiração (dias)</label>
+    <input id="api-key-expires" type="text" inputmode="numeric" placeholder="Opcional (máx 365)" />
+    <div id="create-api-key-msg" class="mensagem"></div>
+    <div class="modal-actions">
+      <button id="close-create-api-key" class="secondary">Cancelar</button>
+      <button id="btn-confirm-create-api-key">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: CHAVE CRIADA ===== -->
+<div id="api-key-created-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2>Chave criada</h2>
+    <div class="merchant-key-row">
+      <input id="new-api-key-value" readonly class="mono" />
+      <button class="btn-copy-key secondary" data-target="new-api-key-value">Copiar</button>
+    </div>
+    <div class="merchant-alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Copie esta chave agora. Ela não será exibida novamente.</div>
+    <button id="close-api-key-created">Entendi</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: REVOGAR API KEY ===== -->
+<div id="revoke-api-key-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2>Revogar chave</h2>
+    <p class="info-text">Tem certeza? Essa ação é irreversível. Qualquer integração usando essa chave parará de funcionar.</p>
+    <div id="revoke-api-key-msg" class="mensagem"></div>
+    <div class="modal-actions">
+      <button id="close-revoke-api-key" class="secondary">Cancelar</button>
+      <button id="btn-confirm-revoke" class="danger-btn">Revogar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: CONFIRMAR SENHA (merchant) ===== -->
+<div id="merchant-password-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2 id="merchant-password-title">Confirmar senha</h2>
+    <p id="merchant-password-desc" class="info-text">Confirme sua senha para continuar.</p>
+    <div id="merchant-password-msg" class="mensagem"></div>
+    <input id="merchant-password-input" type="password" placeholder="Sua senha" autocomplete="current-password" />
+    <div class="modal-actions">
+      <button id="close-merchant-password" class="secondary">Cancelar</button>
+      <button id="btn-merchant-password-confirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: NOVO WEBHOOK SECRET ===== -->
+<div id="webhook-secret-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2>Novo webhook secret</h2>
+    <div class="merchant-key-row">
+      <input id="new-webhook-secret-value" readonly class="mono" />
+      <button class="btn-copy-key secondary" data-target="new-webhook-secret-value">Copiar</button>
+    </div>
+    <div class="merchant-alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Copie este secret agora. Ele não será exibido novamente.</div>
+    <button id="close-webhook-secret">Entendi</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: IMAGEM DO PRODUTO ===== -->
+<div id="checkout-image-modal" class="modal hidden">
+  <div class="modal-box" style="text-align:left">
+    <h2>Imagem do produto</h2>
+    <p class="info-text">Cole o link de uma foto do seu produto. A imagem aparece na tela de pagamento do cliente.</p>
+    <p class="info-text" style="margin-top:8px">Nao aceitamos upload. Use uma imagem que ja esteja online: do seu site, redes sociais ou servicos como Imgur.</p>
+    <div style="margin:14px 0 0;font-size:12px;color:#8a9bb0;line-height:1.8">
+      <div style="display:flex;gap:8px;align-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5a6d82" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> JPG ou PNG, quadrada (1:1)</div>
+      <div style="display:flex;gap:8px;align-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5a6d82" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg> Ideal: 800x800px, max 2 MB</div>
+    </div>
+    <button id="close-checkout-image-modal" class="secondary" style="width:100%;margin-top:16px">Entendi</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: EDITAR CAMPO MERCHANT ===== -->
+<div id="merchant-edit-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2 id="merchant-edit-title">Editar</h2>
+    <input id="merchant-edit-input" />
+    <div id="merchant-edit-modal-msg" class="mensagem"></div>
+    <div class="modal-actions">
+      <button id="close-merchant-edit" class="secondary">Cancelar</button>
+      <button id="btn-merchant-edit-save">Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== CONTATO (modal) ===== -->
 <div id="contact-modal" class="modal hidden">
