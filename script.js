@@ -9,7 +9,7 @@ import {
   abbreviateAddress, hasAddresses
 } from "./addresses.js";
 import { toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
-import { validateLiquidAddress, validatePhone, validatePixKey, validateCPF, formatPixKey, preparePixKeyForApi } from "./validation.js";
+import { validateLiquidAddress, validatePhone, validatePixKey, validateCPF, validateCNPJ, formatPixKey, preparePixKeyForApi } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
 import { renderBrandedQr } from "./qr.js";
@@ -2337,6 +2337,12 @@ let pendingMerchantAction = null;
 let pendingRevokeKeyId = null;
 let pendingLiquidPassword = null;
 
+function normalizeWebsite(url) {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return "https://" + url;
+}
+
 const CHECKOUT_STATUS_LABELS = {
   pending: "Pendente", processing: "Processando", completed: "Concluído",
   expired: "Expirado", cancelled: "Cancelado"
@@ -2960,8 +2966,14 @@ document.getElementById("btn-merchant-edit-save")?.addEventListener("click", asy
   const value = input.value.trim();
   const btn = document.getElementById("btn-merchant-edit-save");
   btn.disabled = true; btn.textContent = "Salvando..."; setMsg("merchant-edit-modal-msg", "");
+  if (field === "cnpj" && value) {
+    const cnpjResult = validateCNPJ(value);
+    if (!cnpjResult.valid) { setMsg("merchant-edit-modal-msg", cnpjResult.error); btn.disabled = false; btn.textContent = "Salvar"; return; }
+  }
   try {
-    const body = { [field]: value || null };
+    let sendValue = value || null;
+    if (field === "website" && value) sendValue = normalizeWebsite(value);
+    const body = { [field]: sendValue };
     if (field === "liquid_address" && pendingLiquidPassword) {
       body.password = pendingLiquidPassword;
       pendingLiquidPassword = null;
@@ -3019,13 +3031,13 @@ document.getElementById("btn-create-merchant")?.addEventListener("click", async 
   if (!addr) { setMsg("merchant-create-msg", "Informe o endereço Liquid."); return; }
   const addrValid = validateLiquidAddress(addr);
   if (!addrValid.valid) { setMsg("merchant-create-msg", addrValid.error); return; }
-  if (cnpj && !/^[0-9]{14}$/.test(cnpj.replace(/\D/g, ""))) { setMsg("merchant-create-msg", "CNPJ deve ter 14 dígitos."); return; }
+  if (cnpj) { const cnpjResult = validateCNPJ(cnpj); if (!cnpjResult.valid) { setMsg("merchant-create-msg", cnpjResult.error); return; } }
 
   btn.disabled = true; btn.textContent = "Criando...";
   try {
     const body = { business_name: name, liquid_address: addr };
     if (cnpj) body.cnpj = cnpj;
-    if (website) body.website = website;
+    if (website) body.website = normalizeWebsite(website);
     const res = await apiFetch("/api/merchants", { method: "POST", body: JSON.stringify(body) });
     const data = await res.json();
     if (!res.ok) {
@@ -3042,10 +3054,7 @@ document.getElementById("btn-create-merchant")?.addEventListener("click", async 
       return;
     }
     merchantData = null;
-    document.getElementById("welcome-live-key").value = data.api_keys?.live?.key || "";
-    document.getElementById("welcome-test-key").value = data.api_keys?.test?.key || "";
-    document.getElementById("welcome-webhook-secret").value = data.webhook_secret || "";
-    document.getElementById("merchant-welcome-modal")?.classList.remove("hidden");
+    showToast("Conta de lojista criada!");
     loadMerchantDispatcher();
   } catch (e) {
     if (!e.blocked) setMsg("merchant-create-msg", e.message || "Erro ao criar conta.");
