@@ -1621,7 +1621,8 @@ async function loadCommissionsData() {
     const res = await apiFetch("/api/status?type=affiliates");
     const data = await res.json();
     if (!res.ok) {
-      loading.textContent = "Erro ao carregar. Tente novamente.";
+      loading.classList.add("hidden");
+      showToast("Erro ao carregar comissões. Tente novamente.");
       return;
     }
     renderReferrals(data.referrals);
@@ -1629,7 +1630,8 @@ async function loadCommissionsData() {
     content.classList.remove("hidden");
     loading.classList.add("hidden");
   } catch {
-    loading.textContent = "Erro ao carregar. Tente novamente.";
+    loading.classList.add("hidden");
+    showToast("Erro ao carregar comissões. Tente novamente.");
   }
 }
 
