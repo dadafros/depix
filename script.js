@@ -2372,7 +2372,7 @@ function renderCheckoutItem(c) {
     ${desc}
     <div class="transaction-details">
       <span class="transaction-detail copyable mono" data-copy="${escapeHtml(c.id || "")}"><span class="transaction-detail-label">ID:</span> <span class="transaction-detail-value">${escapeHtml(c.id || "")}</span>${copyIcon}</span>
-      <span class="transaction-detail copyable mono" data-copy="${escapeHtml(c.payment_url || "")}"><span class="transaction-detail-label">Link:</span> <span class="transaction-detail-value">${escapeHtml(abbreviateHash(c.payment_url || "", 25, 8))}</span>${copyIcon}</span>
+      <span class="transaction-detail copyable mono" data-copy="${escapeHtml(c.payment_url || `https://pay.depixapp.com/${c.id}`)}"><span class="transaction-detail-label">Link:</span> <span class="transaction-detail-value">${escapeHtml(abbreviateHash(c.payment_url || `https://pay.depixapp.com/${c.id}`, 25, 8))}</span>${copyIcon}</span>
       ${paidIn}
     </div>
   </div>`;
@@ -2643,10 +2643,10 @@ async function loadSalesView() {
 
     allSalesCheckouts = data.checkouts || [];
     const stats = data.stats || {};
-    document.getElementById("sales-stat-completed").textContent = stats.total_completed || 0;
-    document.getElementById("sales-stat-received").textContent = formatBRL(stats.total_amount_completed || 0);
-    document.getElementById("sales-stat-conversion").textContent = `${(stats.conversion_rate || 0).toFixed(0)}%`;
-    document.getElementById("sales-stat-pending").textContent = stats.total_pending || 0;
+    document.getElementById("sales-stat-completed").textContent = stats.completed || 0;
+    document.getElementById("sales-stat-received").textContent = formatBRL(stats.completed_amount || 0);
+    document.getElementById("sales-stat-conversion").textContent = `${stats.total > 0 ? Math.round(stats.completed / stats.total * 100) : 0}%`;
+    document.getElementById("sales-stat-pending").textContent = stats.pending || 0;
 
     applySalesFilters();
 
@@ -2661,10 +2661,10 @@ async function loadSalesView() {
           if (r.ok) {
             allSalesCheckouts = d.checkouts || [];
             const st = d.stats || {};
-            document.getElementById("sales-stat-completed").textContent = st.total_completed || 0;
-            document.getElementById("sales-stat-received").textContent = formatBRL(st.total_amount_completed || 0);
-            document.getElementById("sales-stat-conversion").textContent = `${(st.conversion_rate || 0).toFixed(0)}%`;
-            document.getElementById("sales-stat-pending").textContent = st.total_pending || 0;
+            document.getElementById("sales-stat-completed").textContent = st.completed || 0;
+            document.getElementById("sales-stat-received").textContent = formatBRL(st.completed_amount || 0);
+            document.getElementById("sales-stat-conversion").textContent = `${st.total > 0 ? Math.round(st.completed / st.total * 100) : 0}%`;
+            document.getElementById("sales-stat-pending").textContent = st.pending || 0;
             applySalesFilters();
             if (!allSalesCheckouts.some(c => CHECKOUT_NON_TERMINAL.has(c.status))) stopSalesPolling();
           }
@@ -2742,12 +2742,12 @@ async function loadWebhookLogs() {
           <span class="webhook-log-event">${escapeHtml(log.event || "")}</span>
           <span class="webhook-log-status ${statusClass}">${log.status_code || "—"}</span>
           <span class="webhook-log-attempt">${log.attempt || 1}/3</span>
-          <span class="webhook-log-date">${formatDateShort(log.created_at)}</span>
+          <span class="webhook-log-date">${formatDateShort(log.sent_at)}</span>
         </div>
         <div class="webhook-log-url">${escapeHtml(abbreviateHash(log.url || "", 35, 10))}</div>
         <div class="webhook-log-details hidden">
-          <div class="webhook-log-body"><strong>Request:</strong><pre>${escapeHtml(JSON.stringify(log.request_body, null, 2) || "")}</pre></div>
-          <div class="webhook-log-body"><strong>Response:</strong><pre>${escapeHtml(log.response_body || "")}</pre></div>
+          ${log.request_body ? `<div class="webhook-log-body"><strong>Request:</strong><pre>${escapeHtml(typeof log.request_body === "string" ? log.request_body : JSON.stringify(log.request_body, null, 2))}</pre></div>` : ""}
+          ${log.response_body ? `<div class="webhook-log-body"><strong>Response:</strong><pre>${escapeHtml(log.response_body)}</pre></div>` : ""}
           ${log.error ? `<div class="webhook-log-body text-danger"><strong>Erro:</strong> ${escapeHtml(log.error)}</div>` : ""}
         </div>
       </div>`;
@@ -3068,7 +3068,10 @@ document.getElementById("btn-create-merchant")?.addEventListener("click", async 
       return;
     }
     merchantData = null;
-    showToast("Conta de lojista criada!");
+    document.getElementById("welcome-live-key").value = data.api_keys?.live?.key || "";
+    document.getElementById("welcome-test-key").value = data.api_keys?.test?.key || "";
+    document.getElementById("welcome-webhook-secret").value = data.webhook_secret || "";
+    document.getElementById("merchant-welcome-modal")?.classList.remove("hidden");
     loadMerchantDispatcher();
   } catch (e) {
     if (!e.blocked) setMsg("merchant-create-msg", e.message || "Erro ao criar conta.");
