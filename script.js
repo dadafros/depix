@@ -21,7 +21,6 @@ let qrCopyPaste = "";
 let deferredPrompt = null;
 let pendingAddressChange = "";
 let pendingAddressDelete = "";
-let reportType = "";
 let modoSaque = false;
 let modoConvert = false;
 let brswapConfig = null;
@@ -1454,31 +1453,127 @@ document.getElementById("btn-save-addr")?.addEventListener("click", () => {
 });
 
 // =========================================
-// REPORTS
+// EXTRATO REPORT
 // =========================================
 
-document.getElementById("menu-report-depositos")?.addEventListener("click", () => {
-  closeMenu();
-  reportType = "deposito";
-  document.getElementById("report-title").innerText = "Relatório de Depósitos";
-  setMsg("report-msg", "");
-  navigate("#reports");
+document.getElementById("extrato-download-report")?.addEventListener("click", async () => {
+  const period = document.querySelector(".extrato-period-btn.active")?.dataset.period || "all";
+  let dataInicio, dataFim;
+
+  if (period === "all") {
+    // Open filters panel and activate custom range
+    const panel = document.getElementById("extrato-filter-panel");
+    const toggle = document.getElementById("extrato-filter-toggle");
+    if (panel?.classList.contains("hidden")) {
+      panel.classList.remove("hidden");
+      toggle?.classList.add("open");
+    }
+    // Activate "Intervalo" preset
+    document.querySelectorAll(".extrato-period-btn").forEach(b => b.classList.remove("active"));
+    const customBtn = document.querySelector('.extrato-period-btn[data-period="custom"]');
+    if (customBtn) customBtn.classList.add("active");
+    document.getElementById("extrato-custom-range")?.classList.remove("hidden");
+    showToast("Selecione o período desejado para gerar o extrato");
+    return;
+  }
+
+  if (period === "custom") {
+    dataInicio = document.getElementById("filter-start-date")?.value;
+    dataFim = document.getElementById("filter-end-date")?.value;
+    if (!dataInicio || !dataFim) {
+      showToast("Selecione as datas de início e fim");
+      return;
+    }
+  } else {
+    const dates = getDateFromPeriod(period);
+    dataInicio = dates.start;
+    dataFim = dates.end;
+  }
+
+  const start = new Date(dataInicio);
+  const end = new Date(dataFim);
+  if (end < start) {
+    showToast("A data final deve ser posterior à data inicial");
+    return;
+  }
+  if ((end - start) / (1000 * 60 * 60 * 24) > 366) {
+    showToast("O intervalo máximo é de 1 ano");
+    return;
+  }
+
+  const btn = document.getElementById("extrato-download-report");
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-small"></span> Solicitando…';
+
+  try {
+    const res = await apiFetch("/api/reports", {
+      method: "POST",
+      body: JSON.stringify({ tipo: "extrato", dataInicio, dataFim })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data?.response?.errorMessage || "Erro ao solicitar extrato");
+      return;
+    }
+    const user = getUser();
+    showToast(`Extrato será enviado para ${user?.email || "seu e-mail"}`);
+  } catch (e) {
+    showToast(e.message || "Sem conexão. Verifique sua internet e tente novamente.");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+  }
 });
 
-document.getElementById("menu-report-saques")?.addEventListener("click", () => {
-  closeMenu();
-  reportType = "saque";
-  document.getElementById("report-title").innerText = "Relatório de Saques";
-  setMsg("report-msg", "");
-  navigate("#reports");
-});
+// =========================================
+// COMMISSION REPORT (Affiliates)
+// =========================================
 
-document.getElementById("menu-report-comissoes")?.addEventListener("click", () => {
-  closeMenu();
-  reportType = "comissao";
-  document.getElementById("report-title").innerText = "Relatório de Comissões";
-  setMsg("report-msg", "");
-  navigate("#reports");
+document.getElementById("btn-commission-report")?.addEventListener("click", async () => {
+  const dataInicio = document.getElementById("commission-report-start")?.value;
+  const dataFim = document.getElementById("commission-report-end")?.value;
+
+  setMsg("commission-report-msg", "");
+
+  if (!dataInicio || !dataFim) {
+    setMsg("commission-report-msg", "Selecione as datas de início e fim");
+    return;
+  }
+
+  const start = new Date(dataInicio);
+  const end = new Date(dataFim);
+  if (end < start) {
+    setMsg("commission-report-msg", "A data final deve ser posterior à data inicial");
+    return;
+  }
+  if ((end - start) / (1000 * 60 * 60 * 24) > 366) {
+    setMsg("commission-report-msg", "O intervalo máximo é de 1 ano");
+    return;
+  }
+
+  const btn = document.getElementById("btn-commission-report");
+  btn.disabled = true;
+  btn.innerText = "Solicitando…";
+
+  try {
+    const res = await apiFetch("/api/reports", {
+      method: "POST",
+      body: JSON.stringify({ tipo: "comissao", dataInicio, dataFim })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setMsg("commission-report-msg", data?.response?.errorMessage || "Erro ao solicitar relatório");
+      return;
+    }
+    const user = getUser();
+    setMsg("commission-report-msg", `Relatório será enviado para ${user?.email || "seu e-mail"}. Pode levar alguns minutos.`, true);
+  } catch (e) {
+    setMsg("commission-report-msg", e.message || "Sem conexão. Verifique sua internet e tente novamente.");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Solicitar relatório de comissões";
+  }
 });
 
 // ===== AFILIADOS =====
@@ -1686,58 +1781,6 @@ document.getElementById("close-whatsapp-modal")?.addEventListener("click", () =>
 
 document.getElementById("whatsapp-modal-join")?.addEventListener("click", () => {
   document.getElementById("whatsapp-modal")?.classList.add("hidden");
-});
-
-document.getElementById("btn-request-report")?.addEventListener("click", async () => {
-  const dataInicio = document.getElementById("report-start").value;
-  const dataFim = document.getElementById("report-end").value;
-
-  setMsg("report-msg", "");
-
-  if (!dataInicio || !dataFim) {
-    setMsg("report-msg", "Selecione as datas de início e fim");
-    return;
-  }
-
-  const start = new Date(dataInicio);
-  const end = new Date(dataFim);
-
-  if (end < start) {
-    setMsg("report-msg", "A data final deve ser posterior à data inicial");
-    return;
-  }
-
-  const diffDays = (end - start) / (1000 * 60 * 60 * 24);
-  if (diffDays > 366) {
-    setMsg("report-msg", "O intervalo máximo é de 1 ano");
-    return;
-  }
-
-  const btn = document.getElementById("btn-request-report");
-  btn.disabled = true;
-  btn.innerText = "Solicitando…";
-
-  try {
-    const res = await apiFetch("/api/reports", {
-      method: "POST",
-      body: JSON.stringify({ tipo: reportType, dataInicio, dataFim })
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      setMsg("report-msg", data?.response?.errorMessage || "Erro ao solicitar relatório");
-      return;
-    }
-
-    const user = getUser();
-    const email = user?.email || "seu email";
-    setMsg("report-msg", `Relatório será enviado para ${email}. Pode levar alguns minutos.`, true);
-  } catch (e) {
-    setMsg("report-msg", e.message || "Sem conexão. Verifique sua internet e tente novamente.");
-  } finally {
-    btn.disabled = false;
-    btn.innerText = "Solicitar relatório";
-  }
 });
 
 // =========================================
@@ -2217,20 +2260,20 @@ route("#verify", () => {
 route("#affiliates", () => {
   if (!isLoggedIn()) { navigate("#login"); return; }
   loadAffiliateData();
+  // Initialize commission report date fields
+  const fmt = d => d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000);
+  const commStart = document.getElementById("commission-report-start");
+  const commEnd = document.getElementById("commission-report-end");
+  if (commStart) commStart.value = fmt(thirtyDaysAgo);
+  if (commEnd) commEnd.value = fmt(now);
 });
 route("#no-address", () => {});
 route("#faq", () => {});
 route("#transactions", () => { loadTransactions(); });
 route("#forgot-password", () => { setMsg("forgot-msg", ""); });
 route("#reset-password", () => { setMsg("reset-msg", ""); });
-
-route("#reports", () => {
-  const fmt = d => d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000);
-  document.getElementById("report-end").value = fmt(now);
-  document.getElementById("report-start").value = fmt(thirtyDaysAgo);
-});
 
 route("#landing", () => {
   captureReferralCode(window.location.hash);
