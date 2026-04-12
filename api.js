@@ -107,8 +107,11 @@ async function tryRefresh() {
 
     const data = await res.json();
     if (data.token && data.refreshToken) {
-      // Update tokens but keep existing user info
+      // Update tokens and merge verified field from response
       const currentUser = JSON.parse(localStorage.getItem("depix-user") || "null");
+      if (currentUser && data.user && data.user.verified !== undefined) {
+        currentUser.verified = data.user.verified;
+      }
       setAuth(data.token, data.refreshToken, currentUser);
       return true;
     }
