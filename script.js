@@ -2406,10 +2406,20 @@ async function loadMerchantDispatcher() {
     const merchantRes = await apiFetch("/api/merchants/me");
 
     if (merchantRes.status === 403) {
+      const errBody = await merchantRes.json().catch(() => ({}));
+      const errMsg = errBody?.response?.errorMessage || errBody?.errorMessage || "";
+
+      // Deactivated merchant — show deactivation banner
+      if (errMsg.includes("desativada")) {
+        document.getElementById("merchant-deactivated").classList.remove("hidden");
+        return;
+      }
+
       // Not verified — update localStorage and show progress
       const u = getUser();
       if (u && u.verified) { u.verified = 0; localStorage.setItem("depix-user", JSON.stringify(u)); }
       const res = await apiFetch("/api/status?type=deposit");
+      if (!res.ok) { setMsg("merchant-msg", "Erro ao carregar progresso."); return; }
       const data = await res.json();
       const completed = (data.transactions || []).filter(tx => tx.status === "depix_sent").length;
       const progress = Math.min(completed, 10);
