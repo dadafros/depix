@@ -2172,9 +2172,9 @@ document.getElementById("filter-status")?.addEventListener("change", () => { app
 document.getElementById("filter-start-date")?.addEventListener("change", () => { applyFilters(); updateFilterBadge(); });
 document.getElementById("filter-end-date")?.addEventListener("change", () => { applyFilters(); updateFilterBadge(); });
 
-// Extrato: copy detail value on click
-document.getElementById("transactions-list")?.addEventListener("click", (e) => {
-  const el = e.target.closest(".transaction-detail.copyable");
+// Copy detail value on click (shared handler for all lists with .copyable elements)
+function handleCopyableClick(e) {
+  const el = e.target.closest(".copyable");
   if (!el) return;
   const text = el.dataset.copy;
   if (text && navigator.clipboard) {
@@ -2184,7 +2184,10 @@ document.getElementById("transactions-list")?.addEventListener("click", (e) => {
       setTimeout(() => el.classList.remove("copied"), 1500);
     });
   }
-});
+}
+document.getElementById("transactions-list")?.addEventListener("click", handleCopyableClick);
+document.getElementById("merchant-checkouts-list")?.addEventListener("click", handleCopyableClick);
+document.getElementById("api-keys-list")?.addEventListener("click", handleCopyableClick);
 
 // Extrato: clear filters
 document.getElementById("extrato-clear-filters")?.addEventListener("click", () => {
@@ -2389,7 +2392,6 @@ function renderCheckoutItem(c) {
     <span class="transaction-status ${colorClass}">${statusLabel}</span>
     ${desc}
     <div class="transaction-details">
-      <span class="transaction-detail copyable mono" data-copy="${escapeHtml(c.id || "")}"><span class="transaction-detail-label">ID:</span> <span class="transaction-detail-value">${escapeHtml(c.id || "")}</span>${copyIcon}</span>
       <span class="transaction-detail copyable mono" data-copy="${escapeHtml(c.payment_url || `https://pay.depixapp.com/${c.id}`)}"><span class="transaction-detail-label">Link:</span> <span class="transaction-detail-value">${escapeHtml(abbreviateHash(c.payment_url || `https://pay.depixapp.com/${c.id}`, 25, 8))}</span>${copyIcon}</span>
       ${paidIn}
     </div>
@@ -2468,6 +2470,22 @@ async function loadMerchantDispatcher() {
       if (u && !u.verified) { u.verified = 1; localStorage.setItem("depix-user", JSON.stringify(u)); }
       merchantData = null;
       document.getElementById("merchant-create").classList.remove("hidden");
+      // Pre-fill Liquid address from saved addresses
+      const savedAddrs = getAddresses();
+      const addrSelect = document.getElementById("merchant-addr-select");
+      const addrInput = document.getElementById("merchant-liquid-addr");
+      if (savedAddrs.length > 0 && addrSelect) {
+        addrSelect.innerHTML = '<option value="">Selecionar endereço salvo…</option>' +
+          savedAddrs.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(abbreviateAddress(a))}</option>`).join("");
+        addrSelect.classList.remove("hidden");
+        const selected = getSelectedAddress();
+        if (selected && !addrInput.value) {
+          addrInput.value = selected;
+          addrSelect.value = selected;
+        }
+      } else if (addrSelect) {
+        addrSelect.classList.add("hidden");
+      }
       return;
     }
 
@@ -3041,6 +3059,12 @@ document.getElementById("btn-merchant-password-confirm")?.addEventListener("clic
     }
   } catch (e) { setMsg("merchant-password-msg", e.message || "Erro."); }
   finally { btn.disabled = false; btn.textContent = "Confirmar"; pendingMerchantAction = null; }
+});
+
+// Merchant address select
+document.getElementById("merchant-addr-select")?.addEventListener("change", (e) => {
+  const input = document.getElementById("merchant-liquid-addr");
+  if (e.target.value && input) input.value = e.target.value;
 });
 
 // Create merchant

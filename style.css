@@ -824,7 +824,7 @@ button:focus-visible {
 }
 .menu-section-toggle.open::after { transform: rotate(-135deg); }
 .menu-section-toggle:active { opacity: 0.7; }
-.menu-section-items { overflow: hidden; }
+.menu-section-items { overflow: hidden; padding-left: 26px; }
 .menu-section-link {
   cursor: pointer; user-select: none;
 }
@@ -1796,11 +1796,6 @@ textarea:focus {
 /* ===== TRANSACTIONS LIST ===== */
 
 /* Transactions view: fixed layout with scrollable list */
-[data-view="transactions"].page {
-  align-items: flex-start;
-  padding-top: 24px;
-  min-height: auto;
-}
 
 [data-view="transactions"] .card {
   display: flex;
@@ -2236,11 +2231,6 @@ textarea:focus {
 }
 
 /* Commissions view: scrollable layout matching transactions */
-[data-view="commissions"].page {
-  align-items: flex-start;
-  padding-top: 24px;
-  min-height: auto;
-}
 
 [data-view="commissions"] .card {
   display: flex;
@@ -3428,17 +3418,7 @@ textarea:focus {
 [data-view^="merchant"] .link-text,
 [data-view="webhook-logs"] .link-text { text-align: center; }
 
-/* Merchant pages: card at top, sized to content */
-[data-view="merchant"].page,
-[data-view="merchant-charge"].page,
-[data-view="merchant-sales"].page,
-[data-view="merchant-account"].page,
-[data-view="merchant-api"].page,
-[data-view="webhook-logs"].page,
-[data-view="verify-account"].page {
-  align-items: flex-start; padding-top: 24px;
-  min-height: auto;
-}
+/* Merchant & detail pages: left-align content within centered card */
 
 /* Pages with scrollable lists: flex column + max-height so list scrolls when full */
 [data-view="merchant-charge"] .card,
@@ -3557,6 +3537,7 @@ textarea:focus {
 .merchant-banner-close {
   background: none; border: none; color: #5a6d82;
   font-size: 14px; cursor: pointer; padding: 2px; line-height: 1; flex-shrink: 0;
+  width: auto; margin-bottom: 0;
 }
 .merchant-banner-danger { border-color: rgba(255, 107, 107, 0.2); background: rgba(255, 107, 107, 0.06); }
 .merchant-banner-danger p { color: #e8edf2; margin: 0; }

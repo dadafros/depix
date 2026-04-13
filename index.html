@@ -104,16 +104,16 @@
   }
   </script>
 
-  <link rel="manifest" href="manifest.json?v=94" />
-  <link rel="icon" href="icon-192.png?v=94" />
-  <link rel="apple-touch-icon" href="icon-192.png?v=94" />
+  <link rel="manifest" href="manifest.json?v=95" />
+  <link rel="icon" href="icon-192.png?v=95" />
+  <link rel="apple-touch-icon" href="icon-192.png?v=95" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <!-- Asset version must match APP_VERSION in service-worker.js -->
-  <link rel="stylesheet" href="style.css?v=94" />
+  <link rel="stylesheet" href="style.css?v=95" />
 </head>
 <body>
 
@@ -122,7 +122,7 @@
 
   <nav class="landing-nav">
     <div class="landing-nav-inner">
-      <a href="#landing" class="landing-logo"><img src="icon-192.png?v=94" alt="DePix App" class="landing-logo-icon" width="32" height="32"><span>DePix App</span></a>
+      <a href="#landing" class="landing-logo"><img src="icon-192.png?v=95" alt="DePix App" class="landing-logo-icon" width="32" height="32"><span>DePix App</span></a>
       <div class="landing-nav-right">
         <a href="https://blog.depixapp.com/" class="landing-nav-link">Blog</a>
         <a href="#login" class="landing-nav-cta">Entrar</a>
@@ -975,7 +975,7 @@
       <div class="affiliate-section">
         <div class="payment-info-banners">
           <div class="payment-info-banner">
-            <span>Suas comissões são pagas em DePix.<br>Quando o saldo a receber atingir <strong>R$ 100,00</strong><br>você poderá solicitar o pagamento aqui.</span>
+            <span>Suas comissões são pagas em DePix.<br>Quando o saldo a receber atingir <strong>100 DePix</strong>,<br>você poderá solicitar o pagamento aqui.</span>
           </div>
           <div class="payment-info-banner">
             <span>O pagamento é processado em até <strong>30 dias</strong>.<br>Limite de <strong>1 solicitação por mês</strong>.</span>
@@ -1363,11 +1363,14 @@
       <label for="merchant-name">Nome do negócio *</label>
       <input id="merchant-name" placeholder="Ex: Camisetas do João" />
       <label for="merchant-liquid-addr">Endereço Liquid *</label>
+      <select id="merchant-addr-select" class="hidden">
+        <option value="">Selecionar endereço salvo…</option>
+      </select>
       <input id="merchant-liquid-addr" placeholder="Endereço para receber pagamentos" />
       <label for="merchant-cnpj">CNPJ</label>
       <input id="merchant-cnpj" placeholder="Opcional" maxlength="14" />
       <label for="merchant-website">Website</label>
-      <input id="merchant-website" placeholder="Ex: minhaloja.com.br" />
+      <input id="merchant-website" placeholder="Ex: minhaloja.com.br (opcional)" />
       <div id="merchant-create-msg" class="mensagem"></div>
       <button id="btn-create-merchant">Começar</button>
     </div>
@@ -1756,7 +1759,7 @@
   <div class="modal-box" style="text-align:left">
     <h2>Imagem do produto</h2>
     <p class="info-text">Cole o link de uma foto do seu produto. A imagem aparece na tela de pagamento do cliente.</p>
-    <p class="info-text" style="margin-top:8px">Nao aceitamos upload. Use uma imagem que ja esteja online: do seu site, redes sociais ou servicos como Imgur.</p>
+    <p class="info-text" style="margin-top:8px">Não aceitamos upload. Use uma imagem que já esteja online: do seu site, redes sociais ou serviços como Imgur.</p>
     <div style="margin:14px 0 0;font-size:12px;color:#8a9bb0;line-height:1.8">
       <div style="display:flex;gap:8px;align-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5a6d82" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> JPG ou PNG, quadrada (1:1)</div>
       <div style="display:flex;gap:8px;align-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5a6d82" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg> Ideal: 800x800px, max 2 MB</div>
@@ -2149,6 +2152,6 @@
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <!-- Asset version must match APP_VERSION in service-worker.js -->
-<script type="module" src="script.js?v=94"></script>
+<script type="module" src="script.js?v=95"></script>
 </body>
 </html>
