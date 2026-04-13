@@ -2790,6 +2790,7 @@ route("#verify-account", async () => {
   if (!isLoggedIn()) { navigate("#login"); return; }
   try {
     const res = await apiFetch("/api/status?type=deposit");
+    if (!res.ok) return;
     const data = await res.json();
     const completed = (data.transactions || []).filter(tx => tx.status === "depix_sent").length;
     const progress = Math.min(completed, 10);
@@ -2799,7 +2800,7 @@ route("#verify-account", async () => {
 });
 route("#merchant", () => { if (!isLoggedIn()) { navigate("#login"); return; } stopSalesPolling(); loadMerchantDispatcher(); });
 route("#merchant-charge", () => { stopSalesPolling(); merchantGuard(loadChargeView); });
-route("#merchant-sales", () => { merchantGuard(loadSalesView); });
+route("#merchant-sales", () => { stopSalesPolling(); merchantGuard(loadSalesView); });
 route("#merchant-account", () => { stopSalesPolling(); merchantGuard(loadAccountView); });
 route("#merchant-api", () => { stopSalesPolling(); merchantGuard(loadApiView); });
 route("#webhook-logs", () => { stopSalesPolling(); merchantGuard(loadWebhookLogs); });
