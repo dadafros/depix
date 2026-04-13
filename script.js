@@ -2492,7 +2492,7 @@ async function loadChargeView() {
       empty?.classList.add("hidden");
       list.innerHTML = checkouts.map(c => renderCheckoutItem(c)).join("");
     }
-  } catch { /* ignore */ }
+  } catch (e) { if (!e.blocked) showToast("Erro ao carregar cobranças."); }
 }
 
 // === Minha Conta ===
