@@ -1,4 +1,4 @@
-const CACHE_NAME = "depix-v86";
+const CACHE_NAME = "depix-v87";
 
 const STATIC_FILES = [
   "./",
