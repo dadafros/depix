@@ -2983,7 +2983,7 @@ document.getElementById("btn-merchant-edit-save")?.addEventListener("click", asy
     const res = await apiFetch("/api/merchants/me", { method: "PATCH", body: JSON.stringify(body) });
     const data = await res.json();
     if (!res.ok) { setMsg("merchant-edit-modal-msg", data?.errorMessage || "Erro ao salvar."); return; }
-    pendingLiquidPassword = null;
+    if (field === "liquid_address") pendingLiquidPassword = null;
     document.getElementById("merchant-edit-modal")?.classList.add("hidden");
     merchantData = null; // Force reload
     showToast("Dados atualizados");
