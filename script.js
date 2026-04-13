@@ -9,7 +9,7 @@ import {
   abbreviateAddress, hasAddresses
 } from "./addresses.js";
 import { toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
-import { validateLiquidAddress, validatePhone, validatePixKey, validateCPF, formatPixKey, preparePixKeyForApi } from "./validation.js";
+import { validateLiquidAddress, validatePhone, validatePixKey, validateCPF, validateCNPJ, formatPixKey, preparePixKeyForApi } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
 import { renderBrandedQr } from "./qr.js";
@@ -189,7 +189,6 @@ async function handleLogin() {
 
     setAuth(data.token, data.refreshToken, data.user);
     goToAppropriateScreen();
-    document.getElementById("whatsapp-modal")?.classList.remove("hidden");
   } catch (e) {
     if (e.blocked) return; // Modal already shown via user-blocked event
     setMsg("login-msg", e.message || "Sem conexão. Verifique sua internet e tente novamente.");
@@ -811,7 +810,7 @@ document.getElementById("btnGerar")?.addEventListener("click", async () => {
   document.getElementById("loading").classList.remove("hidden");
 
   try {
-    const res = await apiFetch("/api/depix", {
+    const res = await apiFetch("/api/deposit", {
       method: "POST",
       body: JSON.stringify({
         amountInCents: valorCents,
@@ -1799,13 +1798,6 @@ document.getElementById("close-limit-modal")?.addEventListener("click", () => {
   document.getElementById("limit-modal")?.classList.add("hidden");
 });
 
-document.getElementById("close-whatsapp-modal")?.addEventListener("click", () => {
-  document.getElementById("whatsapp-modal")?.classList.add("hidden");
-});
-
-document.getElementById("whatsapp-modal-join")?.addEventListener("click", () => {
-  document.getElementById("whatsapp-modal")?.classList.add("hidden");
-});
 
 // =========================================
 // TRANSACTIONS
@@ -2067,11 +2059,14 @@ function stopTransactionsPolling() {
 // Pause polling when tab/PWA is hidden (minimized, screen off, switched app).
 // Resume when visible again. Prevents wasting Redis commands in background.
 document.addEventListener("visibilitychange", () => {
+  const h = window.location.hash.split("?")[0];
   if (document.hidden) {
     stopTransactionsPolling();
-  } else if (window.location.hash === "#transactions") {
-    // Only resume if user is on the transactions view
+    if (typeof stopSalesPolling === "function") stopSalesPolling();
+  } else if (h === "#transactions") {
     loadTransactions();
+  } else if (h === "#merchant-sales" && typeof loadSalesView === "function") {
+    loadSalesView();
   }
 });
 
@@ -2233,6 +2228,10 @@ function goToAppropriateScreen() {
 route("#home", () => {
   stopTransactionsPolling();
   updateAddrDisplay();
+  // Show banners
+  const homeUser = getUser();
+  document.getElementById("home-verify-banner")?.classList.toggle("hidden", !!homeUser?.verified);
+  document.getElementById("home-whatsapp-banner")?.classList.remove("hidden");
   document.getElementById("resultado")?.classList.add("hidden");
   document.getElementById("formDeposito")?.classList.remove("hidden");
   document.getElementById("valor").value = "";
@@ -2326,6 +2325,796 @@ function setupLandingToggle() {
 }
 setupLandingToggle();
 
+// ===== Merchant Dashboard =====
+let merchantData = null;
+let salesPollingInterval = null;
+let salesObserver = null;
+let salesDisplayedCount = 0;
+let filteredSales = [];
+let allSalesCheckouts = [];
+const SALES_PAGE_SIZE = 50;
+let pendingMerchantAction = null;
+let pendingRevokeKeyId = null;
+let pendingLiquidPassword = null;
+
+function normalizeWebsite(url) {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return "https://" + url;
+}
+
+const CHECKOUT_STATUS_LABELS = {
+  pending: "Pendente", processing: "Processando", completed: "Concluído",
+  expired: "Expirado", cancelled: "Cancelado"
+};
+
+function checkoutStatusColor(status) {
+  if (status === "completed") return "status-green";
+  if (["pending", "processing"].includes(status)) return "status-yellow";
+  if (status === "expired") return "status-gray";
+  if (status === "cancelled") return "status-red";
+  return "status-gray";
+}
+
+const CHECKOUT_NON_TERMINAL = new Set(["pending", "processing"]);
+
+function renderCheckoutItem(c) {
+  const statusLabel = CHECKOUT_STATUS_LABELS[c.status] || escapeHtml(c.status);
+  const colorClass = checkoutStatusColor(c.status);
+  const amount = formatBRL(c.amount);
+  const desc = c.description ? `<span class="checkout-desc">${escapeHtml(c.description)}</span>` : '<span class="checkout-desc text-muted">(sem descrição)</span>';
+  const copyIcon = '<svg class="copy-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  let paidIn = "";
+  if (c.status === "completed" && c.created_at && c.processing_at) {
+    const diffMs = new Date(c.processing_at) - new Date(c.created_at);
+    const mins = Math.round(diffMs / 60000);
+    paidIn = `<span class="transaction-detail"><span class="transaction-detail-label">Pago em:</span> <span class="transaction-detail-value">${mins}min</span></span>`;
+  }
+  return `<div class="transaction-item">
+    <div class="transaction-info">
+      <span class="transaction-amount">${amount}</span>
+      <span class="transaction-date">${formatDateShort(c.created_at)}</span>
+    </div>
+    <span class="transaction-status ${colorClass}">${statusLabel}</span>
+    ${desc}
+    <div class="transaction-details">
+      <span class="transaction-detail copyable mono" data-copy="${escapeHtml(c.id || "")}"><span class="transaction-detail-label">ID:</span> <span class="transaction-detail-value">${escapeHtml(c.id || "")}</span>${copyIcon}</span>
+      <span class="transaction-detail copyable mono" data-copy="${escapeHtml(c.payment_url || `https://pay.depixapp.com/${c.id}`)}"><span class="transaction-detail-label">Link:</span> <span class="transaction-detail-value">${escapeHtml(abbreviateHash(c.payment_url || `https://pay.depixapp.com/${c.id}`, 25, 8))}</span>${copyIcon}</span>
+      ${paidIn}
+    </div>
+  </div>`;
+}
+
+function showMerchantMenu() {
+  document.getElementById("menu-merchant-section")?.classList.remove("hidden");
+}
+
+function stopSalesPolling() {
+  if (salesPollingInterval) { clearInterval(salesPollingInterval); salesPollingInterval = null; }
+  if (salesObserver) { salesObserver.disconnect(); salesObserver = null; }
+}
+
+// === Dispatcher: checks user state and redirects ===
+async function loadMerchantDispatcher() {
+  const sections = ["merchant-unverified", "merchant-create", "merchant-deactivated"];
+  sections.forEach(id => document.getElementById(id)?.classList.add("hidden"));
+  document.getElementById("merchant-loading")?.classList.remove("hidden");
+  setMsg("merchant-msg", "");
+
+  try {
+    // Single API call determines state: 403=not verified, 404=verified no merchant, 200=has merchant
+    const merchantRes = await apiFetch("/api/merchants/me");
+
+    if (merchantRes.status === 403) {
+      const errBody = await merchantRes.json().catch(() => ({}));
+      const errMsg = errBody?.response?.errorMessage || errBody?.errorMessage || "";
+
+      // Deactivated merchant — show deactivation banner
+      if (errMsg.includes("desativada")) {
+        document.getElementById("merchant-deactivated").classList.remove("hidden");
+        return;
+      }
+
+      // Not verified — update localStorage and show progress
+      const u = getUser();
+      if (u && u.verified) { u.verified = 0; localStorage.setItem("depix-user", JSON.stringify(u)); }
+      const res = await apiFetch("/api/status?type=deposit");
+      if (!res.ok) { setMsg("merchant-msg", "Erro ao carregar progresso."); return; }
+      const data = await res.json();
+      const completed = (data.transactions || []).filter(tx => tx.status === "depix_sent").length;
+      const progress = Math.min(completed, 10);
+
+      if (completed >= 10) {
+        // Deposits done but backend hasn't set verified yet — force refresh
+        const rt = getRefreshToken();
+        if (rt) {
+          try {
+            const rRes = await apiFetch("/api/auth/refresh", { method: "POST", body: JSON.stringify({ refreshToken: rt }) });
+            if (rRes.ok) {
+              const rData = await rRes.json();
+              if (rData.token && rData.refreshToken) {
+                const updated = getUser();
+                if (updated) updated.verified = rData.user?.verified;
+                setAuth(rData.token, rData.refreshToken, updated);
+                if (getUser()?.verified) { loadMerchantDispatcher(); return; }
+              }
+            }
+          } catch { /* ignore */ }
+        }
+        document.getElementById("merchant-progress-bar").style.width = "100%";
+        document.getElementById("merchant-progress-text").textContent = "10/10 concluídos — verificação em andamento…";
+      } else {
+        document.getElementById("merchant-progress-bar").style.width = `${progress * 10}%`;
+        document.getElementById("merchant-progress-text").textContent = `${progress}/10 depósitos concluídos`;
+      }
+      document.getElementById("merchant-unverified").classList.remove("hidden");
+      return;
+    }
+
+    if (merchantRes.status === 404) {
+      // Verified but no merchant — update localStorage and show creation form
+      const u = getUser();
+      if (u && !u.verified) { u.verified = 1; localStorage.setItem("depix-user", JSON.stringify(u)); }
+      merchantData = null;
+      document.getElementById("merchant-create").classList.remove("hidden");
+      return;
+    }
+
+    if (!merchantRes.ok) {
+      const errBody = await merchantRes.json().catch(() => ({}));
+      setMsg("merchant-msg", errBody?.errorMessage || "Erro ao carregar dados");
+      return;
+    }
+    const merchant = await merchantRes.json();
+
+    merchantData = merchant.merchant || merchant;
+    // Sync verified in localStorage
+    const u = getUser();
+    if (u && !u.verified) { u.verified = 1; localStorage.setItem("depix-user", JSON.stringify(u)); }
+    showMerchantMenu();
+
+    navigate("#merchant-charge");
+  } catch (e) {
+    if (!e.blocked) setMsg("merchant-msg", e.message || "Erro ao carregar");
+  } finally {
+    document.getElementById("merchant-loading")?.classList.add("hidden");
+  }
+}
+
+// === Cobrar ===
+async function loadChargeView() {
+  showMerchantMenu();
+  const bannerDismissed = localStorage.getItem("depix-ship-banner-dismissed");
+  document.getElementById("merchant-ship-banner")?.classList.toggle("hidden", !!bannerDismissed);
+  document.getElementById("checkout-result")?.classList.add("hidden");
+
+  try {
+    const res = await apiFetch("/api/checkouts?limit=10");
+    if (!res.ok) return;
+    const data = await res.json();
+    const checkouts = data.checkouts || [];
+    const list = document.getElementById("merchant-checkouts-list");
+    const empty = document.getElementById("merchant-checkouts-empty");
+    if (checkouts.length === 0) {
+      list.innerHTML = "";
+      empty?.classList.remove("hidden");
+    } else {
+      empty?.classList.add("hidden");
+      list.innerHTML = checkouts.map(c => renderCheckoutItem(c)).join("");
+    }
+  } catch (e) { if (!e.blocked) showToast("Erro ao carregar cobranças."); }
+}
+
+// === Minha Conta ===
+async function loadAccountView() {
+  showMerchantMenu();
+  try {
+    const res = await apiFetch("/api/merchants/me");
+    if (res.ok) { const d = await res.json(); merchantData = d.merchant || d; }
+    const container = document.getElementById("merchant-account-list");
+    if (merchantData && container) {
+      const fields = [
+        { label: "Nome", value: merchantData.business_name, field: "business_name" },
+        { label: "Endereço Liquid", value: abbreviateHash(merchantData.liquid_address, 12, 8), field: "liquid_address" },
+        { label: "CNPJ", value: merchantData.cnpj, field: "cnpj" },
+        { label: "Website", value: merchantData.website, field: "website" },
+      ];
+      container.innerHTML = '<div class="account-list">' + fields.map(f => {
+        const hasValue = !!f.value;
+        const valueClass = `account-field-value${f.field === "liquid_address" ? " mono" : ""}${hasValue ? "" : " empty"}`;
+        const display = hasValue ? escapeHtml(f.value) : "Não informado";
+        return `<div class="account-field">
+          <div class="account-field-label">${f.label}</div>
+          <div class="account-field-value-row">
+            <span class="${valueClass}">${display}</span>
+            <button class="merchant-edit-btn" data-field="${f.field}">${hasValue ? "Editar" : "Adicionar"}</button>
+          </div>
+        </div>`;
+      }).join("") + '</div>';
+      // Re-attach edit handlers
+      container.querySelectorAll(".merchant-edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const field = btn.dataset.field;
+          const labels = { business_name: "Nome do negócio", liquid_address: "Endereço Liquid", cnpj: "CNPJ", website: "Website" };
+          if (field === "liquid_address") {
+            pendingMerchantAction = { type: "edit_liquid" };
+            document.getElementById("merchant-password-title").textContent = "Confirmar alteração";
+            document.getElementById("merchant-password-desc").textContent = "Para alterar o endereço Liquid, confirme sua senha.";
+            document.getElementById("merchant-password-input").value = "";
+            setMsg("merchant-password-msg", "");
+            document.getElementById("merchant-password-modal")?.classList.remove("hidden");
+            return;
+          }
+          document.getElementById("merchant-edit-title").textContent = `Editar ${labels[field] || field}`;
+          document.getElementById("merchant-edit-input").value = merchantData?.[field] || "";
+          document.getElementById("merchant-edit-input").dataset.field = field;
+          setMsg("merchant-edit-modal-msg", "");
+          document.getElementById("merchant-edit-modal")?.classList.remove("hidden");
+        });
+      });
+    }
+  } catch (e) { if (!e.blocked) showToast("Erro ao carregar conta."); }
+}
+
+// === API e Webhooks ===
+async function loadApiView() {
+  showMerchantMenu();
+  try {
+    // Fetch merchant data and API keys in parallel
+    const [mRes, res] = await Promise.all([
+      apiFetch("/api/merchants/me"),
+      apiFetch("/api/api-keys"),
+    ]);
+    if (mRes.ok) { const d = await mRes.json(); merchantData = d.merchant || d; }
+    if (merchantData) {
+      document.getElementById("merchant-webhook-secret").textContent =
+        merchantData.webhook_secret_prefix ? `${merchantData.webhook_secret_prefix}••••••••` : "—";
+    }
+    if (!res.ok) { showToast("Erro ao carregar chaves."); return; }
+    const data = await res.json();
+    const keys = data.api_keys || [];
+    const list = document.getElementById("api-keys-list");
+    const empty = document.getElementById("api-keys-empty");
+    if (keys.length === 0) {
+      list.innerHTML = "";
+      empty?.classList.remove("hidden");
+    } else {
+      empty?.classList.add("hidden");
+      list.innerHTML = keys.map(k => {
+        const isLive = k.is_live === 1 || k.is_live === true;
+        const typeBadge = isLive
+          ? '<span class="badge badge-green">Produção</span>'
+          : '<span class="badge badge-yellow">Teste</span>';
+        const expired = k.expires_at && new Date(k.expires_at) < new Date();
+        const expiresText = !k.expires_at ? "sem expiração"
+          : expired ? "expirada"
+          : `expira em ${Math.ceil((new Date(k.expires_at) - new Date()) / 86400000)}d`;
+        const expiresClass = expired ? "text-danger" : "";
+        const lastUsed = k.last_used_at ? formatDateShort(k.last_used_at) : "nunca";
+        const keyDisplay = k.key_plain || (k.prefix + "...");
+        const labelText = k.label && k.label !== "Produção" && k.label !== "Teste" ? k.label : null;
+        const copyIcon = '<svg class="copy-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        return `<div class="api-key-card">
+          <div class="api-key-top-row">${typeBadge}${labelText ? `<span class="api-key-label">${escapeHtml(labelText)}</span>` : ""}<button class="btn-revoke-key" data-key-id="${escapeHtml(k.id)}">Revogar</button></div>
+          <div class="api-key-value copyable" data-copy="${escapeHtml(keyDisplay)}"><span class="mono">${escapeHtml(keyDisplay)}</span>${copyIcon}</div>
+          <div class="api-key-detail"><span class="${expiresClass}">${expiresText}</span> · usado: ${lastUsed}</div>
+        </div>`;
+      }).join("");
+
+      // Expired key alert
+      const expiredKey = keys.find(k => k.expires_at && new Date(k.expires_at) < new Date());
+      const expAlert = document.getElementById("merchant-alert-expired-key");
+      if (expiredKey && expAlert) {
+        expAlert.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Sua chave ${escapeHtml(expiredKey.prefix)}...${expiredKey.label ? " (" + escapeHtml(expiredKey.label) + ")" : ""} expirou. Crie uma nova.`;
+        expAlert.classList.remove("hidden");
+      } else if (expAlert) {
+        expAlert.classList.add("hidden");
+      }
+    }
+  } catch (e) { if (!e.blocked) showToast("Erro ao carregar painel."); }
+}
+
+// === Minhas Vendas ===
+function buildSalesFilterParams() {
+  const params = new URLSearchParams();
+  const status = document.getElementById("sales-filter-status")?.value;
+  if (status) params.set("status", status);
+  const search = document.getElementById("sales-filter-search")?.value.trim();
+  if (search) params.set("q", search);
+  const activeBtn = document.querySelector("[data-sales-period].active");
+  const period = activeBtn?.dataset.salesPeriod || "all";
+  if (period !== "all" && period !== "custom") {
+    const now = new Date();
+    const fmt = d => d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+    params.set("to", fmt(now));
+    if (period === "today") params.set("from", fmt(now));
+    else if (period === "7d") params.set("from", fmt(new Date(now.getTime() - 7 * 86400000)));
+    else if (period === "30d") params.set("from", fmt(new Date(now.getTime() - 30 * 86400000)));
+    else if (period === "90d") params.set("from", fmt(new Date(now.getTime() - 90 * 86400000)));
+  } else if (period === "custom") {
+    const from = document.getElementById("sales-filter-start")?.value;
+    const to = document.getElementById("sales-filter-end")?.value;
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+  }
+  return params;
+}
+
+async function loadSalesView() {
+  stopSalesPolling();
+  showMerchantMenu();
+  document.getElementById("sales-loading")?.classList.remove("hidden");
+  document.getElementById("sales-empty")?.classList.add("hidden");
+  setMsg("sales-msg", "");
+  const list = document.getElementById("sales-list");
+  list.innerHTML = '<div id="sales-sentinel" aria-hidden="true" style="height:1px"></div>';
+
+  try {
+    const params = buildSalesFilterParams();
+    const res = await apiFetch(`/api/checkouts?${params.toString()}`);
+    if (!res.ok) { const e = await res.json().catch(() => ({})); setMsg("sales-msg", e?.errorMessage || "Erro ao carregar vendas."); return; }
+    const data = await res.json();
+
+    allSalesCheckouts = data.checkouts || [];
+    const stats = data.stats || {};
+    document.getElementById("sales-stat-completed").textContent = stats.completed || 0;
+    document.getElementById("sales-stat-received").textContent = formatBRL(stats.completed_amount || 0);
+    document.getElementById("sales-stat-conversion").textContent = `${stats.total > 0 ? Math.round(stats.completed / stats.total * 100) : 0}%`;
+    document.getElementById("sales-stat-pending").textContent = stats.pending || 0;
+
+    applySalesFilters();
+
+    // Auto-refresh polling
+    stopSalesPolling();
+    if (allSalesCheckouts.some(c => CHECKOUT_NON_TERMINAL.has(c.status))) {
+      salesPollingInterval = setInterval(async () => {
+        try {
+          const p = buildSalesFilterParams();
+          const r = await apiFetch(`/api/checkouts?${p.toString()}`);
+          if (!r.ok) return;
+          const d = await r.json();
+          {
+            allSalesCheckouts = d.checkouts || [];
+            const st = d.stats || {};
+            document.getElementById("sales-stat-completed").textContent = st.completed || 0;
+            document.getElementById("sales-stat-received").textContent = formatBRL(st.completed_amount || 0);
+            document.getElementById("sales-stat-conversion").textContent = `${st.total > 0 ? Math.round(st.completed / st.total * 100) : 0}%`;
+            document.getElementById("sales-stat-pending").textContent = st.pending || 0;
+            applySalesFilters();
+            if (!allSalesCheckouts.some(c => CHECKOUT_NON_TERMINAL.has(c.status))) stopSalesPolling();
+          }
+        } catch { /* ignore */ }
+      }, 30000);
+    }
+  } catch (e) {
+    if (!e.blocked) setMsg("sales-msg", e.message || "Erro ao carregar vendas.");
+  } finally {
+    document.getElementById("sales-loading")?.classList.add("hidden");
+  }
+}
+
+function applySalesFilters() {
+  const search = (document.getElementById("sales-filter-search")?.value || "").trim().toLowerCase();
+  filteredSales = search
+    ? allSalesCheckouts.filter(c => {
+        const fields = [c.description, c.id, String(c.amount)];
+        return fields.some(f => f && f.toLowerCase().includes(search));
+      })
+    : [...allSalesCheckouts];
+  salesDisplayedCount = 0;
+  const list = document.getElementById("sales-list");
+  list.innerHTML = '<div id="sales-sentinel" aria-hidden="true" style="height:1px"></div>';
+  renderSalesNextPage();
+  setupSalesObserver();
+}
+
+function renderSalesNextPage() {
+  const empty = document.getElementById("sales-empty");
+  const sentinel = document.getElementById("sales-sentinel");
+  const batch = filteredSales.slice(salesDisplayedCount, salesDisplayedCount + SALES_PAGE_SIZE);
+  if (salesDisplayedCount === 0 && batch.length === 0) { empty?.classList.remove("hidden"); return; }
+  empty?.classList.add("hidden");
+  const html = batch.map(c => renderCheckoutItem(c)).join("");
+  sentinel?.insertAdjacentHTML("beforebegin", html);
+  salesDisplayedCount += batch.length;
+}
+
+function setupSalesObserver() {
+  if (salesObserver) salesObserver.disconnect();
+  const list = document.getElementById("sales-list");
+  const sentinel = document.getElementById("sales-sentinel");
+  if (!list || !sentinel) return;
+  salesObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && salesDisplayedCount < filteredSales.length) renderSalesNextPage();
+  }, { root: list, rootMargin: "0px 0px 200px 0px" });
+  salesObserver.observe(sentinel);
+}
+
+// === Webhook Logs ===
+async function loadWebhookLogs() {
+  showMerchantMenu();
+  document.getElementById("webhook-logs-loading")?.classList.remove("hidden");
+  document.getElementById("webhook-logs-empty")?.classList.add("hidden");
+  setMsg("webhook-logs-msg", "");
+
+  try {
+    const res = await apiFetch("/api/webhook-logs");
+    if (!res.ok) { const e = await res.json().catch(() => ({})); setMsg("webhook-logs-msg", e?.errorMessage || "Erro ao carregar logs."); return; }
+    const data = await res.json();
+
+    const logs = data.logs || [];
+    const list = document.getElementById("webhook-logs-list");
+    if (logs.length === 0) {
+      list.innerHTML = "";
+      document.getElementById("webhook-logs-empty")?.classList.remove("hidden");
+      return;
+    }
+
+    list.innerHTML = logs.map(log => {
+      const statusClass = log.status_code >= 200 && log.status_code < 300 ? "status-green" : "status-red";
+      return `<div class="webhook-log-item">
+        <div class="webhook-log-header">
+          <span class="webhook-log-event">${escapeHtml(log.event || "")}</span>
+          <span class="webhook-log-status ${statusClass}">${escapeHtml(String(log.status_code || "—"))}</span>
+          <span class="webhook-log-attempt">${escapeHtml(String(log.attempt || 1))}/3</span>
+          <span class="webhook-log-date">${formatDateShort(log.sent_at)}</span>
+        </div>
+        <div class="webhook-log-url">${escapeHtml(abbreviateHash(log.url || "", 35, 10))}</div>
+        <div class="webhook-log-details hidden">
+          ${log.request_body ? `<div class="webhook-log-body"><strong>Request:</strong><pre>${escapeHtml(typeof log.request_body === "string" ? log.request_body : JSON.stringify(log.request_body, null, 2))}</pre></div>` : ""}
+          ${log.response_body ? `<div class="webhook-log-body"><strong>Response:</strong><pre>${escapeHtml(log.response_body)}</pre></div>` : ""}
+          ${log.error ? `<div class="webhook-log-body text-danger"><strong>Erro:</strong> ${escapeHtml(log.error)}</div>` : ""}
+        </div>
+      </div>`;
+    }).join("");
+
+    list.querySelectorAll(".webhook-log-item").forEach(item => {
+      item.querySelector(".webhook-log-header")?.addEventListener("click", () => {
+        item.querySelector(".webhook-log-details")?.classList.toggle("hidden");
+      });
+    });
+  } catch (e) {
+    if (!e.blocked) setMsg("webhook-logs-msg", e.message || "Erro.");
+  } finally {
+    document.getElementById("webhook-logs-loading")?.classList.add("hidden");
+  }
+}
+
+// Routes
+// Guard: only allow merchant sub-views if user has active merchant (checks via API)
+async function merchantGuard(loadFn) {
+  if (!isLoggedIn()) { navigate("#login"); return; }
+  const user = getUser();
+  if (!user?.verified) { navigate("#merchant"); return; }
+  if (!merchantData) {
+    try {
+      const res = await apiFetch("/api/merchants/me");
+      if (!res.ok) { navigate("#merchant"); return; }
+      { const d = await res.json(); merchantData = d.merchant || d; }
+    } catch { navigate("#merchant"); return; }
+  }
+  loadFn();
+}
+
+route("#verify-account", async () => {
+  if (!isLoggedIn()) { navigate("#login"); return; }
+  try {
+    const res = await apiFetch("/api/status?type=deposit");
+    if (!res.ok) return;
+    const data = await res.json();
+    const completed = (data.transactions || []).filter(tx => tx.status === "depix_sent").length;
+    const progress = Math.min(completed, 10);
+    document.getElementById("verify-page-progress-bar").style.width = `${progress * 10}%`;
+    document.getElementById("verify-page-progress-text").textContent = `${progress}/10 depósitos concluídos`;
+  } catch { /* ignore */ }
+});
+route("#merchant", () => { if (!isLoggedIn()) { navigate("#login"); return; } stopSalesPolling(); loadMerchantDispatcher(); });
+route("#merchant-charge", () => { stopSalesPolling(); merchantGuard(loadChargeView); });
+route("#merchant-sales", () => { stopSalesPolling(); merchantGuard(loadSalesView); });
+route("#merchant-account", () => { stopSalesPolling(); merchantGuard(loadAccountView); });
+route("#merchant-api", () => { stopSalesPolling(); merchantGuard(loadApiView); });
+route("#webhook-logs", () => { stopSalesPolling(); merchantGuard(loadWebhookLogs); });
+
+// Menu accordion — click section title to expand/collapse, only one open at a time
+document.querySelectorAll(".menu-section-toggle").forEach(toggle => {
+  toggle.addEventListener("click", () => {
+    const items = toggle.nextElementSibling;
+    const isOpen = !items.classList.contains("hidden");
+    // Close all sections
+    document.querySelectorAll(".menu-section-items").forEach(s => s.classList.add("hidden"));
+    document.querySelectorAll(".menu-section-toggle").forEach(t => t.classList.remove("open"));
+    // Open clicked section (if it was closed)
+    if (!isOpen) {
+      items.classList.remove("hidden");
+      toggle.classList.add("open");
+    }
+  });
+});
+
+// Menu handlers
+document.getElementById("menu-merchant-charge")?.addEventListener("click", () => { closeMenu(); navigate("#merchant-charge"); });
+document.getElementById("menu-merchant-sales")?.addEventListener("click", () => { closeMenu(); navigate("#merchant-sales"); });
+document.getElementById("menu-merchant-account")?.addEventListener("click", () => { closeMenu(); navigate("#merchant-account"); });
+document.getElementById("menu-merchant-api")?.addEventListener("click", () => { closeMenu(); navigate("#merchant-api"); });
+
+// Dismiss ship banner
+document.getElementById("dismiss-ship-banner")?.addEventListener("click", () => {
+  document.getElementById("merchant-ship-banner")?.classList.add("hidden");
+  localStorage.setItem("depix-ship-banner-dismissed", "1");
+});
+
+// Create checkout
+document.getElementById("btn-create-checkout")?.addEventListener("click", async () => {
+  const amountInput = document.getElementById("checkout-amount");
+  const desc = document.getElementById("checkout-description")?.value.trim();
+  let image = document.getElementById("checkout-image")?.value.trim();
+  if (image && !image.startsWith("http://") && !image.startsWith("https://")) {
+    image = "https://" + image;
+  }
+  const btn = document.getElementById("btn-create-checkout");
+  setMsg("checkout-create-msg", "");
+  const cents = toCents(amountInput?.value || "");
+  if (!cents || cents < 500) { setMsg("checkout-create-msg", `Valor mínimo: ${formatBRL(500)}`); return; }
+
+  btn.disabled = true;
+  btn.textContent = "Criando...";
+  try {
+    const body = { amount: cents };
+    if (desc) body.description = desc;
+    if (image) body.image_url = image;
+    const res = await apiFetch("/api/checkouts", { method: "POST", body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) { setMsg("checkout-create-msg", data?.errorMessage || "Erro ao criar checkout."); return; }
+    document.getElementById("checkout-link").value = data.payment_url || "";
+    document.getElementById("checkout-result")?.classList.remove("hidden");
+    amountInput.value = "";
+    document.getElementById("checkout-description").value = "";
+    document.getElementById("checkout-image").value = "";
+    showToast("Link criado!");
+    loadChargeView();
+  } catch (e) {
+    if (!e.blocked) setMsg("checkout-create-msg", e.message || "Erro ao criar checkout.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Criar link de pagamento";
+  }
+});
+document.getElementById("checkout-image-info")?.addEventListener("click", () => {
+  document.getElementById("checkout-image-modal")?.classList.remove("hidden");
+});
+document.getElementById("close-checkout-image-modal")?.addEventListener("click", () => {
+  document.getElementById("checkout-image-modal")?.classList.add("hidden");
+});
+document.getElementById("btn-copy-checkout-link")?.addEventListener("click", () => {
+  const link = document.getElementById("checkout-link")?.value;
+  if (link) { navigator.clipboard.writeText(link).then(() => showToast("Link copiado!")).catch(() => showToast("Erro ao copiar")); }
+});
+
+// Copy key buttons (delegated)
+document.addEventListener("click", (e) => {
+  const copyBtn = e.target.closest(".btn-copy-key");
+  if (!copyBtn) return;
+  const input = document.getElementById(copyBtn.dataset.target);
+  if (input?.value) { navigator.clipboard.writeText(input.value).then(() => showToast("Copiado!")).catch(() => showToast("Erro ao copiar")); }
+});
+
+// Modal close handlers
+["close-create-api-key", "close-api-key-created", "close-revoke-api-key",
+ "close-merchant-password", "close-webhook-secret", "close-merchant-edit"].forEach(id => {
+  document.getElementById(id)?.addEventListener("click", () => {
+    document.getElementById(id)?.closest(".modal")?.classList.add("hidden");
+  });
+});
+document.getElementById("btn-welcome-continue")?.addEventListener("click", () => {
+  document.getElementById("merchant-welcome-modal")?.classList.add("hidden");
+});
+
+// API key: open create modal
+document.getElementById("btn-create-api-key")?.addEventListener("click", () => {
+  document.getElementById("api-key-type").value = "live";
+  document.getElementById("api-key-label").value = "";
+  document.getElementById("api-key-expires").value = "";
+  setMsg("create-api-key-msg", "");
+  document.getElementById("create-api-key-modal")?.classList.remove("hidden");
+});
+
+// API key: confirm create
+document.getElementById("btn-confirm-create-api-key")?.addEventListener("click", async () => {
+  const type = document.getElementById("api-key-type").value;
+  const label = document.getElementById("api-key-label")?.value.trim();
+  const expires = document.getElementById("api-key-expires")?.value;
+  const btn = document.getElementById("btn-confirm-create-api-key");
+  btn.disabled = true; btn.textContent = "Criando..."; setMsg("create-api-key-msg", "");
+  try {
+    const body = { type };
+    if (label) body.label = label;
+    if (expires) body.expires_in_days = parseInt(expires, 10);
+    const res = await apiFetch("/api/api-keys", { method: "POST", body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) { setMsg("create-api-key-msg", data?.errorMessage || "Erro ao criar chave."); return; }
+    document.getElementById("create-api-key-modal")?.classList.add("hidden");
+    document.getElementById("new-api-key-value").value = data.key || "";
+    document.getElementById("api-key-created-modal")?.classList.remove("hidden");
+    loadApiView();
+  } catch (e) { setMsg("create-api-key-msg", e.message || "Erro."); }
+  finally { btn.disabled = false; btn.textContent = "Criar"; }
+});
+
+// API key: revoke
+document.getElementById("api-keys-list")?.addEventListener("click", (e) => {
+  const revokeBtn = e.target.closest(".btn-revoke-key");
+  if (!revokeBtn) return;
+  pendingRevokeKeyId = revokeBtn.dataset.keyId;
+  setMsg("revoke-api-key-msg", "");
+  document.getElementById("revoke-api-key-modal")?.classList.remove("hidden");
+});
+document.getElementById("btn-confirm-revoke")?.addEventListener("click", async () => {
+  const btn = document.getElementById("btn-confirm-revoke");
+  btn.disabled = true; btn.textContent = "Revogando..."; setMsg("revoke-api-key-msg", "");
+  try {
+    const res = await apiFetch("/api/api-keys/revoke", { method: "POST", body: JSON.stringify({ key_id: pendingRevokeKeyId }) });
+    const data = await res.json();
+    if (!res.ok) { setMsg("revoke-api-key-msg", data?.errorMessage || "Erro ao revogar."); return; }
+    document.getElementById("revoke-api-key-modal")?.classList.add("hidden");
+    showToast("Chave revogada");
+    loadApiView();
+  } catch (e) { setMsg("revoke-api-key-msg", e.message || "Erro."); }
+  finally { btn.disabled = false; btn.textContent = "Revogar"; pendingRevokeKeyId = null; }
+});
+
+// Rotate webhook secret
+document.getElementById("btn-rotate-webhook")?.addEventListener("click", () => {
+  pendingMerchantAction = { type: "rotate_webhook" };
+  document.getElementById("merchant-password-title").textContent = "Rotacionar webhook secret";
+  document.getElementById("merchant-password-desc").textContent = "Confirme sua senha para gerar um novo secret.";
+  document.getElementById("merchant-password-input").value = "";
+  setMsg("merchant-password-msg", "");
+  document.getElementById("merchant-password-modal")?.classList.remove("hidden");
+});
+
+// Save edit (simple fields)
+document.getElementById("btn-merchant-edit-save")?.addEventListener("click", async () => {
+  const input = document.getElementById("merchant-edit-input");
+  const field = input.dataset.field;
+  const value = input.value.trim();
+  const btn = document.getElementById("btn-merchant-edit-save");
+  btn.disabled = true; btn.textContent = "Salvando..."; setMsg("merchant-edit-modal-msg", "");
+  if (field === "cnpj" && value) {
+    const cnpjResult = validateCNPJ(value);
+    if (!cnpjResult.valid) { setMsg("merchant-edit-modal-msg", cnpjResult.error); btn.disabled = false; btn.textContent = "Salvar"; return; }
+  }
+  try {
+    let sendValue = value || null;
+    if (field === "website" && value) sendValue = normalizeWebsite(value);
+    const body = { [field]: sendValue };
+    if (field === "liquid_address" && pendingLiquidPassword) {
+      body.password = pendingLiquidPassword;
+    }
+    const res = await apiFetch("/api/merchants/me", { method: "PATCH", body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) { setMsg("merchant-edit-modal-msg", data?.errorMessage || "Erro ao salvar."); return; }
+    if (field === "liquid_address") pendingLiquidPassword = null;
+    document.getElementById("merchant-edit-modal")?.classList.add("hidden");
+    merchantData = null; // Force reload
+    showToast("Dados atualizados");
+    loadAccountView();
+  } catch (e) { setMsg("merchant-edit-modal-msg", e.message || "Erro ao salvar."); }
+  finally { btn.disabled = false; btn.textContent = "Salvar"; }
+});
+
+// Password confirmation (for liquid_address edit or webhook rotation)
+document.getElementById("btn-merchant-password-confirm")?.addEventListener("click", async () => {
+  const password = document.getElementById("merchant-password-input")?.value;
+  const btn = document.getElementById("btn-merchant-password-confirm");
+  if (!password) { setMsg("merchant-password-msg", "Informe sua senha."); return; }
+  btn.disabled = true; btn.textContent = "Verificando..."; setMsg("merchant-password-msg", "");
+  try {
+    if (pendingMerchantAction?.type === "edit_liquid") {
+      document.getElementById("merchant-password-modal")?.classList.add("hidden");
+      document.getElementById("merchant-edit-title").textContent = "Editar Endereço Liquid";
+      document.getElementById("merchant-edit-input").value = merchantData?.liquid_address || "";
+      document.getElementById("merchant-edit-input").dataset.field = "liquid_address";
+      pendingLiquidPassword = password;
+      document.getElementById("merchant-edit-modal")?.classList.remove("hidden");
+    } else if (pendingMerchantAction?.type === "rotate_webhook") {
+      const res = await apiFetch("/api/merchants/me/rotate-webhook-secret", {
+        method: "POST", body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (!res.ok) { setMsg("merchant-password-msg", data?.errorMessage || "Erro ao rotacionar."); return; }
+      document.getElementById("merchant-password-modal")?.classList.add("hidden");
+      document.getElementById("new-webhook-secret-value").value = data.webhook_secret || "";
+      document.getElementById("webhook-secret-modal")?.classList.remove("hidden");
+      merchantData = null;
+      loadApiView();
+    }
+  } catch (e) { setMsg("merchant-password-msg", e.message || "Erro."); }
+  finally { btn.disabled = false; btn.textContent = "Confirmar"; pendingMerchantAction = null; }
+});
+
+// Create merchant
+document.getElementById("btn-create-merchant")?.addEventListener("click", async () => {
+  const name = document.getElementById("merchant-name")?.value.trim();
+  const addr = document.getElementById("merchant-liquid-addr")?.value.trim();
+  const cnpj = document.getElementById("merchant-cnpj")?.value.trim();
+  const website = document.getElementById("merchant-website")?.value.trim();
+  const btn = document.getElementById("btn-create-merchant");
+  setMsg("merchant-create-msg", "");
+  if (!name) { setMsg("merchant-create-msg", "Informe o nome do negócio."); return; }
+  if (!addr) { setMsg("merchant-create-msg", "Informe o endereço Liquid."); return; }
+  const addrValid = validateLiquidAddress(addr);
+  if (!addrValid.valid) { setMsg("merchant-create-msg", addrValid.error); return; }
+  if (cnpj) { const cnpjResult = validateCNPJ(cnpj); if (!cnpjResult.valid) { setMsg("merchant-create-msg", cnpjResult.error); return; } }
+
+  btn.disabled = true; btn.textContent = "Criando...";
+  try {
+    const body = { business_name: name, liquid_address: addr };
+    if (cnpj) body.cnpj = cnpj;
+    if (website) body.website = normalizeWebsite(website);
+    const res = await apiFetch("/api/merchants", { method: "POST", body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) {
+      if (res.status === 403) {
+        // localStorage was stale — update verified and redirect to progress screen
+        const u = getUser();
+        if (u) { u.verified = 0; localStorage.setItem("depix-user", JSON.stringify(u)); }
+        merchantData = null;
+        navigate("#merchant");
+        return;
+      }
+      else if (res.status === 409) setMsg("merchant-create-msg", "Você já possui uma conta de lojista.");
+      else setMsg("merchant-create-msg", data?.errorMessage || "Erro ao criar conta.");
+      return;
+    }
+    merchantData = null;
+    showToast("Conta de lojista criada!");
+    loadMerchantDispatcher();
+  } catch (e) {
+    if (!e.blocked) setMsg("merchant-create-msg", e.message || "Erro ao criar conta.");
+  } finally { btn.disabled = false; btn.textContent = "Começar"; }
+});
+
+// Sales filter toggle
+document.getElementById("sales-filter-toggle")?.addEventListener("click", () => {
+  const panel = document.getElementById("sales-filter-panel");
+  const toggle = document.getElementById("sales-filter-toggle");
+  panel.classList.toggle("hidden", !panel.classList.contains("hidden"));
+  toggle.classList.toggle("open");
+});
+// Sales status filter
+document.getElementById("sales-filter-status")?.addEventListener("change", () => loadSalesView());
+// Sales period presets
+document.querySelectorAll("[data-sales-period]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-sales-period]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("sales-custom-range")?.classList.toggle("hidden", btn.dataset.salesPeriod !== "custom");
+    if (btn.dataset.salesPeriod !== "custom") loadSalesView();
+  });
+});
+// Sales custom date range
+document.getElementById("sales-filter-start")?.addEventListener("change", () => loadSalesView());
+document.getElementById("sales-filter-end")?.addEventListener("change", () => loadSalesView());
+// Sales search (debounced)
+let salesSearchTimer;
+document.getElementById("sales-filter-search")?.addEventListener("input", () => {
+  clearTimeout(salesSearchTimer);
+  salesSearchTimer = setTimeout(() => applySalesFilters(), 200);
+});
+// Sales clear filters
+document.getElementById("sales-clear-filters")?.addEventListener("click", () => {
+  document.getElementById("sales-filter-status").value = "";
+  document.getElementById("sales-filter-search").value = "";
+  document.querySelectorAll("[data-sales-period]").forEach(b => b.classList.remove("active"));
+  document.querySelector("[data-sales-period='all']")?.classList.add("active");
+  document.getElementById("sales-custom-range")?.classList.add("hidden");
+  loadSalesView();
+});
+// Sales empty CTA
+document.getElementById("btn-sales-goto-create")?.addEventListener("click", () => navigate("#merchant-charge"));
+
+formatCurrencyInput(document.getElementById("checkout-amount"), "deposito");
+
 // ===== Initialize =====
 const isPWA = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
 
@@ -2335,5 +3124,4 @@ if (isPWA || (hashBase && hashBase !== "#" && hashBase !== "#landing")) {
 } else if (isLoggedIn()) {
   goToAppropriateScreen();
 }
-// else: no hash + not logged in + browser mode → router shows #landing
 initRouter();
