@@ -51,7 +51,7 @@ depix/
 ├── utils.js            # Pure utilities (isAllowedImageUrl, toCents, formatBRL)
 ├── validation.js       # Input validators (validateLiquidAddress, validatePhone)
 ├── style.css           # All styles — dark teal theme, responsive, animations
-├── service-worker.js   # Offline cache (static assets only, never caches API calls)
+├── service-worker.js   # PWA cache: network-first HTML, cache-first versioned assets, auto-reload on update
 ├── manifest.json       # PWA manifest (name, icons, start_url, display)
 ├── package.json        # Dev dependencies only (vitest + jsdom for testing)
 └── tests/              # Vitest tests with jsdom environment
@@ -162,11 +162,50 @@ Frontend changes reflect immediately (volume mount). See `../depix-dev/CLAUDE.md
 - CI: GitHub Actions runs ESLint + `npm test` on push to `main` and on PRs to `main`
 - Deploy: GitHub Pages from main branch
 
-## Service Worker Cache
+## Service Worker & Cache Versioning
 
-**CRITICAL**: After ANY change to frontend files (JS, CSS, HTML), you MUST bump the `CACHE_NAME` version in `service-worker.js` (e.g. `"depix-v23"` → `"depix-v24"`). Without this, users with the old service worker will keep serving stale cached files, which can break the app entirely if imports changed.
+### How it works
 
-The service worker caches all static files on install. On activate, it deletes all caches except the current `CACHE_NAME`. Bumping the version forces a fresh install of all assets.
+The app uses a service worker with two caching strategies:
+- **HTML (`index.html`)**: Network-first — always fetches from server, falls back to cache when offline
+- **Static assets (JS, CSS, images)**: Cache-first — served from cache for speed, versioned via `?v=N` query strings
+
+A single `APP_VERSION` constant in `service-worker.js` controls all cache busting. When bumped, all asset URLs change (e.g. `script.js?v=90` → `script.js?v=91`), causing cache misses that force fresh downloads.
+
+The SW uses `skipWaiting()` + `clients.claim()` so new versions activate immediately. The app detects `controllerchange` and auto-reloads — users never stay stuck on an old version.
+
+### CRITICAL: Deploy checklist
+
+**Every time you change ANY frontend file (JS, CSS, HTML), you MUST do both of these steps before pushing:**
+
+1. **Bump `APP_VERSION`** in `service-worker.js` (line 3): e.g. `const APP_VERSION = 90;` → `const APP_VERSION = 91;`
+2. **Update `?v=` query strings** in `index.html` to match the new version number. Search for `?v=` — there are ~6 occurrences (script.js, style.css, router.js, manifest.json, icons). Change all from `?v=90` to `?v=91`.
+
+**Both steps are required.** If you only bump `APP_VERSION` but not the HTML query strings, the SW will cache new URLs but the HTML will still reference old ones. If you only bump the HTML but not `APP_VERSION`, the SW won't reinstall.
+
+### What happens if you forget
+
+- Users will be served stale cached files from the old service worker
+- The app can break entirely if JS/CSS imports changed between versions
+- There is no way to remotely force-update users — they must wait for the browser to detect the SW change
+
+### Files involved
+
+| File | What to change |
+|------|---------------|
+| `service-worker.js` line 3 | `APP_VERSION = N` → `APP_VERSION = N+1` |
+| `index.html` (~6 places) | All `?v=N` → `?v=N+1` |
+
+### Adding new files to the cache
+
+If you create a new JS/CSS file, add it to the `STATIC_FILES` array in `service-worker.js` using the versioned template:
+```js
+`./new-file.js?v=${APP_VERSION}`,
+```
+And reference it in `index.html` with the matching query string:
+```html
+<script type="module" src="new-file.js?v=90"></script>
+```
 
 ## Workflow Rules
 
