@@ -1,24 +1,28 @@
-const CACHE_NAME = "depix-v90";
+// Service Worker — DePix PWA
+// Bump APP_VERSION on every release. Keep in sync with ?v= query strings in index.html.
+const APP_VERSION = 90;
+const CACHE_NAME = `depix-v${APP_VERSION}`;
 
 const STATIC_FILES = [
   "./",
   "./index.html",
-  "./style.css",
-  "./script.js?v=24",
-  "./router.js",
-  "./auth.js",
-  "./api.js",
-  "./addresses.js",
-  "./utils.js",
-  "./validation.js",
-  "./script-helpers.js",
-  "./affiliates.js",
-  "./qr.js",
-  "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png"
+  `./style.css?v=${APP_VERSION}`,
+  `./script.js?v=${APP_VERSION}`,
+  `./router.js?v=${APP_VERSION}`,
+  `./auth.js?v=${APP_VERSION}`,
+  `./api.js?v=${APP_VERSION}`,
+  `./addresses.js?v=${APP_VERSION}`,
+  `./utils.js?v=${APP_VERSION}`,
+  `./validation.js?v=${APP_VERSION}`,
+  `./script-helpers.js?v=${APP_VERSION}`,
+  `./affiliates.js?v=${APP_VERSION}`,
+  `./qr.js?v=${APP_VERSION}`,
+  `./manifest.json?v=${APP_VERSION}`,
+  `./icon-192.png?v=${APP_VERSION}`,
+  `./icon-512.png?v=${APP_VERSION}`
 ];
 
+// Install — cache all static assets and activate immediately
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
@@ -32,6 +36,7 @@ self.addEventListener("install", event => {
   self.skipWaiting();
 });
 
+// Activate — delete old caches and take control of all clients
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -43,30 +48,47 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
+// Fetch — strategy depends on request type
 self.addEventListener("fetch", event => {
   const req = event.request;
+  const url = new URL(req.url);
 
-  // Never interfere with POST or API calls
+  // Never interfere with non-GET requests
   if (req.method !== "GET") return;
 
+  // Never cache API calls or external resources
   if (
-    req.url.startsWith("https://depix-backend.vercel.app") ||
-    req.url.startsWith("https://api.qrserver.com") ||
-    req.url.includes("/api/")
+    url.origin !== self.location.origin ||
+    url.pathname.startsWith("/api/")
   ) {
     return;
   }
 
-  // Stale-while-revalidate: serve cache immediately, update in background
-  event.respondWith(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.match(req).then(cached => {
-        const fetched = fetch(req).then(response => {
-          if (response.ok) cache.put(req, response.clone());
+  // Navigation (HTML) — network-first with cache fallback
+  if (req.mode === "navigate") {
+    event.respondWith(
+      fetch(req)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
           return response;
-        });
-        return cached || fetched;
-      })
-    )
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Static assets — cache-first with network fallback
+  event.respondWith(
+    caches.match(req).then(cached => {
+      if (cached) return cached;
+      return fetch(req).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+        }
+        return response;
+      });
+    })
   );
 });

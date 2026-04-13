@@ -30,9 +30,20 @@ let lastDepositQrId = "";
 let lastWithdrawalId = "";
 let transactionsPollingInterval = null;
 
-// Register service worker
+// Register service worker with update detection
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js");
+  navigator.serviceWorker.register("./service-worker.js").then(reg => {
+    // Check for SW updates on every page load
+    reg.update();
+  });
+
+  // When a new SW takes control, reload to get fresh assets
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
 }
 
 // ===== Utility functions =====
