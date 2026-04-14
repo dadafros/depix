@@ -9,7 +9,23 @@
   <meta name="theme-color" content="#0a0f14" />
 
   <link rel="canonical" href="https://depixapp.com/docs" />
+  <link rel="alternate" hreflang="pt-BR" href="https://depixapp.com/docs" />
+  <link rel="alternate" hreflang="en" href="https://depixapp.com/docs/en" />
+  <link rel="alternate" hreflang="x-default" href="https://depixapp.com/docs" />
   <link rel="icon" href="../icon-192.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://depixapp.com/docs" />
+  <meta property="og:title" content="Documentação da API — DePix App" />
+  <meta property="og:description" content="Documentação completa da API do DePix App. Autenticação, checkouts, webhooks e sandbox." />
+  <meta property="og:image" content="https://depixapp.com/social-preview.png" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:locale:alternate" content="en_US" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Documentação da API — DePix App" />
+  <meta name="twitter:description" content="Documentação completa da API do DePix App. Autenticação, checkouts, webhooks e sandbox." />
+  <meta name="twitter:image" content="https://depixapp.com/social-preview.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -78,7 +94,7 @@
       letter-spacing: -0.03em;
     }
     .nav-logo img { flex-shrink: 0; border-radius: 5px; }
-    .nav-logo span { color: var(--muted); font-weight: 500; font-size: 0.9rem; margin-left: 4px; }
+    .nav-logo span { color: var(--dim); font-weight: 500; font-size: 0.8rem; margin-left: 2px; opacity: 0.7; }
     .nav-right { display: flex; align-items: center; gap: 1.25rem; }
     .nav-link {
       font-size: 0.88rem;
@@ -426,12 +442,29 @@
       .sidebar-toggle { display: inline-flex; }
       .content { padding: 24px 16px 60px; }
       .nav-link { display: none; }
+      .nav-link.lang-switch { display: inline; }
     }
 
     @media (min-width: 1100px) {
       .content { padding: 40px 48px 80px; }
     }
   </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Documentação da API — DePix App",
+    "description": "Documentação completa da API do DePix App. Autenticação, checkouts, webhooks e sandbox.",
+    "url": "https://depixapp.com/docs",
+    "inLanguage": "pt-BR",
+    "publisher": {
+      "@type": "Organization",
+      "name": "DePix App",
+      "url": "https://depixapp.com"
+    }
+  }
+  </script>
 </head>
 <body>
 
@@ -439,9 +472,10 @@
   <div class="nav-inner">
     <a href="https://depixapp.com/" class="nav-logo">
       <img src="../icon-192.png" alt="DePix App" width="24" height="24">
-      DePix App <span>/ API</span>
+      DePix App <span>API</span>
     </a>
     <div class="nav-right">
+      <a href="https://depixapp.com/docs/en" class="nav-link lang-switch" lang="en">English</a>
       <a href="https://depixapp.com/btcpay" class="nav-link">Plugin BTCPay</a>
       <a href="https://depixapp.com/#register" class="nav-link" style="color: var(--accent);">Criar conta</a>
     </div>

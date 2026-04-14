@@ -54,6 +54,12 @@ depix/
 ├── service-worker.js   # PWA cache: network-first HTML, cache-first versioned assets, auto-reload on update
 ├── manifest.json       # PWA manifest (name, icons, start_url, display)
 ├── package.json        # Dev dependencies only (vitest + jsdom for testing)
+├── docs/               # API documentation (static HTML, pt-BR + en)
+│   ├── index.html      # Portuguese version (default)
+│   └── en/index.html   # English version
+├── btcpay/             # BTCPay Server plugin page (static HTML, pt-BR + en)
+│   ├── index.html      # Portuguese version (default)
+│   └── en/index.html   # English version
 └── tests/              # Vitest tests with jsdom environment
     ├── addresses.test.js
     ├── api.test.js
@@ -138,6 +144,21 @@ Requires Node.js >= 22.
 - **Error messages**: Red (#ff6b6b), always user-friendly (no technical jargon)
 - **Success messages**: Green (#68d391)
 - **Toast notifications**: Bottom center, auto-dismiss after 2s
+
+## Internationalization (i18n) — Static Pages
+
+The `/docs` and `/btcpay` pages support Portuguese (default) and English:
+
+- **Portuguese**: `{page}/index.html` — served at root path (e.g., `/docs`)
+- **English**: `{page}/en/index.html` — served at `/en` subpath (e.g., `/docs/en`)
+
+### When editing these pages:
+- Update **both language versions** when changing content
+- Both files must have matching `hreflang` tags (pt-BR, en, x-default)
+- CSS is duplicated intentionally (pages have different style needs)
+- Each page has full SEO: OG tags, Twitter Card tags, JSON-LD structured data, hreflang, canonical
+- Icon paths in `/en/` files use `../../icon-192.png` (one level deeper)
+- Update `sitemap.xml` when adding new pages
 
 ## Local Dev Environment
 
