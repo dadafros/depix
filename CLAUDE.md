@@ -152,13 +152,42 @@ The `/docs` and `/btcpay` pages support Portuguese (default) and English:
 - **Portuguese**: `{page}/index.html` — served at root path (e.g., `/docs`)
 - **English**: `{page}/en/index.html` — served at `/en` subpath (e.g., `/docs/en`)
 
+### Critical rule: content parity
+The PT-BR and EN versions of each page must have **identical content** — same sections, same structure, same information. When adding, removing, or changing any content, **always apply the change to both languages**. Never leave one version ahead of the other.
+
 ### When editing these pages:
 - Update **both language versions** when changing content
 - Both files must have matching `hreflang` tags (pt-BR, en, x-default)
-- CSS is duplicated intentionally (pages have different style needs)
+- CSS is duplicated intentionally (pages are standalone — no shared stylesheet)
 - Each page has full SEO: OG tags, Twitter Card tags, JSON-LD structured data, hreflang, canonical
 - Icon paths in `/en/` files use `../../icon-192.png` (one level deeper)
-- Update `sitemap.xml` when adding new pages
+- Update `sitemap.xml` when adding new pages (with `xhtml:link` hreflang annotations)
+- Nav links in EN pages point to EN counterparts (`/docs/en`, `/btcpay/en`) and vice versa
+- Each page has a language switcher link in the nav
+
+### Portuguese accentuation
+All Portuguese text must have correct accentuation. This is non-negotiable — unaccented Portuguese reads as broken/unprofessional. Common patterns to watch for:
+- **é** (not "e") when it means "is": *é possível*, *é enviado*, *é compatível*
+- **ã/ão/ões**: *não*, *descrição*, *informações*, *requisições*, *produção*, *conversão*
+- **í**: *possível*, *disponível*, *compatível*, *específico*, *início*, *válido*
+- **ó**: *só*, *ótimo*
+- **ú**: *útil*, *único*
+- **ç**: *diferenças*, *reformatação*
+- **ê**: *você*, *vê*
+- **à**: *à* (crase)
+
+After any edit to Portuguese content, grep for common unaccented words to catch regressions: `especifico`, `possivel`, `voce`, `producao`, `informacoes`, `disponivel`, `conversao`, etc.
+
+### Docs page (`/docs`) — API documentation
+- **Structure**: Nav + sidebar (section links) + main content with doc-section blocks
+- **Code examples**: Multi-language tabs (curl, JavaScript, Python, PHP, C#, Go, Ruby, Java) using `setLang()` JS. User's choice is persisted in `localStorage`.
+- **What to translate**: Headings, prose, table headers/descriptions, alert text, code labels ("Resposta — 201 Created" → "Response — 201 Created"), copy button text ("copiar"/"copiado!" → "copy"/"copied!"), code comments inside examples, badge labels ("obrigatório"/"opcional" → "required"/"optional")
+- **What NOT to translate**: Code blocks, JSON payloads, curl commands, API paths, field names in tables (amount, description, etc.), technical terms standard in English (webhook, sandbox, endpoint, checkout, merchant, slug, payload)
+
+### BTCPay page (`/btcpay`) — Plugin landing page
+- **Structure**: Hero + MED banner + 3-step setup + benefits grid + FAQ accordion + final CTA + footer
+- **Translate everything visible**: Hero text, step descriptions, benefit cards, FAQ questions/answers, CTA text, footer
+- **FAQ accordion**: Uses `<details>/<summary>` elements — make sure both languages have the same questions
 
 ## Local Dev Environment
 

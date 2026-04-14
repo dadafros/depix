@@ -49,6 +49,13 @@ depix/
 ├── style.css           # All styles (dark teal theme, responsive, mobile-first)
 ├── service-worker.js   # Offline caching for static assets
 ├── manifest.json       # PWA manifest
+├── sitemap.xml         # Sitemap with hreflang annotations
+├── docs/               # API documentation (pt-BR + en)
+│   ├── index.html      # Portuguese (default)
+│   └── en/index.html   # English
+├── btcpay/             # BTCPay Server plugin page (pt-BR + en)
+│   ├── index.html      # Portuguese (default)
+│   └── en/index.html   # English
 ├── icon-192.png        # App icon (192x192)
 └── icon-512.png        # App icon (512x512)
 ```
@@ -99,6 +106,35 @@ npm test
 Deployed automatically to GitHub Pages on push to `main`. The app is served at:
 
 **https://depixapp.com**
+
+## Static Pages
+
+The repo includes standalone HTML pages (no framework, no build step) for documentation and the BTCPay plugin landing page. Each page exists in **Portuguese (default)** and **English**.
+
+| Page | Portuguese | English |
+|------|-----------|---------|
+| API Docs | [`/docs`](https://depixapp.com/docs) | [`/docs/en`](https://depixapp.com/docs/en) |
+| BTCPay Plugin | [`/btcpay`](https://depixapp.com/btcpay) | [`/btcpay/en`](https://depixapp.com/btcpay/en) |
+
+### File structure
+
+```
+docs/
+├── index.html        # Portuguese (default)
+└── en/index.html     # English
+btcpay/
+├── index.html        # Portuguese (default)
+└── en/index.html     # English
+```
+
+### Editing guidelines
+
+- **Content parity**: PT-BR and EN versions must have identical content. Always update both when making changes.
+- **Accentuation**: Portuguese text must have correct accents (é, ã, ç, í, etc.). Unaccented Portuguese is treated as a bug.
+- **SEO**: Each page includes OG tags, Twitter Card tags, JSON-LD structured data, hreflang tags, and canonical URLs. Update all meta tags when changing page content.
+- **Sitemap**: Listed in `sitemap.xml` with `xhtml:link` hreflang annotations.
+- **CSS**: Duplicated per page intentionally — each page is fully standalone.
+- **Icon paths**: Root pages use `../icon-192.png`, `/en/` pages use `../../icon-192.png`.
 
 ## Related
 
