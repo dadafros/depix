@@ -67,7 +67,7 @@ body {
   text-align: center;
 }
 
-h1 {
+h1, .view-title {
   font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 1.4rem;
   margin: 0 0 16px;
@@ -2246,7 +2246,7 @@ textarea:focus {
   flex-shrink: 0;
 }
 
-.commissions-header h1 {
+.commissions-header h2 {
   margin: 0;
 }
 

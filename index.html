@@ -22,7 +22,7 @@
   <meta property="og:image:height" content="512" />
   <meta property="og:image:type" content="image/png" />
 
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="DePix App - Aceite Pix. Receba em DePix." />
   <meta name="twitter:description" content="Aceite Pix, receba DePix. A forma mais simples de receber pagamentos e proteger seu dinheiro." />
   <meta name="twitter:image" content="https://depixapp.com/icon-512.png" />
@@ -597,7 +597,7 @@
 <!-- ===== LOGIN ===== -->
 <section data-view="login" class="page hidden">
   <div class="card">
-    <h2>Entrar no DePix App</h2>
+    <h2 class="view-title">Entrar no DePix App</h2>
     <div id="login-msg" class="mensagem"></div>
     <p id="login-verify-action" class="link-text hidden">
       <a href="#" id="btn-resend-login" class="link">Reenviar código de verificação</a>
@@ -624,7 +624,7 @@
 <!-- ===== ESQUECI MINHA SENHA ===== -->
 <section data-view="forgot-password" class="page hidden">
   <div class="card">
-    <h2>Recuperar senha</h2>
+    <h2 class="view-title">Recuperar senha</h2>
     <div id="forgot-msg" class="mensagem"></div>
     <p class="info-text">Informe seu usuário ou email para receber um código de recuperação.</p>
     <label for="forgot-identificador">Usuário ou email</label>
@@ -639,7 +639,7 @@
 <!-- ===== REDEFINIR SENHA ===== -->
 <section data-view="reset-password" class="page hidden">
   <div class="card">
-    <h2>Redefinir senha</h2>
+    <h2 class="view-title">Redefinir senha</h2>
     <div id="reset-msg" class="mensagem"></div>
     <p class="info-text" id="reset-info">
       Enviamos um código de 6 dígitos para seu email. Verifique sua caixa de entrada e spam.
@@ -663,7 +663,7 @@
 <!-- ===== CADASTRO ===== -->
 <section data-view="register" class="page hidden">
   <div class="card">
-    <h2>Criar conta</h2>
+    <h2 class="view-title">Criar conta</h2>
     <div id="register-msg" class="mensagem"></div>
 
     <label for="reg-nome">Nome ou Razão Social</label>
@@ -694,7 +694,7 @@
 <!-- ===== VERIFICAÇÃO DE EMAIL ===== -->
 <section data-view="verify" class="page hidden">
   <div class="card">
-    <h2>Verificar email</h2>
+    <h2 class="view-title">Verificar email</h2>
     <div id="verify-msg" class="mensagem"></div>
 
     <p class="info-text" id="verify-info">
@@ -968,7 +968,7 @@
 <!-- ===== AFILIADOS ===== -->
 <section data-view="affiliates" class="page hidden">
   <div class="card">
-    <h2>Programa de Afiliados</h2>
+    <h2 class="view-title">Programa de Afiliados</h2>
     <div id="affiliates-msg" class="mensagem"></div>
     <div id="affiliates-loading" class="hidden"><span class="spinner"></span> Carregando…</div>
 
@@ -1035,7 +1035,7 @@
 <section data-view="commissions" class="page hidden">
   <div class="card">
     <div class="commissions-header">
-      <h2>Minhas Comissões</h2>
+      <h2 class="view-title">Minhas Comissões</h2>
       <div class="report-popover-wrap">
         <button id="commission-download-report" class="extrato-report-btn" type="button" title="Baixar relatório por e-mail">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1215,7 +1215,7 @@
 <!-- ===== TRANSAÇÕES ===== -->
 <section data-view="transactions" class="page hidden">
   <div class="card">
-    <h2>Extrato</h2>
+    <h2 class="view-title">Extrato</h2>
 
     <div class="extrato-filters">
       <div class="extrato-toolbar">
@@ -1319,7 +1319,7 @@
 <!-- ===== FAQ ===== -->
 <section data-view="faq" class="page hidden">
   <div class="card">
-    <h2>Perguntas frequentes</h2>
+    <h2 class="view-title">Perguntas frequentes</h2>
     <div class="faq-list">
       <div class="faq-item">
         <button class="faq-question">O que é o DePix?</button>
@@ -1375,7 +1375,7 @@
 <!-- ===== MERCHANT: Dispatcher (verifica estado) ===== -->
 <section data-view="merchant" class="page hidden">
   <div class="card">
-    <h2>Área do Lojista</h2>
+    <h2 class="view-title">Área do Lojista</h2>
     <div id="merchant-msg" class="mensagem"></div>
     <div id="merchant-loading" class="hidden"><span class="spinner"></span> Carregando…</div>
 
@@ -1434,7 +1434,7 @@
     <div class="verify-account-header">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#38e3ac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
       <div>
-        <h2 class="verify-account-title">Verificação da conta</h2>
+        <h2 class="view-title verify-account-title">Verificação da conta</h2>
         <p class="verify-account-subtitle">Prazo de liberação nos primeiros depósitos</p>
       </div>
     </div>
@@ -1512,7 +1512,7 @@
 <!-- ===== COBRAR ===== -->
 <section data-view="merchant-charge" class="page hidden">
   <div class="card">
-    <h2>Cobrar</h2>
+    <h2 class="view-title">Cobrar</h2>
 
     <div id="merchant-ship-banner" class="merchant-banner">
       <div class="merchant-banner-content">
@@ -1558,7 +1558,7 @@
 <!-- ===== MINHAS VENDAS ===== -->
 <section data-view="merchant-sales" class="page hidden">
   <div class="card merchant-card">
-    <h2>Minhas Vendas</h2>
+    <h2 class="view-title">Minhas Vendas</h2>
     <div class="sales-stats">
       <div class="sales-stat">
         <span class="sales-stat-label">Vendas</span>
@@ -1642,7 +1642,7 @@
 <!-- ===== MINHA CONTA (lojista) ===== -->
 <section data-view="merchant-account" class="page hidden">
   <div class="card">
-    <h2>Minha Conta</h2>
+    <h2 class="view-title">Minha Conta</h2>
 
     <div id="merchant-account-list"></div>
     <div id="merchant-edit-msg" class="mensagem"></div>
@@ -1654,7 +1654,7 @@
 <!-- ===== API E WEBHOOKS ===== -->
 <section data-view="merchant-api" class="page hidden">
   <div class="card">
-    <h2>API e Webhooks</h2>
+    <h2 class="view-title">API e Webhooks</h2>
 
     <div id="merchant-alert-expired-key" class="merchant-alert hidden"></div>
 
@@ -1685,7 +1685,7 @@
 <!-- ===== WEBHOOK LOGS ===== -->
 <section data-view="webhook-logs" class="page hidden">
   <div class="card">
-    <h2>Logs de Webhook</h2>
+    <h2 class="view-title">Logs de Webhook</h2>
     <div id="webhook-logs-msg" class="mensagem"></div>
     <div id="webhook-logs-loading" class="hidden"><span class="spinner"></span> Carregando…</div>
     <div id="webhook-logs-empty" class="hidden">
