@@ -2898,7 +2898,7 @@ document.getElementById("btn-create-checkout")?.addEventListener("click", async 
     if (image) body.image_url = image;
     const res = await apiFetch("/api/checkouts", { method: "POST", body: JSON.stringify(body) });
     const data = await res.json();
-    if (!res.ok) { setMsg("checkout-create-msg", data?.errorMessage || "Erro ao criar checkout."); return; }
+    if (!res.ok) { setMsg("checkout-create-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao criar checkout."); return; }
     document.getElementById("checkout-link").value = data.payment_url || "";
     document.getElementById("checkout-result")?.classList.remove("hidden");
     amountInput.value = "";
@@ -2965,7 +2965,7 @@ document.getElementById("btn-confirm-create-api-key")?.addEventListener("click",
     if (expires) body.expires_in_days = parseInt(expires, 10);
     const res = await apiFetch("/api/api-keys", { method: "POST", body: JSON.stringify(body) });
     const data = await res.json();
-    if (!res.ok) { setMsg("create-api-key-msg", data?.errorMessage || "Erro ao criar chave."); return; }
+    if (!res.ok) { setMsg("create-api-key-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao criar chave."); return; }
     document.getElementById("create-api-key-modal")?.classList.add("hidden");
     document.getElementById("new-api-key-value").value = data.key || "";
     document.getElementById("api-key-created-modal")?.classList.remove("hidden");
@@ -2988,7 +2988,7 @@ document.getElementById("btn-confirm-revoke")?.addEventListener("click", async (
   try {
     const res = await apiFetch("/api/api-keys/revoke", { method: "POST", body: JSON.stringify({ key_id: pendingRevokeKeyId }) });
     const data = await res.json();
-    if (!res.ok) { setMsg("revoke-api-key-msg", data?.errorMessage || "Erro ao revogar."); return; }
+    if (!res.ok) { setMsg("revoke-api-key-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao revogar."); return; }
     document.getElementById("revoke-api-key-modal")?.classList.add("hidden");
     showToast("Chave revogada");
     loadApiView();
@@ -3026,7 +3026,7 @@ document.getElementById("btn-merchant-edit-save")?.addEventListener("click", asy
     }
     const res = await apiFetch("/api/merchants/me", { method: "PATCH", body: JSON.stringify(body) });
     const data = await res.json();
-    if (!res.ok) { setMsg("merchant-edit-modal-msg", data?.errorMessage || "Erro ao salvar."); return; }
+    if (!res.ok) { setMsg("merchant-edit-modal-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao salvar."); return; }
     if (field === "liquid_address") pendingLiquidPassword = null;
     document.getElementById("merchant-edit-modal")?.classList.add("hidden");
     merchantData = null; // Force reload
@@ -3055,7 +3055,7 @@ document.getElementById("btn-merchant-password-confirm")?.addEventListener("clic
         method: "POST", body: JSON.stringify({ password })
       });
       const data = await res.json();
-      if (!res.ok) { setMsg("merchant-password-msg", data?.errorMessage || "Erro ao rotacionar."); return; }
+      if (!res.ok) { setMsg("merchant-password-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao rotacionar."); return; }
       document.getElementById("merchant-password-modal")?.classList.add("hidden");
       document.getElementById("new-webhook-secret-value").value = data.webhook_secret || "";
       document.getElementById("webhook-secret-modal")?.classList.remove("hidden");
@@ -3129,7 +3129,7 @@ document.getElementById("btn-create-merchant")?.addEventListener("click", async 
         return;
       }
       else if (res.status === 409) setMsg("merchant-create-msg", "Você já possui uma conta de lojista.");
-      else setMsg("merchant-create-msg", data?.errorMessage || "Erro ao criar conta.");
+      else setMsg("merchant-create-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao criar conta.");
       return;
     }
     merchantData = null;
