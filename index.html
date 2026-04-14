@@ -104,16 +104,16 @@
   }
   </script>
 
-  <link rel="manifest" href="manifest.json?v=95" />
-  <link rel="icon" href="icon-192.png?v=95" />
-  <link rel="apple-touch-icon" href="icon-192.png?v=95" />
+  <link rel="manifest" href="manifest.json?v=96" />
+  <link rel="icon" href="icon-192.png?v=96" />
+  <link rel="apple-touch-icon" href="icon-192.png?v=96" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <!-- Asset version must match APP_VERSION in service-worker.js -->
-  <link rel="stylesheet" href="style.css?v=95" />
+  <link rel="stylesheet" href="style.css?v=96" />
 </head>
 <body>
 
@@ -122,7 +122,7 @@
 
   <nav class="landing-nav">
     <div class="landing-nav-inner">
-      <a href="#landing" class="landing-logo"><img src="icon-192.png?v=95" alt="DePix App" class="landing-logo-icon" width="32" height="32"><span>DePix App</span></a>
+      <a href="#landing" class="landing-logo"><img src="icon-192.png?v=96" alt="DePix App" class="landing-logo-icon" width="32" height="32"><span>DePix App</span></a>
       <div class="landing-nav-right">
         <a href="https://blog.depixapp.com/" class="landing-nav-link">Blog</a>
         <a href="#login" class="landing-nav-cta">Entrar</a>
@@ -1363,10 +1363,14 @@
       <label for="merchant-name">Nome do negócio *</label>
       <input id="merchant-name" placeholder="Ex: Camisetas do João" />
       <label for="merchant-liquid-addr">Endereço Liquid *</label>
-      <select id="merchant-addr-select" class="hidden">
-        <option value="">Selecionar endereço salvo…</option>
-      </select>
-      <input id="merchant-liquid-addr" placeholder="Endereço para receber pagamentos" />
+      <div id="merchant-addr-dropdown" class="custom-dropdown hidden">
+        <button type="button" id="merchant-addr-toggle" class="custom-dropdown-toggle">
+          <span id="merchant-addr-toggle-text">Selecionar endereço salvo…</span>
+          <svg class="custom-dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="merchant-addr-options" class="custom-dropdown-options hidden"></div>
+      </div>
+      <input id="merchant-liquid-addr" placeholder="Ou cole um endereço manualmente" />
       <label for="merchant-cnpj">CNPJ</label>
       <input id="merchant-cnpj" placeholder="Opcional" maxlength="14" />
       <label for="merchant-website">Website</label>
@@ -1490,12 +1494,16 @@
     <button id="btn-create-checkout" class="merchant-cta">Criar link de pagamento</button>
 
     <div id="checkout-result" class="hidden">
-      <div class="checkout-link-box">
-        <label>Link de pagamento</label>
+      <div class="checkout-result-box">
+        <div class="checkout-result-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38e3ac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <p class="checkout-result-title">Link criado!</p>
+        <p class="checkout-result-subtitle">Envie para seu cliente realizar o pagamento</p>
         <div class="checkout-link-row">
           <input id="checkout-link" readonly />
-          <button id="btn-copy-checkout-link" class="secondary">Copiar</button>
         </div>
+        <button id="btn-copy-checkout-link">Copiar link</button>
       </div>
     </div>
 
@@ -1630,9 +1638,9 @@
       </div>
     </div>
 
-    <div style="margin-top:12px"><a href="#webhook-logs" class="link" style="font-size:13px">Ver logs de webhook →</a></div>
+    <div style="margin-top:16px;text-align:center"><a href="#webhook-logs" class="link" style="font-size:13px">Ver logs de webhook →</a></div>
 
-    <p class="link-text"><a href="#home" class="link">← Voltar</a></p>
+    <p class="link-text" style="margin-top:16px"><a href="#home" class="link">← Voltar</a></p>
   </div>
 </section>
 
@@ -2152,6 +2160,6 @@
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <!-- Asset version must match APP_VERSION in service-worker.js -->
-<script type="module" src="script.js?v=95"></script>
+<script type="module" src="script.js?v=96"></script>
 </body>
 </html>

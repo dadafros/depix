@@ -2188,6 +2188,7 @@ function handleCopyableClick(e) {
 document.getElementById("transactions-list")?.addEventListener("click", handleCopyableClick);
 document.getElementById("merchant-checkouts-list")?.addEventListener("click", handleCopyableClick);
 document.getElementById("api-keys-list")?.addEventListener("click", handleCopyableClick);
+document.getElementById("sales-list")?.addEventListener("click", handleCopyableClick);
 
 // Extrato: clear filters
 document.getElementById("extrato-clear-filters")?.addEventListener("click", () => {
@@ -2472,19 +2473,23 @@ async function loadMerchantDispatcher() {
       document.getElementById("merchant-create").classList.remove("hidden");
       // Pre-fill Liquid address from saved addresses
       const savedAddrs = getAddresses();
-      const addrSelect = document.getElementById("merchant-addr-select");
+      const dropdown = document.getElementById("merchant-addr-dropdown");
       const addrInput = document.getElementById("merchant-liquid-addr");
-      if (savedAddrs.length > 0 && addrSelect) {
-        addrSelect.innerHTML = '<option value="">Selecionar endereço salvo…</option>' +
-          savedAddrs.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(abbreviateAddress(a))}</option>`).join("");
-        addrSelect.classList.remove("hidden");
+      const optionsEl = document.getElementById("merchant-addr-options");
+      const toggleText = document.getElementById("merchant-addr-toggle-text");
+      if (savedAddrs.length > 0 && dropdown && optionsEl) {
+        optionsEl.innerHTML = savedAddrs.map(a => {
+          const abbr = abbreviateAddress(a);
+          return `<div class="custom-dropdown-option" data-value="${escapeHtml(a)}">${escapeHtml(abbr)}</div>`;
+        }).join("");
+        dropdown.classList.remove("hidden");
         const selected = getSelectedAddress();
         if (selected && !addrInput.value) {
           addrInput.value = selected;
-          addrSelect.value = selected;
+          if (toggleText) toggleText.textContent = abbreviateAddress(selected);
         }
-      } else if (addrSelect) {
-        addrSelect.classList.add("hidden");
+      } else if (dropdown) {
+        dropdown.classList.add("hidden");
       }
       return;
     }
@@ -3061,10 +3066,36 @@ document.getElementById("btn-merchant-password-confirm")?.addEventListener("clic
   finally { btn.disabled = false; btn.textContent = "Confirmar"; pendingMerchantAction = null; }
 });
 
-// Merchant address select
-document.getElementById("merchant-addr-select")?.addEventListener("change", (e) => {
+// Merchant address dropdown
+document.getElementById("merchant-addr-toggle")?.addEventListener("click", () => {
+  const dropdown = document.getElementById("merchant-addr-dropdown");
+  const options = document.getElementById("merchant-addr-options");
+  const isOpen = dropdown.classList.contains("open");
+  dropdown.classList.toggle("open", !isOpen);
+  options.classList.toggle("hidden", isOpen);
+});
+document.getElementById("merchant-addr-options")?.addEventListener("click", (e) => {
+  const opt = e.target.closest(".custom-dropdown-option");
+  if (!opt) return;
+  const value = opt.dataset.value;
   const input = document.getElementById("merchant-liquid-addr");
-  if (e.target.value && input) input.value = e.target.value;
+  const toggleText = document.getElementById("merchant-addr-toggle-text");
+  if (value && input) input.value = value;
+  if (toggleText) toggleText.textContent = opt.textContent;
+  // Mark selected
+  document.querySelectorAll("#merchant-addr-options .custom-dropdown-option").forEach(o => o.classList.remove("selected"));
+  opt.classList.add("selected");
+  // Close dropdown
+  document.getElementById("merchant-addr-dropdown").classList.remove("open");
+  document.getElementById("merchant-addr-options").classList.add("hidden");
+});
+// Close dropdown on outside click
+document.addEventListener("click", (e) => {
+  const dropdown = document.getElementById("merchant-addr-dropdown");
+  if (dropdown && !dropdown.contains(e.target)) {
+    dropdown.classList.remove("open");
+    document.getElementById("merchant-addr-options")?.classList.add("hidden");
+  }
 });
 
 // Create merchant
