@@ -253,7 +253,7 @@ button:focus-visible {
   padding: 10px 12px;
   border-radius: 8px;
   background: rgba(255, 107, 107, 0.1);
-  border-left: 3px solid #ff6b6b;
+  border-left: 3px solid var(--color-error);
   text-align: left;
   line-height: 1.4;
 }
@@ -295,8 +295,8 @@ button:focus-visible {
 
 /* ===== Copy success ===== */
 .copy-success {
-  background: #68d391 !important;
-  color: #0a0f14 !important;
+  background: var(--color-success) !important;
+  color: var(--bg-primary) !important;
 }
 
 /* ===== Links ===== */
@@ -460,6 +460,11 @@ button:focus-visible {
   background: rgba(56, 227, 172, 0.15);
   color: var(--accent);
   font-weight: 600;
+}
+
+.mode-toggle-option.active small {
+  color: var(--accent);
+  opacity: 0.75;
 }
 
 /* ===== BRSwap Converter ===== */
@@ -787,7 +792,7 @@ button:focus-visible {
 
 .qr-hint {
   font-size: 0.8rem;
-  color: #6b7f94;
+  color: var(--text-placeholder);
   margin: 16px 0 8px;
   line-height: 1.45;
 }
@@ -1951,6 +1956,7 @@ textarea:focus {
 .transaction-status {
   font-size: 11px;
   font-weight: 600;
+  text-transform: uppercase;
   padding: 3px 8px;
   border-radius: 6px;
   flex-shrink: 0;
@@ -2120,10 +2126,10 @@ textarea:focus {
   font-size: 13px;
   height: 40px !important;
   box-sizing: border-box;
-  background: #1a2535 !important;
+  background: var(--bg-input) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px !important;
-  color: #c0cdd8 !important;
+  color: var(--text-bright) !important;
 }
 
 .extrato-search-clear {
@@ -2246,7 +2252,7 @@ textarea:focus {
 
 .extrato-filter-badge {
   background: var(--accent);
-  color: #0b1a1a;
+  color: var(--bg-primary);
   font-size: 11px;
   font-weight: 700;
   min-width: 18px;
@@ -2376,7 +2382,7 @@ textarea:focus {
 .report-popover-field input[type="date"] {
   width: 100%;
   padding: 5px 4px !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   margin: 0 !important;
   min-width: 0;
 }
@@ -2451,14 +2457,14 @@ textarea:focus {
   box-sizing: border-box;
   -webkit-appearance: none !important;
   appearance: none !important;
-  background: #1a2535 !important;
+  background: var(--bg-input) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px !important;
-  color: #c0cdd8 !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6d82' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+  color: var(--text-bright) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238294a7' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: right 12px center !important;
-  background-color: #1a2535 !important;
+  background-color: var(--bg-input) !important;
 }
 
 .extrato-date-row {
@@ -2496,7 +2502,7 @@ textarea:focus {
   appearance: none !important;
   background: transparent !important;
   border: none !important;
-  color: #c0cdd8 !important;
+  color: var(--text-bright) !important;
   color-scheme: dark;
 }
 
@@ -2548,7 +2554,7 @@ textarea:focus {
   background: transparent !important;
   border: 1px solid rgba(255, 107, 107, 0.25) !important;
   border-radius: 8px !important;
-  color: #ff6b6b !important;
+  color: var(--color-error) !important;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -2977,7 +2983,7 @@ textarea:focus {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #38e3ac, #2bb88a);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   color: var(--bg-primary);
   font-family: 'Space Grotesk', system-ui, sans-serif;
   font-weight: 700;
@@ -3220,7 +3226,7 @@ textarea:focus {
 
 .landing-what-sub {
   font-size: 1rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   line-height: 1.7;
   max-width: 600px;
   margin: 0 auto 32px;
@@ -3307,7 +3313,7 @@ textarea:focus {
 }
 
 .landing-inclusion-text {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 1.05rem;
   line-height: 1.7;
   max-width: 600px;
@@ -3791,10 +3797,10 @@ textarea:focus {
   color: var(--text-primary); font-size: 14px; width: 100%;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.account-field-value.empty { color: var(--text-dim); font-size: 13px; }
+.account-field-value.empty { color: var(--text-dim); font-size: 14px; }
 .merchant-edit-btn {
   background: none; border: none; color: var(--accent);
-  font-size: 12px; padding: 0 0 0 10px; cursor: pointer; opacity: 0.7;
+  font-size: 12px; padding: 0 0 0 10px; cursor: pointer; opacity: 0.8;
   white-space: nowrap;
 }
 .merchant-edit-btn:hover { opacity: 1; }
@@ -3846,7 +3852,7 @@ textarea:focus {
 .api-key-detail { font-size: 12px; color: var(--text-tertiary); }
 .btn-revoke-key {
   font-size: 12px; padding: 0; background: none; border: none;
-  color: var(--color-error); cursor: pointer; opacity: 0.6; margin-left: auto;
+  color: var(--color-error); cursor: pointer; opacity: 0.8; margin-left: auto;
   width: auto; margin-bottom: 0;
 }
 .btn-revoke-key:hover { opacity: 1; }
@@ -3933,10 +3939,10 @@ textarea:focus {
 .webhook-log-body {
   background: var(--bg-primary); border-radius: 6px; padding: 8px; margin-top: 6px; font-size: 12px; color: var(--text-secondary);
 }
-.webhook-log-body strong { color: var(--text-bright); font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+.webhook-log-body strong { color: var(--text-bright); font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
 .webhook-log-body pre {
   margin: 4px 0 0; white-space: pre-wrap; word-break: break-all;
-  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary);
 }
 
 .text-danger { color: var(--color-error) !important; }
