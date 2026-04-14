@@ -2863,8 +2863,8 @@ async function loadProductsView() {
 
     // Stats
     const totalCount = products.length;
-    const activeCount = products.filter(p => p.is_active).length;
-    const totalCheckouts = products.reduce((sum, p) => sum + (p.checkout_count || 0), 0);
+    const activeCount = products.filter(p => p.active).length;
+    const totalCheckouts = products.reduce((sum, p) => sum + (p.total_checkouts || 0), 0);
     document.getElementById("products-stat-total").textContent = totalCount;
     document.getElementById("products-stat-active").textContent = activeCount;
     document.getElementById("products-stat-checkouts").textContent = totalCheckouts;
@@ -2875,14 +2875,14 @@ async function loadProductsView() {
     }
 
     list.innerHTML = products.map(p => {
-      const statusBadge = p.is_active
+      const statusBadge = p.active
         ? '<span class="badge badge-green">Ativo</span>'
         : '<span class="badge badge-gray">Inativo</span>';
       const amount = formatBRL(p.amount);
       const desc = p.description
         ? `<span class="product-card-desc">${escapeHtml(p.description)}</span>`
         : '';
-      const checkoutCount = p.checkout_count || 0;
+      const checkoutCount = p.total_checkouts || 0;
       return `<div class="product-card">
         <div class="product-card-header">
           <div class="product-card-name">${escapeHtml(p.slug)}</div>
@@ -2956,8 +2956,8 @@ async function loadProductEditView() {
     document.getElementById("product-edit-metadata").value = product.metadata ? JSON.stringify(product.metadata, null, 2) : "";
 
     // Product URL
-    if (product.slug && merchantData?.slug) {
-      const productUrl = `https://pay.depixapp.com/${merchantData.slug}/${product.slug}`;
+    if (product.slug && merchantData?.username) {
+      const productUrl = `https://pay.depixapp.com/${merchantData.username}/${product.slug}`;
       document.getElementById("product-edit-url").value = productUrl;
       document.getElementById("product-edit-url-row")?.classList.remove("hidden");
     }
@@ -2965,9 +2965,9 @@ async function loadProductEditView() {
     // Toggle button label
     const toggleBtn = document.getElementById("btn-product-edit-toggle");
     if (toggleBtn) {
-      toggleBtn.textContent = product.is_active ? "Desativar" : "Ativar";
+      toggleBtn.textContent = product.active ? "Desativar" : "Ativar";
       toggleBtn.dataset.productId = productId;
-      toggleBtn.dataset.isActive = product.is_active ? "1" : "0";
+      toggleBtn.dataset.isActive = product.active ? "1" : "0";
     }
 
     // Save button
@@ -3005,8 +3005,10 @@ async function loadProductCheckoutsView() {
       document.getElementById("product-checkouts-info").innerHTML = `
         <div class="product-checkouts-summary">
           <span>${formatBRL(product.amount)}</span>
-          <span class="badge ${product.is_active ? 'badge-green' : 'badge-gray'}">${product.is_active ? 'Ativo' : 'Inativo'}</span>
+          <span class="badge ${product.active ? 'badge-green' : 'badge-gray'}">${product.active ? 'Ativo' : 'Inativo'}</span>
         </div>`;
+    } else {
+      setMsg("product-checkouts-msg", "Não foi possível carregar os detalhes do produto.");
     }
 
     if (!checkoutsRes.ok) {
@@ -3237,6 +3239,10 @@ document.getElementById("btn-merchant-edit-save")?.addEventListener("click", asy
   if (field === "cnpj" && value) {
     const cnpjResult = validateCNPJ(value);
     if (!cnpjResult.valid) { setMsg("merchant-edit-modal-msg", cnpjResult.error); btn.disabled = false; btn.textContent = "Salvar"; return; }
+  }
+  if ((field === "logo_url" || field === "default_callback_url" || field === "default_redirect_url") && value) {
+    const urlError = validateHttpsUrl(value, field.replace(/_url$/, " URL").replace(/_/g, " "));
+    if (urlError) { setMsg("merchant-edit-modal-msg", urlError); btn.disabled = false; btn.textContent = "Salvar"; return; }
   }
   try {
     let sendValue = value || null;
