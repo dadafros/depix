@@ -1549,6 +1549,12 @@ initReportPopover(
   "commission-report-submit", "commission-report-msg", "comissao"
 );
 
+initReportPopover(
+  "sales-download-report", "sales-report-popover",
+  "sales-report-start", "sales-report-end",
+  "sales-report-submit", "sales-report-msg", "checkouts"
+);
+
 // Single delegated close-on-outside-click for all popovers
 document.addEventListener("click", (e) => {
   document.querySelectorAll(".report-popover-wrap").forEach(wrap => {

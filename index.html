@@ -142,16 +142,16 @@
   }
   </script>
 
-  <link rel="manifest" href="manifest.json?v=102" />
-  <link rel="icon" href="icon-192.png?v=102" />
-  <link rel="apple-touch-icon" href="icon-192.png?v=102" />
+  <link rel="manifest" href="manifest.json?v=103" />
+  <link rel="icon" href="icon-192.png?v=103" />
+  <link rel="apple-touch-icon" href="icon-192.png?v=103" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <!-- Asset version must match APP_VERSION in service-worker.js -->
-  <link rel="stylesheet" href="style.css?v=102" />
+  <link rel="stylesheet" href="style.css?v=103" />
 </head>
 <body>
 
@@ -160,7 +160,7 @@
 
   <nav class="landing-nav">
     <div class="landing-nav-inner">
-      <a href="#landing" class="landing-logo"><img src="icon-192.png?v=102" alt="DePix App" class="landing-logo-icon" width="32" height="32"><span>DePix App</span></a>
+      <a href="#landing" class="landing-logo"><img src="icon-192.png?v=103" alt="DePix App" class="landing-logo-icon" width="32" height="32"><span>DePix App</span></a>
       <div class="landing-nav-right">
         <a href="https://blog.depixapp.com/" class="landing-nav-link">Blog</a>
         <a href="#login" class="landing-nav-cta">Entrar</a>
@@ -1625,6 +1625,26 @@
           <input id="sales-filter-search" type="text" placeholder="Buscar…" autocomplete="off" />
           <button id="sales-search-clear" class="extrato-search-clear hidden" type="button" aria-label="Limpar busca">&times;</button>
         </div>
+        <div class="report-popover-wrap">
+          <button id="sales-download-report" class="extrato-report-btn" type="button" title="Solicitar relatório de vendas por e-mail">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Baixar
+          </button>
+          <div id="sales-report-popover" class="report-popover hidden">
+            <div class="report-popover-dates">
+              <div class="report-popover-field">
+                <label for="sales-report-start">De</label>
+                <input id="sales-report-start" type="date" />
+              </div>
+              <div class="report-popover-field">
+                <label for="sales-report-end">Até</label>
+                <input id="sales-report-end" type="date" />
+              </div>
+            </div>
+            <button id="sales-report-submit" class="report-popover-submit">Enviar por e-mail</button>
+            <div id="sales-report-msg" class="mensagem"></div>
+          </div>
+        </div>
         <button id="sales-filter-toggle" class="extrato-filter-toggle" type="button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           Filtros
@@ -2379,6 +2399,6 @@
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <!-- Asset version must match APP_VERSION in service-worker.js -->
-<script type="module" src="script.js?v=102"></script>
+<script type="module" src="script.js?v=103"></script>
 </body>
 </html>
