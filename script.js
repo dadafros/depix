@@ -12,7 +12,7 @@ import { toCents, formatBRL, formatDePix, escapeHtml } from "./utils.js";
 import { validateLiquidAddress, validatePhone, validatePixKey, validateCPF, validateCNPJ, formatPixKey, preparePixKeyForApi } from "./validation.js";
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
-import { renderBrandedQr } from "./qr.js";
+import { renderBrandedQr, renderPrintableQr } from "./qr.js";
 
 // ===== Constants =====
 const MIN_VALOR_CENTS = 500;
@@ -3155,13 +3155,16 @@ document.getElementById("btn-charge-copy")?.addEventListener("click", () => {
   const link = document.getElementById("charge-payment-link")?.value;
   if (link) { navigator.clipboard.writeText(link).then(() => showToast("Link copiado!")).catch(() => showToast("Erro ao copiar")); }
 });
-document.getElementById("btn-charge-download")?.addEventListener("click", () => {
-  const img = document.getElementById("charge-qr-img");
-  if (!img || !img.src) return;
-  const a = document.createElement("a");
-  a.href = img.src;
-  a.download = "depix-qrcode.png";
-  a.click();
+document.getElementById("btn-charge-download")?.addEventListener("click", async () => {
+  const link = document.getElementById("charge-payment-link")?.value;
+  if (!link) return;
+  try {
+    const dataUrl = await renderPrintableQr(link);
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = "depix-qrcode.png";
+    a.click();
+  } catch { /* generation failed */ }
 });
 document.getElementById("btn-charge-share")?.addEventListener("click", async () => {
   const link = document.getElementById("charge-payment-link")?.value;

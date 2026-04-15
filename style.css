@@ -3619,21 +3619,25 @@ textarea:focus {
   width: 100%; text-align: center;
   font-family: 'JetBrains Mono', monospace; font-size: 12px;
 }
-.charge-actions {
-  display: flex; gap: 8px; margin-bottom: 24px;
+.charge-cta-primary {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 16px; border-radius: 12px; font-size: 15px; font-weight: 600;
+  cursor: pointer; border: none;
+  background: #38e3ac; color: #0a0f14;
+  margin-bottom: 12px;
+}
+.charge-cta-primary:active { background: #2bc896; }
+.charge-actions-secondary {
+  display: flex; gap: 10px; margin-bottom: 24px;
 }
 .charge-action-btn {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 10px 8px; border-radius: 10px; font-size: 13px; font-weight: 600;
-  cursor: pointer; border: 1px solid rgba(56, 227, 172, 0.15);
-  background: rgba(56, 227, 172, 0.06); color: #c8d6e5;
+  padding: 11px 8px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: 1px solid rgba(56, 227, 172, 0.18);
+  background: transparent; color: #c8d6e5;
   white-space: nowrap;
 }
-.charge-action-btn:active { background: rgba(56, 227, 172, 0.12); }
-.charge-action-primary {
-  background: #38e3ac; color: #0a0f14; border-color: #38e3ac;
-}
-.charge-action-primary:active { background: #2bc896; }
+.charge-action-btn:active { background: rgba(56, 227, 172, 0.10); }
 .charge-help {
   background: rgba(56, 227, 172, 0.04); border: 1px solid rgba(56, 227, 172, 0.08);
   border-radius: 12px; padding: 16px; text-align: left;
