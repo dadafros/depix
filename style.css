@@ -3542,6 +3542,18 @@ textarea:focus {
 }
 .verify-badge-yellow { background: rgba(236, 201, 75, 0.12); color: #ecc94b; }
 .verify-badge-green { background: rgba(104, 211, 145, 0.12); color: #68d391; }
+.verify-badge-limit {
+  font-size: 10px;
+  color: #8a9bb5;
+  background: rgba(138, 155, 181, 0.1);
+  padding: 2px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.verify-badge-limit-green {
+  color: #38e3ac;
+  background: rgba(56, 227, 172, 0.08);
+}
 
 .verify-bonus {
   background: rgba(255,255,255,0.03); border-radius: 10px;
@@ -3614,6 +3626,7 @@ textarea:focus {
 }
 .charge-qr-loading { color: #5a6d82; font-size: 13px; }
 .charge-qr-error { color: #ff6b6b; font-size: 13px; }
+.charge-qr-hint { color: #94a3b8; font-size: 12px; text-align: center; margin: 8px 0 0; line-height: 1.4; }
 .charge-link-box { margin-bottom: 16px; }
 .charge-link-box input {
   width: 100%; text-align: center;
