@@ -3958,3 +3958,14 @@ textarea:focus {
 @media (min-width: 768px) {
   .sales-stats { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* Deposit limit info */
+.deposit-limit-info {
+  font-size: 11px;
+  color: #8a9bb5;
+  margin: 4px 0 8px;
+}
+.deposit-limit-info a {
+  color: #4fd1c5;
+  text-decoration: underline;
+}

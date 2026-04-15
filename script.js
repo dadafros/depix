@@ -2264,6 +2264,7 @@ route("#home", () => {
   // Show banners
   const homeUser = getUser();
   document.getElementById("home-verify-banner")?.classList.toggle("hidden", !!homeUser?.verified);
+  document.getElementById("deposit-limit-info")?.classList.toggle("hidden", !!homeUser?.verified);
   document.getElementById("home-whatsapp-banner")?.classList.remove("hidden");
   document.getElementById("resultado")?.classList.add("hidden");
   document.getElementById("formDeposito")?.classList.remove("hidden");
