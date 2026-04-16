@@ -1201,11 +1201,51 @@ document.getElementById("menu-overlay")?.addEventListener("click", (e) => {
   }
 });
 
+// Reset all user-specific app state (prevents data leaking between accounts)
+function resetAppState() {
+  stopTransactionsPolling();
+  stopSalesPolling();
+
+  // General state
+  qrCopyPaste = "";
+  pendingAddressChange = "";
+  pendingAddressDelete = "";
+  modoSaque = false;
+  modoConvert = false;
+  brswapConfig = null;
+  valorModeIsPix = false;
+  saqueDepositAddress = "";
+  lastDepositQrId = "";
+  lastWithdrawalId = "";
+
+  // Transactions state
+  allTransactions = [];
+  filteredTransactions = [];
+  displayedCount = 0;
+
+  // Merchant state
+  merchantData = null;
+  salesDisplayedCount = 0;
+  filteredSales = [];
+  allSalesCheckouts = [];
+  currentSalesProductId = null;
+  currentSalesProductSlug = "";
+  pendingMerchantAction = null;
+  pendingRevokeKeyId = null;
+  pendingLiquidPassword = null;
+  salesProductsCache = null;
+
+  // Clear user-specific localStorage
+  localStorage.removeItem("depix-pixkey");
+  localStorage.removeItem("depix-brswap-warned");
+}
+
 // Logout
 document.getElementById("menu-logout")?.addEventListener("click", () => {
   closeMenu();
   const refreshToken = getRefreshToken();
   clearAuth();
+  resetAppState();
   const loginSenha = document.getElementById("login-senha");
   if (loginSenha) loginSenha.value = "";
   navigate("#login");
