@@ -2093,6 +2093,16 @@ document.getElementById("menu-transactions")?.addEventListener("click", () => {
   navigate("#transactions");
 });
 
+// Shared: collapse a filter panel after selection
+function collapseFilterPanel(panelId, toggleId) {
+  const panel = document.getElementById(panelId);
+  const toggle = document.getElementById(toggleId);
+  if (panel && !panel.classList.contains("hidden")) {
+    panel.classList.add("hidden");
+    toggle?.classList.remove("open");
+  }
+}
+
 // Extrato: pill toggle filters (type)
 document.querySelectorAll(".extrato-pill").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -2100,6 +2110,7 @@ document.querySelectorAll(".extrato-pill").forEach(btn => {
     btn.classList.add("active");
     applyFilters();
     updateFilterBadge();
+    collapseFilterPanel("extrato-filter-panel", "extrato-filter-toggle");
   });
 });
 
@@ -2142,6 +2153,7 @@ document.querySelectorAll(".extrato-period-btn").forEach(btn => {
       const { start, end } = getDateFromPeriod(period);
       if (startInput) startInput.value = start;
       if (endInput) endInput.value = end;
+      collapseFilterPanel("extrato-filter-panel", "extrato-filter-toggle");
     }
     applyFilters();
     updateFilterBadge();
@@ -2186,7 +2198,7 @@ document.getElementById("filter-search-clear")?.addEventListener("click", () => 
 });
 
 // Extrato: auto-filter on change
-document.getElementById("filter-status")?.addEventListener("change", () => { applyFilters(); updateFilterBadge(); });
+document.getElementById("filter-status")?.addEventListener("change", () => { applyFilters(); updateFilterBadge(); collapseFilterPanel("extrato-filter-panel", "extrato-filter-toggle"); });
 document.getElementById("filter-start-date")?.addEventListener("change", () => { applyFilters(); updateFilterBadge(); });
 document.getElementById("filter-end-date")?.addEventListener("change", () => { applyFilters(); updateFilterBadge(); });
 
@@ -2733,22 +2745,62 @@ function buildSalesFilterParams() {
   return params;
 }
 
+function syncSalesProductChip() {
+  const chip = document.getElementById("sales-product-filter");
+  const label = document.getElementById("sales-product-filter-label");
+  const dropdown = document.getElementById("sales-filter-product");
+  if (currentSalesProductId && chip && label) {
+    label.textContent = currentSalesProductSlug || currentSalesProductId;
+    chip.classList.remove("hidden");
+  } else if (chip) {
+    chip.classList.add("hidden");
+  }
+  if (dropdown) dropdown.value = currentSalesProductId || "";
+}
+
+let salesProductsCache = null;
+async function populateSalesProductDropdown() {
+  const dropdown = document.getElementById("sales-filter-product");
+  if (!dropdown) return;
+  try {
+    if (!salesProductsCache) {
+      const res = await apiFetch("/api/products");
+      if (res.ok) {
+        const data = await res.json();
+        salesProductsCache = (data.products || []).filter(p => p.active);
+      }
+    }
+    if (salesProductsCache) {
+      // Keep "Todos" option, rebuild the rest
+      dropdown.innerHTML = '<option value="">Todos</option>';
+      for (const p of salesProductsCache) {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.description || p.slug;
+        dropdown.appendChild(opt);
+      }
+      if (currentSalesProductId) dropdown.value = currentSalesProductId;
+    }
+  } catch { /* non-critical — dropdown stays with just "Todos" */ }
+}
+
 async function loadSalesView() {
   stopSalesPolling();
   showMerchantMenu();
 
   // Parse product filter from hash params
   const hashParams = new URLSearchParams(window.location.hash.split("?")[1] || "");
-  currentSalesProductId = hashParams.get("product_id") || null;
-  currentSalesProductSlug = hashParams.get("product") || "";
-  const productChip = document.getElementById("sales-product-filter");
-  const productLabel = document.getElementById("sales-product-filter-label");
-  if (currentSalesProductId && productChip && productLabel) {
-    productLabel.textContent = `Produto: ${currentSalesProductSlug || currentSalesProductId}`;
-    productChip.classList.remove("hidden");
-  } else if (productChip) {
-    productChip.classList.add("hidden");
+  const hashProductId = hashParams.get("product_id") || null;
+  const hashProductSlug = hashParams.get("product") || "";
+  // Only override from hash if it carries a product_id (i.e. coming from products screen)
+  if (hashProductId) {
+    currentSalesProductId = hashProductId;
+    currentSalesProductSlug = hashProductSlug;
   }
+  syncSalesProductChip();
+
+  // Populate product dropdown (non-blocking)
+  populateSalesProductDropdown();
 
   document.getElementById("sales-loading")?.classList.remove("hidden");
   document.getElementById("sales-empty")?.classList.add("hidden");
@@ -3391,14 +3443,28 @@ document.getElementById("sales-filter-toggle")?.addEventListener("click", () => 
   toggle.classList.toggle("open");
 });
 // Sales status filter
-document.getElementById("sales-filter-status")?.addEventListener("change", () => { loadSalesView(); updateSalesFilterBadge(); });
+document.getElementById("sales-filter-status")?.addEventListener("change", () => { loadSalesView(); updateSalesFilterBadge(); collapseFilterPanel("sales-filter-panel", "sales-filter-toggle"); });
+// Sales product filter dropdown
+document.getElementById("sales-filter-product")?.addEventListener("change", (e) => {
+  const sel = e.target;
+  const selectedOpt = sel.options[sel.selectedIndex];
+  currentSalesProductId = sel.value || null;
+  currentSalesProductSlug = sel.value ? selectedOpt.textContent : "";
+  syncSalesProductChip();
+  loadSalesView();
+  updateSalesFilterBadge();
+  collapseFilterPanel("sales-filter-panel", "sales-filter-toggle");
+});
 // Sales period presets
 document.querySelectorAll("[data-sales-period]").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll("[data-sales-period]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     document.getElementById("sales-custom-range")?.classList.toggle("hidden", btn.dataset.salesPeriod !== "custom");
-    if (btn.dataset.salesPeriod !== "custom") loadSalesView();
+    if (btn.dataset.salesPeriod !== "custom") {
+      loadSalesView();
+      collapseFilterPanel("sales-filter-panel", "sales-filter-toggle");
+    }
     updateSalesFilterBadge();
   });
 });
@@ -3423,6 +3489,8 @@ document.getElementById("sales-search-clear")?.addEventListener("click", () => {
 document.getElementById("sales-clear-filters")?.addEventListener("click", () => {
   document.getElementById("sales-filter-status").value = "";
   document.getElementById("sales-filter-search").value = "";
+  const productDropdown = document.getElementById("sales-filter-product");
+  if (productDropdown) productDropdown.value = "";
   document.querySelectorAll("[data-sales-period]").forEach(b => b.classList.remove("active"));
   document.querySelector("[data-sales-period='all']")?.classList.add("active");
   document.getElementById("sales-custom-range")?.classList.add("hidden");
@@ -3441,7 +3509,7 @@ document.getElementById("sales-clear-filters")?.addEventListener("click", () => 
 document.getElementById("sales-product-filter-clear")?.addEventListener("click", () => {
   currentSalesProductId = null;
   currentSalesProductSlug = "";
-  document.getElementById("sales-product-filter")?.classList.add("hidden");
+  syncSalesProductChip();
   navigate("#merchant-sales");
 });
 // Sales empty CTA
@@ -3519,6 +3587,7 @@ document.getElementById("btn-product-create-submit")?.addEventListener("click", 
     const res = await apiFetch("/api/products", { method: "POST", body: JSON.stringify(body) });
     const data = await res.json();
     if (!res.ok) { setMsg("product-create-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao criar produto."); return; }
+    salesProductsCache = null;
     showToast("Produto criado!");
     navigate("#merchant-products");
   } catch (e) {
@@ -3580,6 +3649,7 @@ document.getElementById("btn-product-edit-save")?.addEventListener("click", asyn
     const res = await apiFetch(`/api/products/${productId}`, { method: "PATCH", body: JSON.stringify(body) });
     const data = await res.json();
     if (!res.ok) { setMsg("product-edit-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao salvar."); return; }
+    salesProductsCache = null;
     showToast("Produto atualizado!");
     loadProductEditView();
   } catch (e) {
@@ -3604,6 +3674,7 @@ document.getElementById("btn-product-edit-toggle")?.addEventListener("click", as
     const res = await apiFetch(`/api/products/${productId}/${action}`, { method: "POST" });
     const data = await res.json();
     if (!res.ok) { setMsg("product-edit-msg", data?.response?.errorMessage || data?.errorMessage || "Erro."); return; }
+    salesProductsCache = null;
     showToast(isActive ? "Produto desativado." : "Produto ativado!");
     loadProductEditView();
   } catch (e) {
