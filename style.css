@@ -3937,11 +3937,11 @@ textarea:focus {
   border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 .product-card-url {
-  font-size: 11px; color: #5a6d82; cursor: pointer;
-  display: flex; align-items: center; gap: 4px; margin-bottom: 4px;
+  font-size: 13px; color: #5a6d82; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
 }
 .product-card-url:hover { color: #38e3ac; }
-.product-card-url .copy-icon { opacity: 0.5; }
+.product-card-url .copy-icon { opacity: 0.7; }
 .product-card-url:hover .copy-icon { opacity: 1; }
 .product-card-checkouts { font-size: 11px; color: #5a6d82; }
 .product-card-actions { display: flex; gap: 10px; }
