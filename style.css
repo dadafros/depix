@@ -4230,7 +4230,6 @@ textarea:focus {
   color: #8a9bb5;
   margin: 4px 0 8px;
 }
-.deposit-limit-info a {
-  color: #4fd1c5;
-  text-decoration: underline;
+.deposit-limit-info .link {
+  font-size: inherit;
 }
