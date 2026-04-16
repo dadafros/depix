@@ -314,28 +314,49 @@ Frontend changes reflect immediately (volume mount). See `../depix-dev/CLAUDE.md
 
 ### How it works
 
-The app uses a service worker with two caching strategies:
+The app uses a service worker with three caching strategies:
 - **HTML (`index.html`)**: Network-first — always fetches from server, falls back to cache when offline
-- **Static assets (JS, CSS, images)**: Cache-first — served from cache for speed, versioned via `?v=N` query strings
+- **JS / CSS**: Network-first — prevents stale ES module drift (see "iOS PWA blank-screen incident" below). Falls back to cache when offline.
+- **Images / icons / manifest**: Cache-first — served from cache for speed. Versioned via `?v=N`.
 
-A single `APP_VERSION` constant in `service-worker.js` controls all cache busting. When bumped, all asset URLs change (e.g. `script.js?v=90` → `script.js?v=91`), causing cache misses that force fresh downloads.
+A single `APP_VERSION` constant in `service-worker.js` controls cache naming (`depix-v${APP_VERSION}`). When bumped, the install event creates a brand-new cache and the activate event deletes older ones.
 
 The SW uses `skipWaiting()` + `clients.claim()` so new versions activate immediately. The app detects `controllerchange` and auto-reloads — users never stay stuck on an old version.
+
+### CRITICAL: the unversioned-modules gotcha (iOS PWA blank-screen incident, 2026-04-16)
+
+ES module imports in `script.js` use **unversioned specifiers**:
+
+```js
+import { slugify } from "./utils.js";  // NOT "./utils.js?v=123"
+```
+
+The browser resolves these relative to the importing module's URL but **drops the query string** during resolution, so the actual request is `https://depixapp.com/utils.js` — with no `?v=`. That means:
+
+- Versioned entries in `STATIC_FILES` (like `./utils.js?v=124`) are **never hit by module imports**.
+- If the SW's fetch handler uses cache-first and dynamically caches unversioned URLs, the cache can permanently retain a stale `./utils.js` from an earlier version. When a later `script.js` imports a newly-added export, the browser gets the old file, parsing fails with `SyntaxError: Importing binding name 'X' is not found`, and the whole app is dead before `serviceWorker.register` runs — so the SW can't even self-repair.
+
+**Mitigations in place (do not remove without replacing):**
+
+1. `STATIC_FILES` pre-caches JS modules under BOTH URLs — `./utils.js?v=${APP_VERSION}` (for the HTML references) AND `./utils.js` (for the ES module imports). Each install guarantees the unversioned entry matches the new source.
+2. JS/CSS fetches are **network-first**. Even if the cache has a stale module, the network response takes precedence. Cache is only used when offline.
+
+Images, icons, and the manifest remain cache-first because they don't cross-version-drift and cache-first is cheaper for them.
 
 ### CRITICAL: Deploy checklist
 
 **Every time you change ANY frontend file (JS, CSS, HTML), you MUST do both of these steps before pushing:**
 
-1. **Bump `APP_VERSION`** in `service-worker.js` (line 3): e.g. `const APP_VERSION = 90;` → `const APP_VERSION = 91;`
-2. **Update `?v=` query strings** in `index.html` to match the new version number. Search for `?v=` — there are ~6 occurrences (script.js, style.css, router.js, manifest.json, icons). Change all from `?v=90` to `?v=91`.
+1. **Bump `APP_VERSION`** in `service-worker.js` (line 3): e.g. `const APP_VERSION = 124;` → `const APP_VERSION = 125;`
+2. **Update `?v=` query strings** in `index.html` to match the new version number. Search for `?v=` — there are ~6 occurrences (script.js, style.css, manifest.json, icons). Change all from `?v=124` to `?v=125`.
 
-**Both steps are required.** If you only bump `APP_VERSION` but not the HTML query strings, the SW will cache new URLs but the HTML will still reference old ones. If you only bump the HTML but not `APP_VERSION`, the SW won't reinstall.
+**Both steps are required.** If you only bump `APP_VERSION` but not the HTML query strings, the HTML will reference the old version. If you only bump the HTML but not `APP_VERSION`, the SW won't reinstall.
 
 ### What happens if you forget
 
 - Users will be served stale cached files from the old service worker
-- The app can break entirely if JS/CSS imports changed between versions
-- There is no way to remotely force-update users — they must wait for the browser to detect the SW change
+- New-export imports will break (classic blank-screen symptom) — the unversioned-modules mitigations help but don't cover every case
+- There is no remote kill switch — stuck users must wait for the browser's 24h SW auto-update or reinstall the PWA manually
 
 ### Files involved
 
@@ -346,13 +367,13 @@ The SW uses `skipWaiting()` + `clients.claim()` so new versions activate immedia
 
 ### Adding new files to the cache
 
-If you create a new JS/CSS file, add it to the `STATIC_FILES` array in `service-worker.js` using the versioned template:
+If you create a new JS module, add it to the `JS_MODULES` array in `service-worker.js` (it gets spread into `STATIC_FILES` both with and without `?v=`). For CSS or other static files, add directly to `STATIC_FILES` using the versioned template:
 ```js
-`./new-file.js?v=${APP_VERSION}`,
+`./new-file.css?v=${APP_VERSION}`,
 ```
 And reference it in `index.html` with the matching query string:
 ```html
-<script type="module" src="new-file.js?v=90"></script>
+<link rel="stylesheet" href="new-file.css?v=124" />
 ```
 
 ## Workflow Rules
