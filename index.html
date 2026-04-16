@@ -142,16 +142,16 @@
   }
   </script>
 
-  <link rel="manifest" href="manifest.json?v=108" />
-  <link rel="icon" href="icon-192.png?v=108" />
-  <link rel="apple-touch-icon" href="icon-192.png?v=108" />
+  <link rel="manifest" href="manifest.json?v=109" />
+  <link rel="icon" href="icon-192.png?v=109" />
+  <link rel="apple-touch-icon" href="icon-192.png?v=109" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <!-- Asset version must match APP_VERSION in service-worker.js -->
-  <link rel="stylesheet" href="style.css?v=108" />
+  <link rel="stylesheet" href="style.css?v=109" />
 </head>
 <body>
 
@@ -160,7 +160,7 @@
 
   <nav class="landing-nav">
     <div class="landing-nav-inner">
-      <a href="#landing" class="landing-logo"><img src="icon-192.png?v=108" alt="DePix App" class="landing-logo-icon" width="32" height="32"><span>DePix App</span></a>
+      <a href="#landing" class="landing-logo"><img src="icon-192.png?v=109" alt="DePix App" class="landing-logo-icon" width="32" height="32"><span>DePix App</span></a>
       <div class="landing-nav-right">
         <a href="https://blog.depixapp.com/" class="landing-nav-link">Blog</a>
         <a href="#login" class="landing-nav-cta">Entrar</a>
@@ -1559,7 +1559,7 @@
       <div id="charge-qr-loading" class="charge-qr-loading">Gerando QR code...</div>
       <div id="charge-qr-error" class="charge-qr-error hidden">Não foi possível gerar o QR code.</div>
     </div>
-    <p class="charge-qr-hint">Use a câmera do celular para ler. Não use o app do banco — este não é um QR code Pix.</p>
+    <p class="charge-qr-hint">Use a câmera do celular para ler.<br>Não use o app do banco — este não é um QR code Pix.</p>
 
     <div class="charge-link-box">
       <input id="charge-payment-link" readonly />
@@ -1585,15 +1585,15 @@
       <div class="charge-help-steps">
         <div class="charge-help-step">
           <span class="charge-help-num">1</span>
-          <p>Cadastre seus produtos em <a href="#merchant-products" class="link">Meus Produtos</a></p>
-        </div>
-        <div class="charge-help-step">
-          <span class="charge-help-num">2</span>
           <p>Compartilhe o link ou imprima o QR code</p>
         </div>
         <div class="charge-help-step">
+          <span class="charge-help-num">2</span>
+          <p>Seu cliente escolhe um valor ou um produto, paga via Pix e você recebe em DePix</p>
+        </div>
+        <div class="charge-help-step">
           <span class="charge-help-num">3</span>
-          <p>Seu cliente escolhe um produto ou digita qualquer valor, paga via Pix e você recebe em DePix</p>
+          <p>Cadastre seus produtos em <a href="#merchant-products" class="link">Meus Produtos</a></p>
         </div>
       </div>
     </div>
@@ -1803,7 +1803,7 @@
       <option value="900">15 minutos</option>
       <option value="1200">20 minutos</option>
     </select>
-    <div class="product-advanced-toggle-row"><button id="btn-product-create-advanced" class="merchant-text-btn" type="button">Avançado <span class="product-advanced-arrow">&#x25B8;</span></button></div>
+    <div class="product-advanced-toggle-row"><button id="btn-product-create-advanced" class="advanced-toggle-btn" type="button">Configurações avançadas <span class="advanced-toggle-arrow">&#x25B8;</span></button></div>
     <div class="product-advanced hidden" data-advanced="product-create">
       <label for="product-create-callback-url">Callback URL (HTTPS) <button class="icon-btn-sm product-callback-info" aria-label="O que é isso?" type="button">?</button></label>
       <input id="product-create-callback-url" placeholder="https://..." />
@@ -1839,7 +1839,7 @@
       <option value="900">15 minutos</option>
       <option value="1200">20 minutos</option>
     </select>
-    <div class="product-advanced-toggle-row"><button id="btn-product-edit-advanced" class="merchant-text-btn" type="button">Avançado <span class="product-advanced-arrow">&#x25B8;</span></button></div>
+    <div class="product-advanced-toggle-row"><button id="btn-product-edit-advanced" class="advanced-toggle-btn" type="button">Configurações avançadas <span class="advanced-toggle-arrow">&#x25B8;</span></button></div>
     <div class="product-advanced hidden" data-advanced="product-edit">
       <label for="product-edit-callback-url">Callback URL (HTTPS) <button class="icon-btn-sm product-callback-info" aria-label="O que é isso?" type="button">?</button></label>
       <input id="product-edit-callback-url" placeholder="https://..." />
@@ -2405,6 +2405,6 @@
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <!-- Asset version must match APP_VERSION in service-worker.js -->
-<script type="module" src="script.js?v=108"></script>
+<script type="module" src="script.js?v=109"></script>
 </body>
 </html>

@@ -2601,7 +2601,7 @@ async function loadAccountView() {
       };
       container.innerHTML = '<div class="account-list">'
         + mainFields.map(renderField).join("")
-        + `<div class="account-advanced-toggle-row"><button id="btn-account-advanced" class="merchant-text-btn">Avançado <span id="account-advanced-arrow">▸</span></button></div>`
+        + `<div class="account-advanced-toggle-row"><button id="btn-account-advanced" class="advanced-toggle-btn">Configurações avançadas <span id="account-advanced-arrow" class="advanced-toggle-arrow">▸</span></button></div>`
         + `<div id="account-advanced-fields" class="account-advanced hidden">${advancedFields.map(renderField).join("")}</div>`
         + '</div>';
       // Re-attach edit handlers
@@ -2611,7 +2611,7 @@ async function loadAccountView() {
         const arrow = document.getElementById("account-advanced-arrow");
         if (panel) {
           const isHidden = panel.classList.toggle("hidden");
-          if (arrow) arrow.textContent = isHidden ? "▸" : "▾";
+          if (arrow) arrow.classList.toggle("open", !isHidden);
         }
       });
       // Info modals for advanced fields
@@ -2981,6 +2981,11 @@ async function loadProductCreateView() {
   document.getElementById("product-create-expires").value = "";
   document.getElementById("product-create-metadata").value = "";
   setMsg("product-create-msg", "");
+  // Collapse advanced section
+  const createAdvPanel = document.querySelector('[data-advanced="product-create"]');
+  const createAdvArrow = document.getElementById("btn-product-create-advanced")?.querySelector(".advanced-toggle-arrow");
+  if (createAdvPanel) createAdvPanel.classList.add("hidden");
+  if (createAdvArrow) createAdvArrow.classList.remove("open");
 }
 
 async function loadProductEditView() {
@@ -3009,14 +3014,12 @@ async function loadProductEditView() {
     document.getElementById("product-edit-expires").value = product.expires_in ? String(product.expires_in) : "";
     document.getElementById("product-edit-metadata").value = product.metadata ? JSON.stringify(product.metadata, null, 2) : "";
 
-    // Auto-expand advanced if any advanced field has a value
+    // Reset advanced to collapsed, then expand only if needed
     const hasAdvanced = product.callback_url || product.redirect_url || product.metadata;
     const advPanel = document.querySelector('[data-advanced="product-edit"]');
-    const advArrow = document.getElementById("btn-product-edit-advanced")?.querySelector(".product-advanced-arrow");
-    if (hasAdvanced && advPanel) {
-      advPanel.classList.remove("hidden");
-      if (advArrow) advArrow.innerHTML = "&#x25BE;";
-    }
+    const advArrow = document.getElementById("btn-product-edit-advanced")?.querySelector(".advanced-toggle-arrow");
+    if (advPanel) advPanel.classList.toggle("hidden", !hasAdvanced);
+    if (advArrow) advArrow.classList.toggle("open", !!hasAdvanced);
 
     // Toggle button label
     const toggleBtn = document.getElementById("btn-product-edit-toggle");
@@ -3473,10 +3476,10 @@ document.getElementById("btn-products-goto-create")?.addEventListener("click", (
   document.getElementById(id)?.addEventListener("click", () => {
     const btn = document.getElementById(id);
     const panel = btn?.closest(".card")?.querySelector(".product-advanced");
-    const arrow = btn?.querySelector(".product-advanced-arrow");
+    const arrow = btn?.querySelector(".advanced-toggle-arrow");
     if (panel) {
       const isHidden = panel.classList.toggle("hidden");
-      if (arrow) arrow.innerHTML = isHidden ? "&#x25B8;" : "&#x25BE;";
+      if (arrow) arrow.classList.toggle("open", !isHidden);
     }
   });
 });
