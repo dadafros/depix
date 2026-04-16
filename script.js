@@ -2404,6 +2404,25 @@ document.getElementById("products-list")?.addEventListener("click", handleCopyab
 document.getElementById("api-keys-list")?.addEventListener("click", handleCopyableClick);
 document.getElementById("sales-list")?.addEventListener("click", handleCopyableClick);
 
+// Checkout metadata modal
+document.getElementById("sales-list")?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".checkout-metadata-btn");
+  if (!btn) return;
+  e.stopPropagation();
+  const raw = btn.dataset.metadata;
+  if (!raw) return;
+  try {
+    const obj = JSON.parse(raw);
+    document.getElementById("checkout-metadata-content").textContent = JSON.stringify(obj, null, 2);
+  } catch {
+    document.getElementById("checkout-metadata-content").textContent = raw;
+  }
+  document.getElementById("checkout-metadata-modal")?.classList.remove("hidden");
+});
+document.getElementById("close-checkout-metadata")?.addEventListener("click", () => {
+  document.getElementById("checkout-metadata-modal")?.classList.add("hidden");
+});
+
 // Extrato: clear filters
 document.getElementById("extrato-clear-filters")?.addEventListener("click", () => {
   // Reset search
@@ -2595,13 +2614,18 @@ function renderCheckoutItem(c) {
   const colorClass = checkoutStatusColor(c.status);
   const amount = formatBRL(c.amount);
   const desc = c.description ? `<span class="checkout-desc">${escapeHtml(c.description)}</span>` : '<span class="checkout-desc text-muted">(sem descrição)</span>';
-  const copyIcon = '<svg class="copy-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const productName = c.product_name ? `<span class="checkout-product-name">${escapeHtml(c.product_name)}</span>` : "";
   let paidIn = "";
   if (c.status === "completed" && c.created_at && c.processing_at) {
     const diffMs = new Date(c.processing_at) - new Date(c.created_at);
     const mins = Math.round(diffMs / 60000);
     paidIn = `<span class="transaction-detail"><span class="transaction-detail-label">Pago em:</span> <span class="transaction-detail-value">${mins}min</span></span>`;
   }
+  let parsedMeta = null;
+  if (c.metadata) {
+    try { parsedMeta = typeof c.metadata === "string" ? JSON.parse(c.metadata) : c.metadata; } catch { /* ignore */ }
+  }
+  const metadataBtn = parsedMeta ? `<button class="checkout-metadata-btn" type="button" data-metadata="${escapeHtml(JSON.stringify(parsedMeta))}">Metadata</button>` : "";
   return `<div class="transaction-item">
     <div class="transaction-info">
       <span class="transaction-amount">${amount}</span>
@@ -2609,9 +2633,10 @@ function renderCheckoutItem(c) {
     </div>
     <span class="transaction-status ${colorClass}">${statusLabel}</span>
     ${desc}
+    ${productName}
     <div class="transaction-details">
-      <span class="transaction-detail copyable mono" data-copy="${escapeHtml(c.payment_url || `https://pay.depixapp.com/${c.id}`)}"><span class="transaction-detail-label">Link:</span> <span class="transaction-detail-value">${escapeHtml(abbreviateHash(c.payment_url || `https://pay.depixapp.com/${c.id}`, 25, 8))}</span>${copyIcon}</span>
       ${paidIn}
+      ${metadataBtn}
     </div>
   </div>`;
 }

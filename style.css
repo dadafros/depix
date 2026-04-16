@@ -3854,6 +3854,61 @@ textarea:focus {
 }
 .checkout-desc.text-muted { color: #5a6d82; font-style: italic; }
 
+.checkout-product-name {
+  display: block;
+  font-size: 11px;
+  color: #38e3ac;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.checkout-metadata-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #8a9bb0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.checkout-metadata-btn:hover {
+  background: rgba(56, 227, 172, 0.1);
+  color: #38e3ac;
+  border-color: rgba(56, 227, 172, 0.25);
+}
+
+.checkout-metadata-btn:active {
+  background: rgba(56, 227, 172, 0.18);
+}
+
+.checkout-metadata-modal-box {
+  max-width: 420px;
+}
+
+.checkout-metadata-pre {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 14px;
+  margin: 12px 0 0;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 12px;
+  color: #c0cdd8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-y: auto;
+  max-height: 50vh;
+  line-height: 1.5;
+}
+
 /* ===== Webhook logs — scrollable like transactions-list ===== */
 .webhook-logs-list {
   display: flex; flex-direction: column; gap: 6px;
