@@ -13,6 +13,7 @@ import { validateLiquidAddress, validatePhone, validatePixKey, validateCPF, vali
 import { showToast, setMsg, goToAppropriateScreen as _goToAppropriateScreen } from "./script-helpers.js";
 import { captureReferralCode, buildRegistrationBody, clearReferralCode, buildAffiliateLink, renderReferralsHTML, generateFingerprint } from "./affiliates.js";
 import { renderBrandedQr, renderPrintableQr } from "./qr.js";
+import { resizeImage } from "./image-resize.js";
 
 // ===== Constants =====
 const MIN_VALOR_CENTS = 500;
@@ -61,6 +62,149 @@ function formatCurrencyInput(input, mode) {
     input.value = useDepix ? v + " DePix" : "R$ " + v;
   });
 }
+
+// ===== Image upload helpers =====
+
+/**
+ * Upload an image file to R2 via presigned URL flow.
+ * @param {File} file - Image file from <input type="file">
+ * @param {"logo"|"product"} type
+ * @param {string|null} productId - Required if type === "product"
+ * @returns {Promise<string>} Public URL of uploaded image
+ */
+async function uploadImage(file, type, productId = null) {
+  const maxSize = type === "logo" ? 144 : 360;
+  const blob = await resizeImage(file, maxSize);
+
+  const uploadBody = { type, content_type: blob.type || "image/webp" };
+  if (productId) uploadBody.product_id = productId;
+
+  const urlRes = await apiFetch("/api/upload-url", { method: "POST", body: JSON.stringify(uploadBody) });
+  const urlData = await urlRes.json();
+  if (!urlRes.ok) throw new Error(urlData?.response?.errorMessage || "Erro ao preparar upload.");
+
+  const putRes = await fetch(urlData.upload_url, {
+    method: "PUT",
+    headers: { "Content-Type": blob.type || "image/webp" },
+    body: blob,
+  });
+  if (!putRes.ok) throw new Error("Falha no upload da imagem. Tente novamente.");
+
+  const confirmBody = { type, key: urlData.key };
+  if (productId) confirmBody.product_id = productId;
+  const confirmRes = await apiFetch("/api/upload-confirm", { method: "POST", body: JSON.stringify(confirmBody) });
+  const confirmData = await confirmRes.json();
+  if (!confirmRes.ok) throw new Error(confirmData?.response?.errorMessage || "Erro ao confirmar upload.");
+
+  return confirmData.url;
+}
+
+/**
+ * Delete an image from R2 via the backend.
+ * @param {"logo"|"product"} type
+ * @param {string|null} productId
+ */
+async function deleteImageApi(type, productId = null) {
+  const body = { type };
+  if (productId) body.product_id = productId;
+  await apiFetch("/api/upload-image", { method: "DELETE", body: JSON.stringify(body) });
+}
+
+/**
+ * Initialize an image-file-row component: wire up file selection and removal.
+ * @param {string} rowId - DOM id of the .image-file-row element
+ * @returns {{ getFile: () => File|null, reset: () => void, setExisting: (hasImage: boolean) => void, isMarkedForRemoval: () => boolean }}
+ */
+function initImageFileRow(rowId) {
+  const row = document.getElementById(rowId);
+  if (!row) return { getFile: () => null, reset: () => {}, setExisting: () => {}, isMarkedForRemoval: () => false };
+
+  const fileInput = row.querySelector(".image-file-input");
+  const emptyState = row.querySelector(".image-file-empty");
+  const selectedState = row.querySelector(".image-file-selected");
+  const existingState = row.querySelector(".image-file-existing");
+  const uploadingState = row.querySelector(".image-file-uploading");
+  const fileName = row.querySelector(".image-file-name");
+  const removeBtn = row.querySelector(".image-file-remove");
+  const removeExistingBtn = row.querySelector(".image-file-remove-existing");
+  const changeBtn = row.querySelector(".image-file-change");
+
+  let selectedFile = null;
+  let markedForRemoval = false;
+
+  function showState(state) {
+    emptyState?.classList.toggle("hidden", state !== "empty");
+    selectedState?.classList.toggle("hidden", state !== "selected");
+    if (existingState) existingState.classList.toggle("hidden", state !== "existing");
+    uploadingState?.classList.toggle("hidden", state !== "uploading");
+    if (fileInput) fileInput.style.display = state === "uploading" ? "none" : "";
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (file && file.type.startsWith("image/")) {
+        selectedFile = file;
+        markedForRemoval = false;
+        if (fileName) fileName.textContent = file.name;
+        showState("selected");
+      }
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedFile = null;
+      if (fileInput) fileInput.value = "";
+      showState("empty");
+    });
+  }
+
+  if (removeExistingBtn) {
+    removeExistingBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedFile = null;
+      markedForRemoval = true;
+      if (fileInput) fileInput.value = "";
+      showState("empty");
+    });
+  }
+
+  if (changeBtn) {
+    changeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fileInput?.click();
+    });
+  }
+
+  return {
+    getFile: () => selectedFile,
+    reset: () => {
+      selectedFile = null;
+      markedForRemoval = false;
+      if (fileInput) fileInput.value = "";
+      showState("empty");
+    },
+    setExisting: (hasImage) => {
+      selectedFile = null;
+      markedForRemoval = false;
+      if (fileInput) fileInput.value = "";
+      showState(hasImage ? "existing" : "empty");
+    },
+    setUploading: () => showState("uploading"),
+    setDone: () => showState("empty"),
+    isMarkedForRemoval: () => markedForRemoval,
+  };
+}
+
+// Initialize image file rows
+const productCreateImageRow = initImageFileRow("product-create-image-row");
+const productEditImageRow = initImageFileRow("product-edit-image-row");
+const merchantCreateLogoRow = initImageFileRow("merchant-create-logo-row");
 
 // ===== Detect installed PWA =====
 function isAppInstalled() {
@@ -2636,7 +2780,6 @@ async function loadAccountView() {
         { label: "Endereço Liquid", value: abbreviateHash(merchantData.liquid_address, 12, 8), field: "liquid_address" },
         { label: "CNPJ", value: merchantData.cnpj, field: "cnpj" },
         { label: "Website", value: merchantData.website, field: "website" },
-        { label: "Logo URL", value: merchantData.logo_url, field: "logo_url" },
       ];
       const advancedFields = [
         { label: "Callback URL", value: merchantData.default_callback_url, field: "default_callback_url", infoBtn: "account-callback-info" },
@@ -2655,8 +2798,39 @@ async function loadAccountView() {
           </div>
         </div>`;
       };
+      const hasLogo = !!merchantData.logo_url;
+      const logoFieldHtml = `<div class="account-field">
+          <div class="account-field-label">Logo <button class="icon-btn-sm image-tips-btn" aria-label="Dicas para imagem">?</button></div>
+          <div class="image-file-row" id="merchant-account-logo-row">
+            <input type="file" accept="image/*" class="image-file-input" />
+            <div class="image-file-empty${hasLogo ? " hidden" : ""}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>Adicionar logo</span>
+            </div>
+            <div class="image-file-selected hidden">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span class="image-file-name"></span>
+              <button type="button" class="image-file-remove" aria-label="Remover imagem">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="image-file-existing${hasLogo ? "" : " hidden"}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>Logo atual</span>
+              <button type="button" class="image-file-change">Alterar</button>
+              <button type="button" class="image-file-remove-existing" aria-label="Remover logo">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="image-file-uploading hidden">
+              <span class="spinner"></span>
+              <span>Enviando...</span>
+            </div>
+          </div>
+        </div>`;
       container.innerHTML = '<div class="account-list">'
         + mainFields.map(renderField).join("")
+        + logoFieldHtml
         + `<div class="account-advanced-toggle-row"><button id="btn-account-advanced" class="advanced-toggle-btn">Configurações avançadas <span id="account-advanced-arrow" class="advanced-toggle-arrow">▸</span></button></div>`
         + `<div id="account-advanced-fields" class="account-advanced hidden">${advancedFields.map(renderField).join("")}</div>`
         + '</div>';
@@ -2680,7 +2854,7 @@ async function loadAccountView() {
       container.querySelectorAll(".merchant-edit-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           const field = btn.dataset.field;
-          const labels = { business_name: "Nome do negócio", liquid_address: "Endereço Liquid", cnpj: "CNPJ", website: "Website", logo_url: "Logo URL", default_callback_url: "Callback URL", default_redirect_url: "Redirect URL" };
+          const labels = { business_name: "Nome do negócio", liquid_address: "Endereço Liquid", cnpj: "CNPJ", website: "Website", default_callback_url: "Callback URL", default_redirect_url: "Redirect URL" };
           if (field === "liquid_address") {
             pendingMerchantAction = { type: "edit_liquid" };
             document.getElementById("merchant-password-title").textContent = "Confirmar alteração";
@@ -2697,6 +2871,44 @@ async function loadAccountView() {
           document.getElementById("merchant-edit-modal")?.classList.remove("hidden");
         });
       });
+      // Wire up account logo file upload (immediate upload since merchant exists)
+      const accountLogoRow = initImageFileRow("merchant-account-logo-row");
+      const accountLogoInput = document.querySelector("#merchant-account-logo-row .image-file-input");
+      if (accountLogoInput) {
+        accountLogoInput.addEventListener("change", async () => {
+          const file = accountLogoInput.files?.[0];
+          if (!file || !file.type.startsWith("image/")) return;
+          accountLogoRow.setUploading();
+          try {
+            await uploadImage(file, "logo");
+            merchantData = null;
+            showToast("Logo atualizado!");
+            loadAccountView();
+          } catch (err) {
+            showToast(err.message || "Erro no upload do logo.");
+            accountLogoRow.setExisting(!!merchantData?.logo_url);
+          }
+        });
+      }
+      const accountLogoRemoveBtn = document.querySelector("#merchant-account-logo-row .image-file-remove-existing");
+      if (accountLogoRemoveBtn) {
+        accountLogoRemoveBtn.addEventListener("click", async (e) => {
+          e.preventDefault(); e.stopPropagation();
+          try {
+            await deleteImageApi("logo");
+            merchantData = null;
+            showToast("Logo removido!");
+            loadAccountView();
+          } catch (_err) { showToast("Erro ao remover logo."); }
+        });
+      }
+      const accountLogoChangeBtn = document.querySelector("#merchant-account-logo-row .image-file-change");
+      if (accountLogoChangeBtn) {
+        accountLogoChangeBtn.addEventListener("click", (e) => {
+          e.preventDefault(); e.stopPropagation();
+          accountLogoInput?.click();
+        });
+      }
     }
   } catch (e) { if (!e.blocked) showToast("Erro ao carregar conta."); }
 }
@@ -3086,7 +3298,7 @@ async function loadProductCreateView() {
   document.getElementById("product-create-slug").value = "";
   document.getElementById("product-create-amount").value = "";
   document.getElementById("product-create-description").value = "";
-  document.getElementById("product-create-image-url").value = "";
+  productCreateImageRow.reset();
   document.getElementById("product-create-callback-url").value = "";
   document.getElementById("product-create-redirect-url").value = "";
   document.getElementById("product-create-expires").value = "";
@@ -3119,7 +3331,7 @@ async function loadProductEditView() {
     document.getElementById("product-edit-slug").value = product.slug || "";
     document.getElementById("product-edit-amount").value = product.amount ? formatBRL(product.amount) : "";
     document.getElementById("product-edit-description").value = product.description || "";
-    document.getElementById("product-edit-image-url").value = product.image_url || "";
+    productEditImageRow.setExisting(!!product.image_url);
     document.getElementById("product-edit-callback-url").value = product.callback_url || "";
     document.getElementById("product-edit-redirect-url").value = product.redirect_url || "";
     document.getElementById("product-edit-expires").value = product.expires_in ? String(product.expires_in) : "";
@@ -3247,7 +3459,8 @@ document.addEventListener("click", (e) => {
 // Modal close handlers
 ["close-create-api-key", "close-api-key-created", "close-revoke-api-key",
  "close-merchant-password", "close-webhook-secret", "close-merchant-edit",
- "close-callback-info", "close-redirect-info", "close-metadata-info"].forEach(id => {
+ "close-callback-info", "close-redirect-info", "close-metadata-info",
+ "close-image-tips"].forEach(id => {
   document.getElementById(id)?.addEventListener("click", () => {
     document.getElementById(id)?.closest(".modal")?.classList.add("hidden");
   });
@@ -3449,6 +3662,13 @@ document.getElementById("btn-create-merchant")?.addEventListener("click", async 
       else setMsg("merchant-create-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao criar conta.");
       return;
     }
+    // Upload logo if file was selected
+    const logoFile = merchantCreateLogoRow.getFile();
+    if (logoFile) {
+      try { await uploadImage(logoFile, "logo"); }
+      catch (_uploadErr) { showToast("Conta criada, mas falha no upload do logo."); }
+    }
+
     merchantData = null;
     showToast("Conta de lojista criada!");
     loadMerchantDispatcher();
@@ -3580,6 +3800,8 @@ document.addEventListener("click", (e) => {
     document.getElementById("redirect-info-modal")?.classList.remove("hidden");
   } else if (e.target.closest(".product-metadata-info")) {
     document.getElementById("metadata-info-modal")?.classList.remove("hidden");
+  } else if (e.target.closest(".image-tips-btn")) {
+    document.getElementById("image-tips-modal")?.classList.remove("hidden");
   }
 });
 
@@ -3588,7 +3810,7 @@ document.getElementById("btn-product-create-submit")?.addEventListener("click", 
   const slug = document.getElementById("product-create-slug")?.value.trim();
   const amountInput = document.getElementById("product-create-amount");
   const description = document.getElementById("product-create-description")?.value.trim();
-  const imageUrl = document.getElementById("product-create-image-url")?.value.trim();
+  const imageFile = productCreateImageRow.getFile();
   const callbackUrl = document.getElementById("product-create-callback-url")?.value.trim();
   const redirectUrl = document.getElementById("product-create-redirect-url")?.value.trim();
   const expiresIn = document.getElementById("product-create-expires")?.value;
@@ -3602,8 +3824,6 @@ document.getElementById("btn-product-create-submit")?.addEventListener("click", 
   const cents = toCents(amountInput?.value || "");
   if (!cents || cents < 500) { setMsg("product-create-msg", `Valor mínimo: ${formatBRL(500)}`); return; }
   if (cents > 300000) { setMsg("product-create-msg", `Valor máximo: ${formatBRL(300000)}`); return; }
-  const imgErr = validateHttpsUrl(imageUrl, "URL da imagem");
-  if (imgErr) { setMsg("product-create-msg", imgErr); return; }
   const cbErr = validateHttpsUrl(callbackUrl, "Callback URL");
   if (cbErr) { setMsg("product-create-msg", cbErr); return; }
   const rdErr = validateHttpsUrl(redirectUrl, "Redirect URL");
@@ -3619,7 +3839,6 @@ document.getElementById("btn-product-create-submit")?.addEventListener("click", 
   try {
     const body = { slug, amount: cents };
     if (description) body.description = description;
-    if (imageUrl) body.image_url = imageUrl;
     if (callbackUrl) body.callback_url = callbackUrl;
     if (redirectUrl) body.redirect_url = redirectUrl;
     if (expiresIn) body.expires_in = parseInt(expiresIn, 10);
@@ -3627,6 +3846,14 @@ document.getElementById("btn-product-create-submit")?.addEventListener("click", 
     const res = await apiFetch("/api/products", { method: "POST", body: JSON.stringify(body) });
     const data = await res.json();
     if (!res.ok) { setMsg("product-create-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao criar produto."); return; }
+
+    // Upload image after product creation
+    if (imageFile) {
+      const productId = data.product?.id || data.id;
+      try { await uploadImage(imageFile, "product", productId); }
+      catch (_uploadErr) { showToast("Produto criado, mas falha no upload da imagem."); }
+    }
+
     salesProductsCache = null;
     showToast("Produto criado!");
     navigate("#merchant-products");
@@ -3644,7 +3871,8 @@ document.getElementById("btn-product-edit-save")?.addEventListener("click", asyn
   const slug = document.getElementById("product-edit-slug")?.value.trim();
   const amountInput = document.getElementById("product-edit-amount");
   const description = document.getElementById("product-edit-description")?.value.trim();
-  const imageUrl = document.getElementById("product-edit-image-url")?.value.trim();
+  const imageFile = productEditImageRow.getFile();
+  const imageRemoved = productEditImageRow.isMarkedForRemoval();
   const callbackUrl = document.getElementById("product-edit-callback-url")?.value.trim();
   const redirectUrl = document.getElementById("product-edit-redirect-url")?.value.trim();
   const expiresIn = document.getElementById("product-edit-expires")?.value;
@@ -3658,8 +3886,6 @@ document.getElementById("btn-product-edit-save")?.addEventListener("click", asyn
   const cents = toCents(amountInput?.value || "");
   if (!cents || cents < 500) { setMsg("product-edit-msg", `Valor mínimo: ${formatBRL(500)}`); return; }
   if (cents > 300000) { setMsg("product-edit-msg", `Valor máximo: ${formatBRL(300000)}`); return; }
-  const imgErr = validateHttpsUrl(imageUrl, "URL da imagem");
-  if (imgErr) { setMsg("product-edit-msg", imgErr); return; }
   const cbErr = validateHttpsUrl(callbackUrl, "Callback URL");
   if (cbErr) { setMsg("product-edit-msg", cbErr); return; }
   const rdErr = validateHttpsUrl(redirectUrl, "Redirect URL");
@@ -3676,8 +3902,6 @@ document.getElementById("btn-product-edit-save")?.addEventListener("click", asyn
     const body = { slug, amount: cents };
     if (description) body.description = description;
     else body.description = null;
-    if (imageUrl) body.image_url = imageUrl;
-    else body.image_url = null;
     if (callbackUrl) body.callback_url = callbackUrl;
     else body.callback_url = null;
     if (redirectUrl) body.redirect_url = redirectUrl;
@@ -3689,6 +3913,16 @@ document.getElementById("btn-product-edit-save")?.addEventListener("click", asyn
     const res = await apiFetch(`/api/products/${productId}`, { method: "PATCH", body: JSON.stringify(body) });
     const data = await res.json();
     if (!res.ok) { setMsg("product-edit-msg", data?.response?.errorMessage || data?.errorMessage || "Erro ao salvar."); return; }
+
+    // Handle image upload or removal
+    if (imageFile) {
+      try { await uploadImage(imageFile, "product", productId); }
+      catch (_uploadErr) { showToast("Produto salvo, mas falha no upload da imagem."); }
+    } else if (imageRemoved) {
+      try { await deleteImageApi("product", productId); }
+      catch { /* ignore deletion errors */ }
+    }
+
     salesProductsCache = null;
     showToast("Produto atualizado!");
     loadProductEditView();

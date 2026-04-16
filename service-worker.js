@@ -17,6 +17,7 @@ const STATIC_FILES = [
   `./script-helpers.js?v=${APP_VERSION}`,
   `./affiliates.js?v=${APP_VERSION}`,
   `./qr.js?v=${APP_VERSION}`,
+  `./image-resize.js?v=${APP_VERSION}`,
   `./manifest.json?v=${APP_VERSION}`,
   `./icon-192.png?v=${APP_VERSION}`,
   `./icon-512.png?v=${APP_VERSION}`

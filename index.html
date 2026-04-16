@@ -6,7 +6,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Aceite Pix, receba DePix. A forma mais simples de receber pagamentos e proteger seu dinheiro." />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-CfhkB0t1w4huapj30hvuB91Yj3BBXM349rph5EzFxd4=' https://challenges.cloudflare.com; img-src 'self' data: https://depix.eulen.app https://eulen.app https://response.eulen.app; connect-src 'self' https://depix-backend.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src https://brswap.me https://challenges.cloudflare.com" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-CfhkB0t1w4huapj30hvuB91Yj3BBXM349rph5EzFxd4=' https://challenges.cloudflare.com; img-src 'self' data: https://depix.eulen.app https://eulen.app https://response.eulen.app https://img.depixapp.com; connect-src 'self' https://depix-backend.vercel.app https://*.r2.cloudflarestorage.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src https://brswap.me https://challenges.cloudflare.com" />
   <meta name="theme-color" content="#0a0f14" />
 
   <link rel="canonical" href="https://depixapp.com/" />
@@ -1447,6 +1447,25 @@
       <input id="merchant-cnpj" placeholder="Opcional" maxlength="14" />
       <label for="merchant-website">Website</label>
       <input id="merchant-website" placeholder="Ex: minhaloja.com.br (opcional)" />
+      <label>Logo <button class="icon-btn-sm image-tips-btn" aria-label="Dicas para imagem" type="button">?</button></label>
+      <div class="image-file-row" id="merchant-create-logo-row">
+        <input type="file" accept="image/*" class="image-file-input" />
+        <div class="image-file-empty">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Adicionar logo</span>
+        </div>
+        <div class="image-file-selected hidden">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span class="image-file-name"></span>
+          <button type="button" class="image-file-remove" aria-label="Remover imagem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="image-file-uploading hidden">
+          <span class="spinner"></span>
+          <span>Enviando...</span>
+        </div>
+      </div>
       <div id="merchant-create-msg" class="mensagem"></div>
       <button id="btn-create-merchant">Começar</button>
     </div>
@@ -1814,8 +1833,25 @@
     <input id="product-create-amount" inputmode="numeric" placeholder="R$ 0,00" />
     <label for="product-create-description">Descrição</label>
     <textarea id="product-create-description" placeholder="Descrição do produto..." rows="3"></textarea>
-    <label for="product-create-image-url">URL da imagem (HTTPS)</label>
-    <input id="product-create-image-url" placeholder="https://..." />
+    <label>Imagem do produto <button class="icon-btn-sm image-tips-btn" aria-label="Dicas para imagem" type="button">?</button></label>
+    <div class="image-file-row" id="product-create-image-row">
+      <input type="file" accept="image/*" class="image-file-input" />
+      <div class="image-file-empty">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span>Adicionar imagem</span>
+      </div>
+      <div class="image-file-selected hidden">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span class="image-file-name"></span>
+        <button type="button" class="image-file-remove" aria-label="Remover imagem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="image-file-uploading hidden">
+        <span class="spinner"></span>
+        <span>Enviando...</span>
+      </div>
+    </div>
     <label for="product-create-expires">Expiração</label>
     <select id="product-create-expires">
       <option value="">Padrão (20 min)</option>
@@ -1850,8 +1886,33 @@
     <input id="product-edit-amount" inputmode="numeric" placeholder="R$ 0,00" />
     <label for="product-edit-description">Descrição</label>
     <textarea id="product-edit-description" placeholder="Descrição do produto..." rows="3"></textarea>
-    <label for="product-edit-image-url">URL da imagem (HTTPS)</label>
-    <input id="product-edit-image-url" placeholder="https://..." />
+    <label>Imagem do produto <button class="icon-btn-sm image-tips-btn" aria-label="Dicas para imagem" type="button">?</button></label>
+    <div class="image-file-row" id="product-edit-image-row">
+      <input type="file" accept="image/*" class="image-file-input" />
+      <div class="image-file-empty">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span>Adicionar imagem</span>
+      </div>
+      <div class="image-file-selected hidden">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span class="image-file-name"></span>
+        <button type="button" class="image-file-remove" aria-label="Remover imagem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="image-file-existing hidden">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span>Imagem atual</span>
+        <button type="button" class="image-file-change">Alterar</button>
+        <button type="button" class="image-file-remove-existing" aria-label="Remover imagem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="image-file-uploading hidden">
+        <span class="spinner"></span>
+        <span>Enviando...</span>
+      </div>
+    </div>
     <label for="product-edit-expires">Expiração</label>
     <select id="product-edit-expires">
       <option value="">Padrão (20 min)</option>
@@ -2024,6 +2085,22 @@
     <p class="info-text" style="margin-top:8px"><strong>Exemplo:</strong> guardar o SKU do produto, ID interno do seu sistema, ou qualquer informação que ajude a identificar a venda do seu lado.</p>
     <p class="info-text" style="margin-top:8px;color:#5a6d82"><strong>Para quem é:</strong> desenvolvedores que integram o DePix com sistemas próprios e precisam rastrear dados adicionais por checkout.</p>
     <button id="close-metadata-info" class="secondary" style="width:100%;margin-top:16px">Entendi</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: DICAS PARA IMAGEM ===== -->
+<div id="image-tips-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2>Dicas para sua imagem</h2>
+    <ul class="info-text image-tips-list">
+      <li>Use imagens <strong>quadradas (1:1)</strong> para melhor resultado</li>
+      <li>Tamanho recomendado: pelo menos <strong>360×360 pixels</strong></li>
+      <li>Formatos aceitos: JPG, PNG, WebP</li>
+      <li>A imagem será redimensionada e otimizada automaticamente</li>
+      <li>Prefira fundo branco ou transparente para logos</li>
+      <li>Evite texto pequeno — pode ficar ilegível no tamanho final</li>
+    </ul>
+    <button id="close-image-tips" class="secondary" style="width:100%;margin-top:16px">Entendi</button>
   </div>
 </div>
 

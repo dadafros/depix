@@ -4030,6 +4030,129 @@ textarea:focus {
   .sales-stats { grid-template-columns: repeat(4, 1fr); }
 }
 
+/* Image file selector ---------------------------------------------------- */
+/* The row is a plain box. The invisible <input type=file> covers it via
+   position:absolute so clicking anywhere triggers the file picker.
+   Only ONE state div is visible at a time (.hidden hides the others).
+   Each state div is a flex container that lays out icon + text + buttons. */
+
+/* Image file selector ---------------------------------------------------- */
+.image-file-row {
+  position: relative;
+  background: #1a2535;
+  border: 1px solid rgba(56, 227, 172, 0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: border-color 0.2s;
+}
+.image-file-row:hover { border-color: rgba(56, 227, 172, 0.3); }
+/* Inside account-field, remove extra bottom spacing */
+.account-field .image-file-row { margin-bottom: 0; }
+
+.image-file-row .image-file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* State containers — only one visible at a time */
+.image-file-empty,
+.image-file-selected,
+.image-file-existing,
+.image-file-uploading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+/* Icons */
+.image-file-empty svg { color: #5a6d82; flex-shrink: 0; }
+.image-file-selected svg,
+.image-file-existing svg { color: #38e3ac; flex-shrink: 0; }
+
+/* Text */
+.image-file-empty span { color: #5a6d82; font-size: 14px; }
+.image-file-name,
+.image-file-existing span {
+  color: #e8edf2;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Remove button (X) — override global button{width:100%;padding:14px;margin-bottom:12px} */
+.image-file-remove,
+.image-file-remove-existing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: rgba(255, 107, 107, 0.12);
+  border: none;
+  border-radius: 50%;
+  color: #ff6b6b;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 2;
+  padding: 0;
+  margin: 0;
+  font-size: 0;
+  transition: background 0.15s;
+}
+.image-file-remove:hover,
+.image-file-remove-existing:hover { background: rgba(255, 107, 107, 0.25); }
+
+/* "Alterar" button — override global button{width:100%;padding:14px;font-size:16px} */
+.image-file-change {
+  width: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #38e3ac;
+  background: rgba(56, 227, 172, 0.1);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 2;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.image-file-change:hover { background: rgba(56, 227, 172, 0.2); }
+
+/* Uploading state */
+.image-file-uploading span { color: #8a9bb0; font-size: 14px; }
+.image-file-uploading .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(56, 227, 172, 0.2);
+  border-top-color: #38e3ac;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+.image-tips-list {
+  text-align: left;
+  padding-left: 18px;
+  margin: 0;
+}
+.image-tips-list li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
 /* Deposit limit info */
 .deposit-limit-info {
   font-size: 11px;
