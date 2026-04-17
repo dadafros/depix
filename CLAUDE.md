@@ -384,3 +384,15 @@ And reference it in `index.html` with the matching query string:
 - **Use PRs for large or complex work**: Large refactors, high-risk changes, or substantial multi-file work should go on a separate branch and be opened as a PR for review.
 - **User instruction wins**: If the user explicitly asks for a different flow, follow the user's instruction.
 - **Sync before branching**: If the work should go through a PR, always sync with `main` first (`git pull origin main`) before creating or updating the branch.
+
+## Git Worktrees
+
+Ciclo de vida completo em `~/.claude/CLAUDE.md`. Específico deste repo:
+
+- **Localização**: `.claude/worktrees/<branch-slug>/`
+- **Branch default**: `main`
+- **Naming convention**: `feat/*` (features), `fix/*` (bugfixes), `claude/*` (agent work)
+- **Fluxo padrão** (default): worktree com branch → commit → `git push origin HEAD:main` → cleanup imediato (remove worktree + delete branch + `git fetch --prune`)
+- **Fluxo PR** (trabalho grande/complexo, ver "Workflow Rules"): worktree → `git push -u origin <branch>` → `gh pr create` → após merge, mesmo cleanup
+- **Antes de criar**: `git worktree list` + `git branch -a` pra não duplicar trabalho existente
+- **Reminder**: ao editar arquivos JS/CSS/HTML, o "Deploy checklist" acima (bump `APP_VERSION` + `?v=` query strings) aplica antes de pushar pra main — independente do fluxo
