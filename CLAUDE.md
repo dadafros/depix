@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 DePix is a Progressive Web App (PWA) for generating PIX QR codes (deposits) and processing Liquid-to-PIX withdrawals. It's a vanilla JavaScript SPA with zero npm runtime dependencies, hosted on GitHub Pages.
 
 **This project is one of two repos:**
-- **Frontend (this repo)**: `dadafros/depix` — Vanilla JS PWA on GitHub Pages
+- **Frontend (this repo)**: `dadafros/depix-frontend` — Vanilla JS PWA on GitHub Pages
 - **Backend**: `dadafros/depix-backend` — Vercel serverless API
 
 **Live URL**: `https://depixapp.com`
@@ -303,7 +303,7 @@ Frontend changes reflect immediately (volume mount). See `../depix-dev/CLAUDE.md
 
 ## Git
 
-- Remote: `git@github-personal:dadafros/depix.git`
+- Remote: `git@github-personal:dadafros/depix-frontend.git`
 - SSH key alias `github-personal` maps to `~/.ssh/id_ed25519_outlook`
 - Commit as: `dadafros <davi_bf@outlook.com>`
 - Branch naming: `feat/*` for features, `claude/*` for Claude Code branches
